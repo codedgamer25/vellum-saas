@@ -1,0 +1,7 @@
+.gemini
+.bash_logout
+.bashrc
+.profile
+.vercel
+node_modules
+.DS_Store

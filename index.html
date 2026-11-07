@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vellum — Intelligent Product Operations &amp; Workflow Orchestration</title>
+  <meta name="description" content="Vellum unifies telemetry ingestion, deterministic DAG workflow orchestration, and autonomous incident remediation in a single architectural control plane." />
+
+  <!-- Google Fonts: Instrument Serif, Plus Jakarta Sans, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="./styles/tokens.css" />
+  <link rel="stylesheet" href="./styles/main.css" />
+</head>
+<body>
+
+  <!-- Sticky Architectural Top Navigation -->
+  <header class="site-header" id="top-navigation">
+    <div class="container nav-inner">
+      <a href="#hero-cinema-track" class="brand-logo" id="nav-brand-link">
+        <span class="brand-mark" aria-hidden="true">V</span>
+        <span>Vellum</span>
+        <span class="brand-edition">RELEASE 4.2</span>
+      </a>
+
+      <nav aria-label="Primary Navigation">
+        <ul class="nav-links">
+          <li><a href="#hero-cinema-track" class="nav-link active" id="nav-link-cinema">Scroll Cinema</a></li>
+          <li><a href="#live-sandbox-section" class="nav-link" id="nav-link-sandbox">Live Sandbox</a></li>
+          <li><a href="#architecture-section" class="nav-link" id="nav-link-architecture">Architecture</a></li>
+          <li><a href="#customers-section" class="nav-link" id="nav-link-customers">Customers</a></li>
+          <li><a href="#pricing-section" class="nav-link" id="nav-link-pricing">Pricing &amp; ROI</a></li>
+          <li><a href="#faq-section" class="nav-link" id="nav-link-faq">FAQ</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <div class="status-indicator" title="All global clusters operational">
+          <span class="status-dot"></span>
+          <span>99.998% SLA</span>
+        </div>
+        <button type="button" class="btn btn-secondary" id="nav-signin-btn" data-open-modal="demo">Sign In</button>
+        <button type="button" class="btn btn-primary" id="nav-book-demo-btn" data-open-modal="demo">Start Free Workspace</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ====================================================================
+         SECTION 1: APPLE-STYLE SCROLL-WIPE CINEMA HERO (460vh Pinned Track)
+         ==================================================================== -->
+    <section class="hero-cinema-track" id="hero-cinema-track" aria-label="Interactive Product Scroll Movie">
+      <div class="hero-sticky-viewport">
+        <div class="container" style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
+
+          <!-- Editorial Headline & Value Proposition -->
+          <div class="hero-editorial-intro" id="hero-editorial-intro">
+            <div>
+              <span class="eyebrow">INTELLIGENT OPERATIONS CONTROL PLANE</span>
+              <h1 class="headline-display" style="margin-top: 0.4rem;">
+                Orchestrate every production workflow <em>in one living canvas.</em>
+              </h1>
+            </div>
+            <div class="hero-intro-right">
+              <p class="section-lead" style="font-size: 0.98rem;">
+                Scroll down to scrub through Vellum’s architecture in real time—watching live signals ingest, route through deterministic DAGs, and resolve production incidents autonomously.
+              </p>
+              <div class="hero-cta-row">
+                <button type="button" class="btn btn-primary" id="hero-primary-cta" data-open-modal="demo">
+                  Provision Instant Sandbox →
+                </button>
+                <a href="#live-sandbox-section" class="btn btn-secondary" id="hero-secondary-cta">
+                  Test Interactive Runbook
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pinned Cinema Stage (Left Narrative Rail + Right Multi-Layer Wipe Viewport) -->
+          <div class="cinema-stage-wrapper">
+
+            <!-- Synchronized Narrative Rail -->
+            <aside class="cinema-narrative-rail" aria-live="polite">
+              <div class="chapter-badge-header">
+                <span class="chapter-step-counter" id="chapter-step-counter">CHAPTER 01 / 05</span>
+                <span class="scroll-velocity-readout" id="scroll-velocity-readout">TIMELINE 000%</span>
+              </div>
+
+              <div class="narrative-cards-stack">
+                <!-- Chapter 01 Narrative -->
+                <article class="narrative-chapter-card is-active" data-chapter-card="0">
+                  <span class="mono-tag" style="color: var(--text-muted);">01 // UNIFIED COMMAND HORIZON</span>
+                  <h2 class="narrative-chapter-title">Every signal, deployment, and SLA in a single glass pane.</h2>
+                  <p class="narrative-chapter-body">
+                    Eliminate context-switching across fragmented dashboards. Vellum correlates git commits, infrastructure telemetry, and customer impact automatically.
+                  </p>
+                  <div class="narrative-metric-box">
+                    <span class="narrative-metric-value">14.2 ms</span>
+                    <span class="narrative-metric-label">Global State Sync Latency</span>
+                  </div>
+                </article>
+
+                <!-- Chapter 02 Narrative -->
+                <article class="narrative-chapter-card" data-chapter-card="1">
+                  <span class="mono-tag" style="color: var(--text-muted);">02 // HIGH-THROUGHPUT INGESTION</span>
+                  <h2 class="narrative-chapter-title">Sub-second signal triage &amp; anomaly deduplication.</h2>
+                  <p class="narrative-chapter-body">
+                    As you scroll, notice the vertical wipe revealing Vellum’s Ingestion Matrix: filtering 250,000 raw webhook events per second into structured root-cause threads.
+                  </p>
+                  <div class="narrative-metric-box">
+                    <span class="narrative-metric-value">99.4%</span>
+                    <span class="narrative-metric-label">Alert Noise Compression</span>
+                  </div>
+                </article>
+
+                <!-- Chapter 03 Narrative -->
+                <article class="narrative-chapter-card" data-chapter-card="2">
+                  <span class="mono-tag" style="color: var(--text-muted);">03 // DETERMINISTIC DAG ENGINE</span>
+                  <h2 class="narrative-chapter-title">Visual workflow graphs with cryptographic guardrails.</h2>
+                  <p class="narrative-chapter-body">
+                    Horizontal cinema wipe transitions into the live DAG Orchestrator. Branch on real-time Prometheus metrics, canary weights, and human-in-the-loop approvals.
+                  </p>
+                  <div class="narrative-metric-box">
+                    <span class="narrative-metric-value">0.00%</span>
+                    <span class="narrative-metric-label">Unhandled State Drift</span>
+                  </div>
+                </article>
+
+                <!-- Chapter 04 Narrative -->
+                <article class="narrative-chapter-card" data-chapter-card="3">
+                  <span class="mono-tag" style="color: var(--text-muted);">04 // AUTONOMOUS SPEC-TO-SHIP</span>
+                  <h2 class="narrative-chapter-title">Self-healing runbooks &amp; instant canary rollbacks.</h2>
+                  <p class="narrative-chapter-body">
+                    When p99 latency crosses your threshold, Vellum diffs the suspect release, drains degraded traffic pools, and posts verified telemetry to Slack.
+                  </p>
+                  <div class="narrative-metric-box">
+                    <span class="narrative-metric-value">19 sec</span>
+                    <span class="narrative-metric-label">Mean Time to Remediation</span>
+                  </div>
+                </article>
+
+                <!-- Chapter 05 Narrative -->
+                <article class="narrative-chapter-card" data-chapter-card="4">
+                  <span class="mono-tag" style="color: var(--text-muted);">05 // AUDIT-GRADE GOVERNANCE</span>
+                  <h2 class="narrative-chapter-title">Continuous SOC2 evidence &amp; executive ROI ledger.</h2>
+                  <p class="narrative-chapter-body">
+                    Every automated action and approval gate is cryptographically signed into an immutable ledger ready for instant auditor export.
+                  </p>
+                  <div class="narrative-metric-box">
+                    <span class="narrative-metric-value">$2.4M</span>
+                    <span class="narrative-metric-label">Avg. Annual Ops Savings</span>
+                  </div>
+                </article>
+              </div>
+
+              <div class="rail-scroll-prompt">
+                <span>SCROLL WHEEL TO SCRUB</span>
+                <span>240 FPS TIMELINE</span>
+              </div>
+            </aside>
+
+            <!-- Apple-Style Clip-Path Wipe Viewport Frame -->
+            <div class="cinema-viewport-frame">
+              <div class="stage-window-bar">
+                <div class="window-dots" aria-hidden="true">
+                  <span></span><span></span><span></span>
+                </div>
+                <span id="stage-window-url">vellum.app/workspace/command-horizon</span>
+                <span style="color: hsl(158, 70%, 62%);">● LIVE STREAM</span>
+              </div>
+
+              <div class="stage-camera-rig" id="stage-camera-rig">
+                <!-- Active Wipe Seam Indicator -->
+                <div class="wipe-seam-indicator" id="wipe-seam-indicator"></div>
+
+                <!-- High-DPI HTML5 Telemetry Canvas -->
+                <canvas id="hero-telemetry-canvas"></canvas>
+
+                <!-- SCENE 1: Executive Command Horizon -->
+                <div class="cinema-scene-layer scene-layer-1" id="cinema-scene-1">
+                  <div class="scene-top-bar">
+                    <span class="scene-module-tag">SCENE 01 // GLOBAL COMMAND HORIZON</span>
+                    <span class="mono-tag">CLUSTER: US-EAST / EU-CENTRAL / AP-SOUTH</span>
+                  </div>
+
+                  <div class="scene-kpi-strip">
+                    <div class="stage-card">
+                      <div class="stage-card-label">ACTIVE WORKFLOWS</div>
+                      <div class="stage-card-val">1,482 <span style="font-size: 0.75rem; color: hsl(158, 70%, 68%);">+12.4%</span></div>
+                    </div>
+                    <div class="stage-card">
+                      <div class="stage-card-label">GLOBAL P99 LATENCY</div>
+                      <div class="stage-card-val">18.4 ms <span style="font-size: 0.75rem; color: hsl(158, 70%, 68%);">-4.1ms</span></div>
+                    </div>
+                    <div class="stage-card">
+                      <div class="stage-card-label">OPEN P1 INCIDENTS</div>
+                      <div class="stage-card-val">0 <span style="font-size: 0.75rem; color: hsl(158, 70%, 68%);">ALL CLEAR</span></div>
+                    </div>
+                  </div>
+
+                  <div class="stage-split-workspace">
+                    <div class="stage-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                      <div class="stage-card-label">LIVE PRODUCTION SERVICES TOPOLOGY</div>
+                      <div class="stage-table-list">
+                        <div class="stage-row-item">
+                          <span><strong>checkout-orchestrator-v4</strong> (us-east-1)</span>
+                          <span class="badge-pill badge-ok">99.999% HEALTHY</span>
+                        </div>
+                        <div class="stage-row-item">
+                          <span><strong>ledger-settlement-engine</strong> (eu-central-1)</span>
+                          <span class="badge-pill badge-ok">14,200 TX/S</span>
+                        </div>
+                        <div class="stage-row-item">
+                          <span><strong>identity-policy-guard</strong> (global-edge)</span>
+                          <span class="badge-pill badge-ok">ATTESTED</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="stage-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                      <div class="stage-card-label">RECENT AUTONOMOUS RESOLUTIONS</div>
+                      <div class="stage-table-list">
+                        <div class="stage-row-item">
+                          <span>Auto-scaled Redis shard pool #08</span>
+                          <span class="mono-tag">2m ago</span>
+                        </div>
+                        <div class="stage-row-item">
+                          <span>Verified canary rollout sha:8f19c</span>
+                          <span class="mono-tag">9m ago</span>
+                        </div>
+                        <div class="stage-row-item">
+                          <span>Rotated ephemeral vault credentials</span>
+                          <span class="mono-tag">14m ago</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- SCENE 2: Signal Ingestion & Triage Matrix (Wipes Upward via clip-path) -->
+                <div class="cinema-scene-layer scene-layer-2" id="cinema-scene-2">
+                  <div class="scene-top-bar">
+                    <span class="scene-module-tag">SCENE 02 // REAL-TIME SIGNAL INGESTION MATRIX</span>
+                    <span class="mono-tag">INGEST RATE: 248,900 EVENTS / SEC</span>
+                  </div>
+
+                  <div class="scene-kpi-strip">
+                    <div class="stage-card">
+                      <div class="stage-card-label">RAW TELEMETRY STREAM</div>
+                      <div class="stage-card-val">248.9K /s</div>
+                    </div>
+                    <div class="stage-card">
+                      <div class="stage-card-label">CORRELATED INCIDENT THREADS</div>
+                      <div class="stage-card-val">3 Active</div>
+                    </div>
+                    <div class="stage-card">
+                      <div class="stage-card-label">DEDUPLICATION RATIO</div>
+                      <div class="stage-card-val" style="color: hsl(16, 90%, 70%);">99.42%</div>
+                    </div>
+                  </div>
+
+                  <div class="stage-split-workspace">
+                    <div class="stage-card">
+                      <div class="stage-card-label">INCOMING MULTI-SOURCE WEBHOOK BUS</div>
+                      <div class="stage-table-list" style="margin-top: 0.5rem;">
+                        <div class="stage-row-item">
+                          <span>[Datadog] p99_latency &gt; 450ms on api-gateway</span>
+                          <span class="badge-pill badge-hot">CORRELATED #104</span>
+                        </div>
+                        <div class="stage-row-item">
+                          <span>[GitHub] PR #4812 merged to main by @alex-chen</span>
+                          <span class="badge-pill badge-warn">LINKED DIFF</span>
+                        </div>
+                        <div class="stage-row-item">
+                          <span>[Stripe] webhook.checkout.retry_rate +2.1%</span>
+                          <span class="badge-pill badge-hot">ROOT CAUSE</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="stage-card">
+                      <div class="stage-card-label">AI CLASSIFICATION VERDICT</div>
+                      <p style="font-size: 0.82rem; color: var(--text-on-dark-muted); margin-top: 0.4rem; line-height: 1.55;">
+                        412 redundant alerts suppressed across 18 microservices. Root cause isolated to connection pool exhaustion in <code style="color: hsl(16, 90%, 74%);">checkout-db-proxy</code>.
+                      </p>
+                      <div class="stage-row-item" style="margin-top: 0.75rem;">
+                        <span>Confidence Score</span>
+                        <span class="badge-pill badge-ok">99.6% DETERMINISTIC</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- SCENE 3: Deterministic DAG Workflow Topology (Wipes Horizontally via clip-path) -->
+                <div class="cinema-scene-layer scene-layer-3" id="cinema-scene-3">
+                  <div class="scene-top-bar">
+                    <span class="scene-module-tag">SCENE 03 // DETERMINISTIC DAG ORCHESTRATOR</span>
+                    <span class="mono-tag">WORKFLOW ID: wf_canary_drain_v9</span>
+                  </div>
+
+                  <div class="dag-topology-grid">
+                    <div class="dag-node-box">
+                      <div class="stage-card-label">NODE 01 // TRIGGER</div>
+                      <div style="font-weight: 600; font-size: 0.9rem; margin-block: 0.25rem;">Anomaly Threshold Gate</div>
+                      <div class="mono-tag" style="color: hsl(158, 70%, 68%);">✓ PASSED (4ms)</div>
+                    </div>
+
+                    <div class="dag-node-box active-node">
+                      <div class="stage-card-label">NODE 02 // EXECUTION</div>
+                      <div style="font-weight: 600; font-size: 0.9rem; margin-block: 0.25rem;">Shift 35% Traffic to EU Pool</div>
+                      <div class="mono-tag" style="color: hsl(16, 90%, 74%);">● RUNNING DRAIN</div>
+                    </div>
+
+                    <div class="dag-node-box">
+                      <div class="stage-card-label">NODE 03 // ATTESTATION</div>
+                      <div style="font-weight: 600; font-size: 0.9rem; margin-block: 0.25rem;">Verify SLA &amp; Sign Ledger</div>
+                      <div class="mono-tag" style="color: var(--text-on-dark-muted);">◎ AWAITING VERIFY</div>
+                    </div>
+                  </div>
+
+                  <div class="stage-card">
+                    <div class="stage-row-item">
+                      <span><strong>Guardrail Policy:</strong> Never drain &gt; 40% regional capacity without @sre-oncall cryptographic quorum</span>
+                      <span class="badge-pill badge-ok">POLICY ENFORCED</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- SCENE 4: Autonomous Spec-to-Ship Runbook & Diff Gate (Wipes Upward) -->
+                <div class="cinema-scene-layer scene-layer-4" id="cinema-scene-4">
+                  <div class="scene-top-bar">
+                    <span class="scene-module-tag">SCENE 04 // AUTONOMOUS SPEC-TO-SHIP REMEDIATION</span>
+                    <span class="mono-tag">PATCH VERIFICATION: PASSED</span>
+                  </div>
+
+                  <div class="stage-split-workspace" style="margin-top: 0.5rem;">
+                    <div class="stage-card">
+                      <div class="stage-card-label">AUTOMATED CONFIG DIFF (COMMIT #a94f21c)</div>
+                      <pre style="font-family: var(--font-mono); font-size: 0.75rem; line-height: 1.6; margin-top: 0.5rem; color: hsl(40, 20%, 92%);">- max_pool_connections: 120
++ max_pool_connections: 450
+- circuit_breaker_timeout_ms: 2500
++ circuit_breaker_timeout_ms: 450</pre>
+                    </div>
+                    <div class="stage-card">
+                      <div class="stage-card-label">CANARY HEALTH TELEMETRY</div>
+                      <div class="stage-table-list" style="margin-top: 0.5rem;">
+                        <div class="stage-row-item">
+                          <span>Error Rate (Post-Rollback)</span>
+                          <span class="badge-pill badge-ok">0.001% (-99.8%)</span>
+                        </div>
+                        <div class="stage-row-item">
+                          <span>Checkout Throughput</span>
+                          <span class="badge-pill badge-ok">18,400 req/s</span>
+                        </div>
+                        <div class="stage-row-item">
+                          <span>Customer Impact Window</span>
+                          <span class="badge-pill badge-ok">19.2 Seconds Total</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- SCENE 5: Executive Telemetry & Instant Action (Wipes Right) -->
+                <div class="cinema-scene-layer scene-layer-5" id="cinema-scene-5">
+                  <div class="scene-top-bar">
+                    <span class="scene-module-tag">SCENE 05 // EXECUTIVE LEDGER &amp; AUDIT EXPORT</span>
+                    <span class="mono-tag">SOC2 TYPE II / ISO-27001 READY</span>
+                  </div>
+
+                  <div class="scene-kpi-strip">
+                    <div class="stage-card">
+                      <div class="stage-card-label">QUARTERLY SLA ATTAINMENT</div>
+                      <div class="stage-card-val">99.998%</div>
+                    </div>
+                    <div class="stage-card">
+                      <div class="stage-card-label">ENGINEERING HOURS RECLAIMED</div>
+                      <div class="stage-card-val">14,280 hrs</div>
+                    </div>
+                    <div class="stage-card">
+                      <div class="stage-card-label">CRYPTOGRAPHIC AUDIT LOGS</div>
+                      <div class="stage-card-val">100% Signed</div>
+                    </div>
+                  </div>
+
+                  <div class="stage-card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                      <div class="stage-card-label">READY TO DEPLOY IN YOUR CLOUD OR VPC</div>
+                      <div style="font-size: 1.05rem; font-weight: 600;">Connect GitHub, Datadog, AWS, and PagerDuty in under 5 minutes.</div>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="scene5-launch-btn" data-open-modal="demo">
+                      Launch Your Vellum Workspace →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Filmstrip Scrubber Bar -->
+          <div class="cinema-scrubber-bar" role="region" aria-label="Scroll Movie Scrubber Controls">
+            <div class="scrubber-controls-left">
+              <button type="button" class="scrubber-play-btn" id="cinema-autoplay-btn" aria-pressed="false">
+                ▶ AUTO-SCRUB
+              </button>
+              <span class="frame-readout" id="cinema-frame-readout">FRAME 001 / 240</span>
+            </div>
+
+            <div class="scrubber-timeline-chapters">
+              <button type="button" class="chapter-scrub-btn is-current" id="scrub-ch-0">
+                <span class="chapter-scrub-num">01</span>
+                <span class="chapter-scrub-name">Command Horizon</span>
+                <span class="chapter-scrub-progress"></span>
+              </button>
+              <button type="button" class="chapter-scrub-btn" id="scrub-ch-1">
+                <span class="chapter-scrub-num">02</span>
+                <span class="chapter-scrub-name">Signal Ingestion</span>
+                <span class="chapter-scrub-progress"></span>
+              </button>
+              <button type="button" class="chapter-scrub-btn" id="scrub-ch-2">
+                <span class="chapter-scrub-num">03</span>
+                <span class="chapter-scrub-name">DAG Orchestrator</span>
+                <span class="chapter-scrub-progress"></span>
+              </button>
+              <button type="button" class="chapter-scrub-btn" id="scrub-ch-3">
+                <span class="chapter-scrub-num">04</span>
+                <span class="chapter-scrub-name">Spec-to-Ship Gate</span>
+                <span class="chapter-scrub-progress"></span>
+              </button>
+              <button type="button" class="chapter-scrub-btn" id="scrub-ch-4">
+                <span class="chapter-scrub-num">05</span>
+                <span class="chapter-scrub-name">Executive Ledger</span>
+                <span class="chapter-scrub-progress"></span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Editorial Trust Strip -->
+    <section class="trust-ledger-strip" aria-label="Trusted Engineering Organizations">
+      <div class="container trust-ledger-inner">
+        <span class="trust-caption">ORCHESTRATING PRODUCTION FOR HIGH-VELOCITY TEAMS</span>
+        <div class="trust-logos-row">
+          <span class="trust-wordmark">Kestrel Financial <small>[$14B/DAY]</small></span>
+          <span class="trust-wordmark">Helios Compute <small>[40K GPUS]</small></span>
+          <span class="trust-wordmark">Vanguard Freight <small>[190 PORTS]</small></span>
+          <span class="trust-wordmark">Meridian BioLabs <small>[ISO-27001]</small></span>
+          <span class="trust-wordmark">Aethelgard Cloud <small>[99.999%]</small></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 2: INTERACTIVE "TRY VELLUM LIVE" PRODUCT SANDBOX
+         ==================================================================== -->
+    <section class="section-block" id="live-sandbox-section">
+      <div class="container">
+        <div class="section-header-row">
+          <div>
+            <span class="eyebrow">INTERACTIVE PRODUCT SANDBOX</span>
+            <h2 class="section-title" style="margin-top: 0.5rem;">Test-drive deterministic remediation live.</h2>
+          </div>
+          <p class="section-lead">
+            Select a real-world operational scenario below and dispatch workflow steps to inspect Vellum’s live execution state and signed JSON payloads.
+          </p>
+        </div>
+
+        <div class="sandbox-console">
+          <div class="sandbox-toolbar">
+            <div class="sandbox-scenario-tabs" role="tablist" aria-label="Operational Scenarios">
+              <button type="button" class="scenario-tab active" id="tab-scenario-latency" data-scenario="latency">
+                01 // Payment Latency Spike
+              </button>
+              <button type="button" class="scenario-tab" id="tab-scenario-migration" data-scenario="migration">
+                02 // Multi-Region Ledger Cutover
+              </button>
+              <button type="button" class="scenario-tab" id="tab-scenario-audit" data-scenario="audit">
+                03 // Continuous SOC2 Access Audit
+              </button>
+            </div>
+            <button type="button" class="btn btn-primary" id="sandbox-run-btn">
+              ▶ Advance Active Workflow Step
+            </button>
+          </div>
+
+          <div class="sandbox-body-grid">
+            <div class="sandbox-pipeline-pane">
+              <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                  <h3 style="font-size: 1.2rem; font-weight: 700;" id="sandbox-scenario-title">Payment Gateway p99 Latency Spike</h3>
+                  <span class="mono-tag" style="color: var(--accent-emerald);">TARGET MTTR: <strong id="sandbox-sla-readout">14.2s</strong></span>
+                </div>
+                <div class="pipeline-steps-list" id="sandbox-steps-list">
+                  <div class="pipeline-step-row">
+                    <div class="pipeline-step-left">
+                      <span class="step-index-box">01</span>
+                      <span style="font-weight: 600; font-size: 0.9rem;">Ingest Datadog &amp; Stripe Webhook Anomaly</span>
+                    </div>
+                    <span class="mono-tag" style="color: var(--accent-emerald); font-weight: 600;">VERIFIED (12ms)</span>
+                  </div>
+                  <div class="pipeline-step-row is-running">
+                    <div class="pipeline-step-left">
+                      <span class="step-index-box">02</span>
+                      <span style="font-weight: 600; font-size: 0.9rem;">Correlate Recent Commit #a94f21c in Checkout Service</span>
+                    </div>
+                    <span class="mono-tag" style="color: var(--accent-primary); font-weight: 600;">● EXECUTING NOW</span>
+                  </div>
+                  <div class="pipeline-step-row">
+                    <div class="pipeline-step-left">
+                      <span class="step-index-box">03</span>
+                      <span style="font-weight: 600; font-size: 0.9rem;">Shift 35% Traffic to Fallback EU-Central Pool</span>
+                    </div>
+                    <span class="mono-tag" style="color: var(--accent-emerald); font-weight: 600;">EXECUTING</span>
+                  </div>
+                  <div class="pipeline-step-row">
+                    <div class="pipeline-step-left">
+                      <span class="step-index-box">04</span>
+                      <span style="font-weight: 600; font-size: 0.9rem;">Post Verified Root-Cause Brief to #ops-command</span>
+                    </div>
+                    <span class="mono-tag" style="color: var(--accent-emerald); font-weight: 600;">QUEUED</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 1rem; border-top: 1px solid var(--border-hairline); font-size: 0.85rem; color: var(--text-secondary);">
+                <span>Throughput: <strong id="sandbox-rate-readout">18,420 /s</strong></span>
+                <span>Execution Mode: <strong>Deterministic Sandboxed VPC</strong></span>
+              </div>
+            </div>
+
+            <div class="sandbox-inspector-pane">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; color: var(--text-on-dark-muted);">
+                <span>LIVE ATTESTATION PAYLOAD (JSON)</span>
+                <span>SHA-256 SIGNED</span>
+              </div>
+              <pre class="json-code-block" id="sandbox-json-inspector">{
+  "workflow_id": "wf_pay_latency_mitigation_09",
+  "trigger": "anomaly.checkout.p99_exceeded",
+  "observed_p99_ms": 842,
+  "baseline_p99_ms": 118,
+  "suspected_sha": "a94f21c8e",
+  "automated_action": {
+    "route_shift": "eu-central-fallback",
+    "traffic_weight": 0.35,
+    "approval_gate": "auto_approved_tier_1"
+  },
+  "recovery_eta_seconds": 14
+}</pre>
+              <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: hsl(158, 70%, 68%);">● Zero manual pager intervention required</span>
+                <button type="button" class="btn btn-primary" id="sandbox-deploy-cta" data-open-modal="demo" style="padding: 0.45rem 0.9rem; font-size: 0.78rem;">
+                  Deploy Template →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 3: EXPOSED HAIRLINE ARCHITECTURAL CAPABILITIES GRID
+         ==================================================================== -->
+    <section class="section-block" id="architecture-section">
+      <div class="container">
+        <div class="section-header-row">
+          <div>
+            <span class="eyebrow">SYSTEM ARCHITECTURE</span>
+            <h2 class="section-title" style="margin-top: 0.5rem;">Built on three foundational guarantees.</h2>
+          </div>
+          <p class="section-lead">
+            Unlike brittle scripts or black-box AI agents, Vellum combines formal state machines with high-throughput telemetry ingestion.
+          </p>
+        </div>
+
+        <div class="editorial-hairline-grid">
+          <article class="capability-column">
+            <div>
+              <span class="capability-number">PILLAR 01 // INGESTION</span>
+              <h3 class="capability-heading">Unified Signal Graph</h3>
+              <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.75rem;">
+                Connect Prometheus, Datadog, OpenTelemetry, GitHub, and Stripe webhooks into a single time-aligned causality graph with zero schema configuration.
+              </p>
+            </div>
+            <ul class="capability-spec-list">
+              <li>→ 250,000+ events/sec per edge collector</li>
+              <li>→ Automatic topological dependency mapping</li>
+              <li>→ Sub-15ms cross-region state replication</li>
+            </ul>
+          </article>
+
+          <article class="capability-column">
+            <div>
+              <span class="capability-number">PILLAR 02 // EXECUTION</span>
+              <h3 class="capability-heading">Deterministic Workflow Engine</h3>
+              <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.75rem;">
+                Every runbook compiles to an idempotent, replayable Directed Acyclic Graph (DAG) with strict blast-radius caps and automatic rollback triggers.
+              </p>
+            </div>
+            <ul class="capability-spec-list">
+              <li>→ Version-controlled in Git via TypeScript or HCL</li>
+              <li>→ Exactly-once execution semantics</li>
+              <li>→ Native Slack &amp; PagerDuty quorum gates</li>
+            </ul>
+          </article>
+
+          <article class="capability-column">
+            <div>
+              <span class="capability-number">PILLAR 03 // GOVERNANCE</span>
+              <h3 class="capability-heading">Audit-Grade Compliance Ledger</h3>
+              <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.75rem;">
+                Deploy inside your own AWS, GCP, or Azure VPC via PrivateLink. Every state transition emits a cryptographically verifiable audit record.
+              </p>
+            </div>
+            <ul class="capability-spec-list">
+              <li>→ BYOK (Bring Your Own KMS Key) encryption</li>
+              <li>→ Automated SOC2, HIPAA, &amp; PCI-DSS evidence</li>
+              <li>→ Zero-trust RBAC &amp; ephemeral session tokens</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 4: VERIFIED CUSTOMER IMPACT & CASE STUDIES
+         ==================================================================== -->
+    <section class="section-block" id="customers-section">
+      <div class="container">
+        <div class="section-header-row">
+          <div>
+            <span class="eyebrow">PRODUCTION CASE STUDIES</span>
+            <h2 class="section-title" style="margin-top: 0.5rem;">Proven across mission-critical infrastructure.</h2>
+          </div>
+        </div>
+
+        <div class="case-study-frame">
+          <div class="case-tabs-sidebar" role="tablist" aria-label="Customer Case Studies">
+            <button type="button" class="case-tab-btn active" id="case-btn-kestrel" data-case="kestrel">
+              <div class="mono-tag" style="color: var(--accent-primary);">FINTECH &amp; SETTLEMENT</div>
+              <div style="font-size: 1.15rem; font-weight: 700; margin-top: 0.2rem;">Kestrel Financial</div>
+              <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem;">$14B daily instant treasury volume</div>
+            </button>
+            <button type="button" class="case-tab-btn" id="case-btn-helios" data-case="helios">
+              <div class="mono-tag" style="color: var(--text-muted);">AI INFRASTRUCTURE</div>
+              <div style="font-size: 1.15rem; font-weight: 700; margin-top: 0.2rem;">Helios Compute</div>
+              <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem;">40,000 H100 GPU cluster orchestration</div>
+            </button>
+            <button type="button" class="case-tab-btn" id="case-btn-vanguard" data-case="vanguard">
+              <div class="mono-tag" style="color: var(--text-muted);">GLOBAL LOGISTICS</div>
+              <div style="font-size: 1.15rem; font-weight: 700; margin-top: 0.2rem;">Vanguard Freight</div>
+              <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem;">Autonomous customs &amp; port telemetry</div>
+            </button>
+          </div>
+
+          <div class="case-content-stage">
+            <div>
+              <div class="mono-tag" id="case-study-sector" style="color: var(--text-muted); margin-bottom: 1rem;">
+                Kestrel Financial — Global Treasury &amp; Instant Settlement Infrastructure
+              </div>
+              <blockquote class="case-quote-text" id="case-study-quote">
+                “Vellum replaced four disconnected runbook tools and cut our mean-time-to-remediation from 47 minutes to 19 seconds across $14B in daily settlement volume.”
+              </blockquote>
+              <p style="margin-top: 1.25rem; font-weight: 600; color: var(--text-secondary);" id="case-study-author">
+                Elena Rostova — VP of Platform Engineering, Kestrel Financial
+              </p>
+            </div>
+
+            <div class="case-metrics-row" id="case-study-metrics">
+              <div>
+                <div class="case-metric-number">96%</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.35rem;">Reduction in P1 Incident MTTR</div>
+              </div>
+              <div>
+                <div class="case-metric-number">14,200 hrs</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.35rem;">Engineering Hours Saved Annually</div>
+              </div>
+              <div>
+                <div class="case-metric-number">100%</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.35rem;">Automated SOC2 Change Evidence</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 5: TRANSPARENT PRICING & INTERACTIVE ROI CALCULATOR
+         ==================================================================== -->
+    <section class="section-block" id="pricing-section">
+      <div class="container">
+        <div class="section-header-row">
+          <div>
+            <span class="eyebrow">PREDICTABLE PRICING &amp; ROI</span>
+            <h2 class="section-title" style="margin-top: 0.5rem;">Scale workflows without per-event tax.</h2>
+          </div>
+          <div>
+            <button type="button" class="btn btn-secondary" id="billing-cycle-toggle">
+              ● Annual Billing (Save 20%) — Switch to Monthly
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive ROI Slider Bar -->
+        <div class="roi-calculator-bar">
+          <div>
+            <label for="roi-team-slider" class="mono-tag" style="display: block; color: var(--text-secondary);">
+              ESTIMATE YOUR TEAM’S ANNUAL IMPACT: <strong id="roi-team-count" style="color: var(--text-primary);">65 engineers &amp; operators</strong>
+            </label>
+            <input type="range" id="roi-team-slider" class="range-slider" min="10" max="500" step="5" value="65" />
+          </div>
+          <div style="border-left: 1px solid var(--border-hairline); padding-left: 1.5rem;">
+            <div class="mono-tag" style="color: var(--text-muted);">RECLAIMED ON-CALL &amp; OPS TIME</div>
+            <div style="font-family: var(--font-serif); font-size: 2rem; color: var(--text-primary);" id="roi-hours-saved">9,620 hrs / yr</div>
+          </div>
+          <div style="border-left: 1px solid var(--border-hairline); padding-left: 1.5rem;">
+            <div class="mono-tag" style="color: var(--text-muted);">PROJECTED NET OPS SAVINGS</div>
+            <div style="font-family: var(--font-serif); font-size: 2rem; color: var(--accent-emerald);" id="roi-dollar-saved">$1,106,000 / yr</div>
+          </div>
+        </div>
+
+        <!-- Pricing Cards Grid -->
+        <div class="pricing-tiers-grid">
+          <article class="pricing-card">
+            <div>
+              <div class="mono-tag" style="color: var(--text-muted);">FOUNDATION</div>
+              <h3 style="font-size: 1.4rem; margin-top: 0.3rem;">Growth Team</h3>
+              <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.4rem;">
+                For fast-moving product engineering teams automating core deployment &amp; incident runbooks.
+              </p>
+              <div style="margin-block: 1.5rem; padding-block: 1.25rem; border-block: 1px solid var(--border-hairline);">
+                <span class="price-amount" id="price-tier-growth">$39</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);"> / operator / month</span>
+              </div>
+              <ul class="feature-check-list">
+                <li>✓ Up to 50 active DAG workflows</li>
+                <li>✓ 25M monthly ingested telemetry events</li>
+                <li>✓ GitHub, Datadog, PagerDuty &amp; Slack native sync</li>
+                <li>✓ 30-day replayable execution history</li>
+              </ul>
+            </div>
+            <button type="button" class="btn btn-secondary" id="pricing-growth-cta" data-open-modal="demo" style="width: 100%;">
+              Start 14-Day Free Trial
+            </button>
+          </article>
+
+          <article class="pricing-card featured-tier">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="mono-tag" style="color: var(--accent-primary); font-weight: 700;">MOST POPULAR</span>
+                <span class="mono-tag" style="background: var(--accent-primary-soft); color: var(--accent-primary); padding: 0.15rem 0.5rem; border-radius: 4px;">UNLIMITED WORKFLOWS</span>
+              </div>
+              <h3 style="font-size: 1.4rem; margin-top: 0.3rem;">Production Scale</h3>
+              <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.4rem;">
+                Full autonomous remediation, multi-region canary orchestration, and continuous SOC2 evidence.
+              </p>
+              <div style="margin-block: 1.5rem; padding-block: 1.25rem; border-block: 1px solid var(--border-hairline);">
+                <span class="price-amount" id="price-tier-scale">$89</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);"> / operator / month</span>
+              </div>
+              <ul class="feature-check-list">
+                <li>✓ Unlimited deterministic DAG workflows</li>
+                <li>✓ 250M monthly ingested telemetry events</li>
+                <li>✓ Automated canary traffic shifting &amp; rollback</li>
+                <li>✓ Cryptographic audit ledger &amp; SAML SSO</li>
+              </ul>
+            </div>
+            <button type="button" class="btn btn-primary" id="pricing-scale-cta" data-open-modal="demo" style="width: 100%;">
+              Provision Scale Workspace →
+            </button>
+          </article>
+
+          <article class="pricing-card">
+            <div>
+              <div class="mono-tag" style="color: var(--text-muted);">DEDICATED VPC</div>
+              <h3 style="font-size: 1.4rem; margin-top: 0.3rem;">Enterprise Sovereign</h3>
+              <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.4rem;">
+                Self-hosted data plane in your AWS, GCP, or Azure VPC with custom SLAs and dedicated architect support.
+              </p>
+              <div style="margin-block: 1.5rem; padding-block: 1.25rem; border-block: 1px solid var(--border-hairline);">
+                <span class="price-amount">Custom</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);"> / annual contract</span>
+              </div>
+              <ul class="feature-check-list">
+                <li>✓ Hybrid VPC / Air-gapped deployment options</li>
+                <li>✓ Unlimited telemetry ingestion &amp; multi-year retention</li>
+                <li>✓ BYOK KMS encryption &amp; HIPAA / FedRAMP support</li>
+                <li>✓ 99.999% contractual uptime SLA &amp; 15m response</li>
+              </ul>
+            </div>
+            <button type="button" class="btn btn-secondary" id="pricing-enterprise-cta" data-open-modal="demo" style="width: 100%;">
+              Book Architecture Review
+            </button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 6: INTERACTIVE FAQ ACCORDION
+         ==================================================================== -->
+    <section class="section-block" id="faq-section">
+      <div class="container">
+        <div class="section-header-row">
+          <div>
+            <span class="eyebrow">TECHNICAL FAQ</span>
+            <h2 class="section-title" style="margin-top: 0.5rem;">Architectural questions, answered.</h2>
+          </div>
+        </div>
+
+        <div class="faq-list">
+          <div class="faq-item is-open">
+            <button type="button" class="faq-trigger" id="faq-btn-1" aria-expanded="true">
+              <span>How does Vellum prevent an automated workflow from cascading a bad state?</span>
+              <span class="mono-tag">+</span>
+            </button>
+            <div class="faq-answer">
+              Every Vellum workflow runs inside a formal state machine with explicit blast-radius policies. You define hard invariants (such as maximum concurrent nodes drained or p99 error budget thresholds) that halt execution and require cryptographic human quorum if breached.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button type="button" class="faq-trigger" id="faq-btn-2" aria-expanded="false">
+              <span>Can we keep all production credentials and telemetry inside our own VPC?</span>
+              <span class="mono-tag">+</span>
+            </button>
+            <div class="faq-answer">
+              Yes. Vellum’s stateless agent runner deploys inside your Kubernetes cluster or VPC via AWS PrivateLink / GCP Private Service Connect. Credentials never leave your perimeter; only signed state hashes sync to the control plane UI.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button type="button" class="faq-trigger" id="faq-btn-3" aria-expanded="false">
+              <span>How long does it take to migrate existing Terraform, GitHub Actions, or PagerDuty scripts?</span>
+              <span class="mono-tag">+</span>
+            </button>
+            <div class="faq-answer">
+              Most engineering teams connect their observability and git providers in under 10 minutes and import existing runbooks using our TypeScript SDK or declarative YAML/HCL converter on day one.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Editorial Sitemap Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand-logo" style="margin-bottom: 0.75rem;">
+            <span class="brand-mark">V</span>
+            <span>Vellum Operations Inc.</span>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); max-width: 34ch;">
+            The deterministic product operations and workflow orchestration platform for high-reliability engineering organizations.
+          </p>
+        </div>
+
+        <div>
+          <div class="mono-tag" style="color: var(--text-primary); font-weight: 700; margin-bottom: 0.75rem;">PLATFORM</div>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+            <li><a href="#hero-cinema-track">Scroll Cinema Tour</a></li>
+            <li><a href="#live-sandbox-section">Interactive Sandbox</a></li>
+            <li><a href="#architecture-section">DAG Orchestrator</a></li>
+            <li><a href="#pricing-section">ROI Calculator</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="mono-tag" style="color: var(--text-primary); font-weight: 700; margin-bottom: 0.75rem;">SECURITY &amp; TRUST</div>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+            <li><a href="#architecture-section">SOC2 Type II Report</a></li>
+            <li><a href="#architecture-section">Zero-Trust VPC Agent</a></li>
+            <li><a href="#customers-section">Customer Case Studies</a></li>
+            <li><a href="#faq-section">Architecture FAQ</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="mono-tag" style="color: var(--text-primary); font-weight: 700; margin-bottom: 0.75rem;">START TODAY</div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+            Provision a dedicated sandbox with sample telemetry in 60 seconds.
+          </p>
+          <button type="button" class="btn btn-primary" id="footer-book-demo-btn" data-open-modal="demo">
+            Start Free Workspace →
+          </button>
+        </div>
+      </div>
+
+      <div style="padding-top: 2rem; border-top: 1px solid var(--border-hairline); display: flex; flex-wrap: wrap; justify-content: space-between; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">
+        <span>© 2026 VELLUM OPERATIONS INC. ALL RIGHTS RESERVED.</span>
+        <span>STATUS: ALL SYSTEMS OPERATIONAL (99.998%)</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interactive Demo Booking / Workspace Trial Modal -->
+  <div class="modal-backdrop" id="demo-booking-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+    <div class="modal-dialog">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem;">
+        <div>
+          <span class="eyebrow">INSTANT SANDBOX &amp; ARCHITECTURE REVIEW</span>
+          <h2 id="modal-title" style="font-family: var(--font-serif); font-size: 2rem; margin-top: 0.25rem;">Provision your Vellum workspace</h2>
+        </div>
+        <button type="button" id="modal-close-btn" class="btn-ghost" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="demo-booking-form" novalidate>
+        <div class="form-field">
+          <label for="demo-work-email" class="mono-tag">WORK EMAIL</label>
+          <input type="email" id="demo-work-email" class="form-input" placeholder="you@company.com" required />
+        </div>
+
+        <div class="form-field">
+          <label for="demo-company-name" class="mono-tag">ORGANIZATION / TEAM NAME</label>
+          <input type="text" id="demo-company-name" class="form-input" placeholder="Acme Infrastructure" required />
+        </div>
+
+        <div class="form-field">
+          <label for="demo-deployment-mode" class="mono-tag">PREFERRED DEPLOYMENT MODEL</label>
+          <select id="demo-deployment-mode" class="form-input">
+            <option value="cloud">Vellum Managed Cloud (Instant Sandbox)</option>
+            <option value="vpc">Hybrid VPC PrivateLink Agent (AWS / GCP / Azure)</option>
+            <option value="airgap">Self-Hosted Sovereign Enterprise</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="demo-submit-btn" style="width: 100%; margin-top: 0.5rem;">
+          Create Workspace &amp; Launch Sandbox →
+        </button>
+
+        <p id="demo-form-feedback" style="display: none; margin-top: 1rem; font-size: 0.85rem; font-weight: 600;"></p>
+      </form>
+    </div>
+  </div>
+
+  <script src="./scripts/scroll-cinema.js"></script>
+  <script src="./scripts/interactions.js"></script>
+</body>
+</html>

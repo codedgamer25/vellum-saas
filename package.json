@@ -1,0 +1,9 @@
+{
+  "name": "vellum-saas-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vellum — Intelligent Product Operations & Workflow Orchestration SaaS Landing Page",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}
