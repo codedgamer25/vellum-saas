@@ -1,8 +1,8 @@
 {
-  "name": "vellum-saas-website",
-  "version": "1.0.0",
+  "name": "royal-headmistress-luxury-hair",
+  "version": "2.0.0",
   "private": true,
-  "description": "Vellum — Intelligent Product Operations & Workflow Orchestration SaaS Landing Page",
+  "description": "Royal Headmistress — Premium Wigs & Luxury Hair Couture Website",
   "scripts": {
     "start": "npx serve ."
   }

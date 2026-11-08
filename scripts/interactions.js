@@ -1,6 +1,6 @@
 /**
- * Vellum — Interactive Product Sandbox, Case Study Switcher,
- * ROI & Pricing Calculator, FAQ Accordion, and Demo Booking Modal
+ * Royal Headmistress — Custom Crown Configurator, Client Diaries,
+ * Bundle & Length Calculator, FAQ Accordion, and Atelier Order Modal
  */
 
 (function () {
@@ -8,110 +8,112 @@
 
   const SANDBOX_SCENARIOS = {
     latency: {
-      title: 'Payment Gateway p99 Latency Spike',
-      slaTarget: '14.2s',
-      eventsPerSec: '18,420 /s',
+      title: 'Sovereign 13×6 HD Frontal Crown — Hollywood Body Wave',
+      slaTarget: '220% Royal Density',
+      eventsPerSec: '100% Raw Cuticle',
       steps: [
-        { code: '01', name: 'Ingest Datadog & Stripe Webhook Anomaly', status: 'VERIFIED (12ms)', active: false },
-        { code: '02', name: 'Correlate Recent Commit #a94f21c in Checkout Service', status: 'MATCHED (99.4%)', active: true },
-        { code: '03', name: 'Shift 35% Traffic to Fallback EU-Central Pool', status: 'EXECUTING', active: true },
-        { code: '04', name: 'Post Verified Root-Cause Brief to #ops-command', status: 'QUEUED', active: false }
+        { code: '01', name: 'Select Single-Donor Raw Vietnamese Cuticle Bundles', status: 'GRADE 12A+ RAW', active: false },
+        { code: '02', name: 'Hand-Ventilate 0.10mm Ultra-Thin Swiss HD Lace Frontal', status: 'SINGLE KNOTS', active: true },
+        { code: '03', name: 'Micro-Bleach Knots & Sculpt Pre-Plucked Contoured Hairline', status: 'INVISIBLE MELT', active: true },
+        { code: '04', name: 'Infuse Silk Amino Steam Wave & Seal Royal Crown Tag', status: 'READY TO SHIP', active: false }
       ],
       payload: `{
-  "workflow_id": "wf_pay_latency_mitigation_09",
-  "trigger": "anomaly.checkout.p99_exceeded",
-  "observed_p99_ms": 842,
-  "baseline_p99_ms": 118,
-  "suspected_sha": "a94f21c8e",
-  "automated_action": {
-    "route_shift": "eu-central-fallback",
-    "traffic_weight": 0.35,
-    "approval_gate": "auto_approved_tier_1"
+  "atelier_certificate": "RHM-CROWN-2026-8841",
+  "collection": "Sovereign 13x6 HD Frontal Wig",
+  "hair_origin": "100% Unprocessed Single-Donor Raw Hair",
+  "lace_specification": {
+    "material": "0.10mm Ultra-Thin Swiss HD Lace",
+    "dimensions": "13 inch Ear-to-Ear x 6 inch Deep Parting",
+    "knots": "Hand-Tied Single Strand (Pre-Bleached)"
   },
-  "recovery_eta_seconds": 14
+  "density": "220% Couture Fullness",
+  "lifespan_guarantee": "5+ Years with Proper Silk Care"
 }`
     },
     migration: {
-      title: 'Zero-Downtime Multi-Region Ledger Migration',
-      slaTarget: '0.0ms downtime',
-      eventsPerSec: '42,900 /s',
+      title: 'Empress 5×5 Glueless Silk-Melt Closure Unit — Bone Straight',
+      slaTarget: '30-Sec Put-On',
+      eventsPerSec: 'Zero Adhesive',
       steps: [
-        { code: '01', name: 'Provision Shadow Read-Replica in us-east & eu-west', status: 'READY', active: false },
-        { code: '02', name: 'Dual-Write Verification & Checksum Parity Audit', status: '100.00% PARITY', active: true },
-        { code: '03', name: 'Atomic Read Pointer Flip with Rollback Guard', status: 'ACTIVE GATE', active: true },
-        { code: '04', name: 'Archive Legacy Partition & Emit Compliance Artifact', status: 'STANDBY', active: false }
+        { code: '01', name: 'Align Double-Drawn Bone-Straight Raw Strands (Full Ends)', status: 'DOUBLE DRAWN', active: false },
+        { code: '02', name: 'Construct 3D Contoured Breathable Silk Dome Cap', status: 'CRANIAL FIT', active: true },
+        { code: '03', name: 'Integrate Adjustable Piano-Key Elastic Band & Crown Combs', status: '100% GLUELESS', active: true },
+        { code: '04', name: 'Flat-Iron Glass-Shine Finish & Pack in Satin Crown Pouch', status: 'INSPECTED', active: false }
       ],
       payload: `{
-  "workflow_id": "wf_ledger_cutover_v4",
-  "shards_verified": 128,
-  "row_checksum_mismatch": 0,
-  "replication_lag_ms": 1.8,
-  "cutover_policy": {
-    "abort_on_lag_ms": 15.0,
-    "canary_percentage": 25,
-    "signoff_principals": ["@sre-lead", "@db-arch"]
-  }
+  "atelier_certificate": "RHM-EMPRESS-2026-4109",
+  "collection": "Empress 5x5 Glueless Closure Wig",
+  "install_method": "True Wear-and-Go (Zero Glue or Gel Required)",
+  "cap_architecture": {
+    "dome": "Breathable Stretch Antibacterial Mesh",
+    "security": "Removable Piano-Key Elastic + 3 Sterling Combs",
+    "ear_tabs": "Contoured Velvet C-Cut (Glasses Friendly)"
+  },
+  "shine_finish": "Mirror Glass-Silk Press"
 }`
     },
     audit: {
-      title: 'Continuous SOC2 & ISO-27001 Access Governance',
-      slaTarget: '100% Attested',
-      eventsPerSec: '6,150 /s',
+      title: 'Royal Couture 4-Bundle + HD Frontal Set — Burmese Deep Wave',
+      slaTarget: '400g Full Weight',
+      eventsPerSec: 'Zero Shedding',
       steps: [
-        { code: '01', name: 'Scan Production IAM Roles & Ephemeral Break-Glass Grants', status: 'SCANNED', active: false },
-        { code: '02', name: 'Revoke 14 Expired Contractor Sessions Automatically', status: 'REVOKED', active: true },
-        { code: '03', name: 'Cryptographically Sign Immutable Audit Ledger Entry', status: 'SIGNED (SHA-256)', active: true },
-        { code: '04', name: 'Sync Evidence Bundle to External Auditor Portal', status: 'COMPLETED', active: false }
+        { code: '01', name: 'Harvest Lush Raw Burmese Temple Curls (Unsteamed)', status: 'AUTHENTIC RAW', active: false },
+        { code: '02', name: 'Triple-Stitch Reinforced Machine Wefts to Prevent Shedding', status: 'SEALED WEFT', active: true },
+        { code: '03', name: 'Pair with Matching 13×6 Pre-Customized HD Lace Frontal', status: 'COLOR MATCHED', active: true },
+        { code: '04', name: 'Include Crystal Crown Comb & Silk Maintenance Kit', status: 'GIFT BOXED', active: false }
       ],
       payload: `{
-  "workflow_id": "wf_soc2_continuous_evidence",
-  "principals_evaluated": 1420,
-  "expired_grants_revoked": 14,
-  "unscoped_admin_tokens": 0,
-  "attestation_hash": "sha256:9f84b2c71e630d4a881",
-  "auditor_export_status": "DELIVERED"
+  "atelier_certificate": "RHM-BUNDLES-2026-9920",
+  "collection": "Royal Burmese Deep Wave Bundle Deal",
+  "bundle_weight_grams": 400,
+  "weft_construction": "Micro-Thin Triple-Reinforced Flat Weft",
+  "coloring_capability": "Lifts Cleanly to #613 Platinum Blonde",
+  "included_accessories": [
+    "Embroidered Royal Satin Storage Bag",
+    "Jeweled Crown Detangling Comb"
+  ]
 }`
     }
   };
 
   const CASE_STUDIES = {
     kestrel: {
-      company: 'Kestrel Financial',
-      sector: 'Global Treasury & Instant Settlement Infrastructure',
-      quote: '“Vellum replaced four disconnected runbook tools and cut our mean-time-to-remediation from 47 minutes to 19 seconds across $14B in daily settlement volume.”',
-      author: 'Elena Rostova — VP of Platform Engineering, Kestrel Financial',
+      company: 'Chidinma A. — Luxury Bridal & Red Carpet Stylist',
+      sector: 'Lagos • London • Paris Bridal Couture',
+      quote: '“Royal Headmistress HD lace disappears into every skin tone without heavy foundation or tint spray. My brides dance for 14 hours straight and the hairline looks like it is growing directly from their scalp.”',
+      author: 'Chidinma Adeyemi — Lead Bridal Hair Architect',
       metrics: [
-        { val: '96%', label: 'Reduction in P1 Incident MTTR' },
-        { val: '14,200 hrs', label: 'Engineering Hours Saved Annually' },
-        { val: '100%', label: 'Automated SOC2 Change Evidence' }
+        { val: '0.10 mm', label: 'Ultra-Thin Undetectable Swiss Lace' },
+        { val: '5+ Years', label: 'Verified Raw Hair Lifespan' },
+        { val: '100%', label: 'Single-Donor Aligned Cuticles' }
       ]
     },
     helios: {
-      company: 'Helios Compute',
-      sector: 'Distributed GPU Cluster & Model Serving Cloud',
-      quote: '“When orchestrating 40,000 H100 nodes across six continents, manual triage is impossible. Vellum’s deterministic DAG engine drains degraded nodes before customers notice a single dropped token.”',
-      author: 'Marcus Vance — Head of Infrastructure, Helios Compute',
+      company: 'Simone V. — Executive & Glueless Collector',
+      sector: 'Atlanta • New York Private Client',
+      quote: '“I own seven units from Royal Headmistress. The glueless piano-key cap fits so securely I wear my 28-inch Hollywood Body Wave to boardroom meetings and flights without a single drop of adhesive.”',
+      author: 'Simone Vance — Managing Partner & VIP Collector',
       metrics: [
-        { val: '99.998%', label: 'Cluster Scheduling Availability' },
-        { val: '3.4x', label: 'Faster Release Train Velocity' },
-        { val: '$2.8M', label: 'Saved in Idle Compute Waste' }
+        { val: '30 sec', label: 'Effortless Glueless Application' },
+        { val: '0.0%', label: 'Matting or Shedding After 18 Washes' },
+        { val: '220%', label: 'True-to-Length Couture Density' }
       ]
     },
     vanguard: {
-      company: 'Vanguard Freight',
-      sector: 'Autonomous Port & Supply-Chain Telemetry',
-      quote: '“Every customs manifest, IoT sensor stream, and carrier API flows through Vellum. Our operations teams went from firefighting spreadsheets to governing autonomous workflows.”',
-      author: 'Devon Lindqvist — Chief Operating Officer, Vanguard Freight',
+      company: 'Maison Noir Salon — Luxury Extension Partner',
+      sector: 'Dubai • Beverly Hills Colorists',
+      quote: '“Most ‘raw’ hair on the market fails the bleach test. Royal Headmistress bundles lift to #613 honey and platinum blonde in a single session while keeping their bounce, luster, and curl memory.”',
+      author: 'Camille Laurent — Master Colorist, Maison Noir',
       metrics: [
-        { val: '410ms', label: 'Global Customs Exception Routing' },
-        { val: '82%', label: 'Fewer Manual Escalation Tickets' },
-        { val: '19 days', label: 'Full Global Deployment Time' }
+        { val: '#613', label: 'Single-Session Blonde Lift Safe' },
+        { val: '400 g', label: 'Full-Weight 4-Bundle Couture Sets' },
+        { val: '48 hrs', label: 'DHL Express Worldwide Dispatch' }
       ]
     }
   };
 
   function initInteractions() {
-    // 1. Sandbox Scenario Switcher & Live Step Runner
+    // 1. Custom Crown Configurator Switcher & Step Runner
     const scenarioBtns = Array.from(document.querySelectorAll('[data-scenario]'));
     const sandboxTitle = document.getElementById('sandbox-scenario-title');
     const sandboxSla = document.getElementById('sandbox-sla-readout');
@@ -140,8 +142,8 @@
               <span class="step-index-box">${s.code}</span>
               <span style="font-weight: 600; font-size: 0.9rem;">${s.name}</span>
             </div>
-            <span class="mono-tag" style="color: ${idx === stepCursor ? 'var(--accent-primary)' : 'var(--accent-emerald)'}; font-weight: 600;">
-              ${idx === stepCursor ? '● EXECUTING NOW' : s.status}
+            <span class="mono-tag" style="color: ${idx === stepCursor ? 'var(--accent-primary)' : 'var(--accent-emerald)'}; font-weight: 700;">
+              ${idx === stepCursor ? '♛ ACTIVE STAGE' : s.status}
             </span>
           </div>
         `).join('');
@@ -162,11 +164,11 @@
         const data = SANDBOX_SCENARIOS[currentScenarioKey];
         stepCursor = (stepCursor + 1) % data.steps.length;
         renderScenario(currentScenarioKey);
-        runSimulationBtn.textContent = `✓ STEP 0${stepCursor + 1} DISPATCHED — ADVANCE NEXT`;
+        runSimulationBtn.textContent = `♛ INSPECT STAGE 0${stepCursor + 1} — NEXT STEP`;
       });
     }
 
-    // 2. Customer Case Study Tabs
+    // 2. Client Diaries Tabs
     const caseBtns = Array.from(document.querySelectorAll('[data-case]'));
     const caseSectorEl = document.getElementById('case-study-sector');
     const caseQuoteEl = document.getElementById('case-study-quote');
@@ -194,7 +196,7 @@
       });
     });
 
-    // 3. Interactive Pricing & ROI Calculator
+    // 3. Interactive Length & Bundle Calculator
     const billingToggleBtn = document.getElementById('billing-cycle-toggle');
     const teamSlider = document.getElementById('roi-team-slider');
     const teamCountOut = document.getElementById('roi-team-count');
@@ -203,32 +205,33 @@
     const priceGrowthEl = document.getElementById('price-tier-growth');
     const priceScaleEl = document.getElementById('price-tier-scale');
 
-    let isAnnual = true;
+    let isVipMember = true;
 
     function updatePricingAndRoi() {
-      const seats = teamSlider ? parseInt(teamSlider.value, 10) : 65;
-      if (teamCountOut) teamCountOut.textContent = `${seats} engineers & operators`;
+      const lengthInches = teamSlider ? parseInt(teamSlider.value, 10) : 26;
+      if (teamCountOut) teamCountOut.textContent = `${lengthInches}" Couture Length`;
 
-      const annualHours = seats * 148;
-      const annualSavingsUsd = Math.round((annualHours * 115) / 1000) * 1000;
+      const bundlesNeeded = lengthInches <= 20 ? 3 : (lengthInches <= 28 ? 4 : 5);
+      const gramsTotal = bundlesNeeded * 100;
+      const densityRec = lengthInches <= 20 ? '180% Natural' : (lengthInches <= 28 ? '220% Royal' : '250% Red Carpet');
 
-      if (hoursSavedOut) hoursSavedOut.textContent = `${annualHours.toLocaleString()} hrs / yr`;
-      if (dollarSavedOut) dollarSavedOut.textContent = `$${annualSavingsUsd.toLocaleString()} / yr`;
+      if (hoursSavedOut) hoursSavedOut.textContent = `${bundlesNeeded} Bundles (${gramsTotal}g)`;
+      if (dollarSavedOut) dollarSavedOut.textContent = `${densityRec}`;
 
-      const growthPrice = isAnnual ? 39 : 49;
-      const scalePrice = isAnnual ? 89 : 109;
-      if (priceGrowthEl) priceGrowthEl.textContent = `$${growthPrice}`;
-      if (priceScaleEl) priceScaleEl.textContent = `$${scalePrice}`;
+      const closurePrice = isVipMember ? 420 : 495;
+      const frontalPrice = isVipMember ? 680 : 795;
+      if (priceGrowthEl) priceGrowthEl.textContent = `$${closurePrice}`;
+      if (priceScaleEl) priceScaleEl.textContent = `$${frontalPrice}`;
       if (billingToggleBtn) {
-        billingToggleBtn.textContent = isAnnual
-          ? '● Annual Billing (Save 20%) — Switch to Monthly'
-          : '○ Monthly Billing — Switch to Annual (Save 20%)';
+        billingToggleBtn.textContent = isVipMember
+          ? '♛ Royal Crown Club Pricing (15% Off) — Switch to Standard'
+          : '○ Standard Atelier Pricing — Switch to Royal Crown Club (15% Off)';
       }
     }
 
     if (billingToggleBtn) {
       billingToggleBtn.addEventListener('click', () => {
-        isAnnual = !isAnnual;
+        isVipMember = !isVipMember;
         updatePricingAndRoi();
       });
     }
@@ -258,7 +261,7 @@
       });
     });
 
-    // 5. Interactive Demo Booking & Trial Modal
+    // 5. Private Atelier Order & Custom Measurement Modal
     const modal = document.getElementById('demo-booking-modal');
     const openModalBtns = Array.from(document.querySelectorAll('[data-open-modal="demo"]'));
     const closeModalBtn = document.getElementById('modal-close-btn');
@@ -299,7 +302,7 @@
           if (formFeedback) {
             formFeedback.style.display = 'block';
             formFeedback.style.color = 'var(--accent-primary)';
-            formFeedback.textContent = 'Please provide a valid work email and organization name.';
+            formFeedback.textContent = 'Please enter your name and email address to reserve your custom crown.';
           }
           return;
         }
@@ -307,7 +310,7 @@
         if (formFeedback) {
           formFeedback.style.display = 'block';
           formFeedback.style.color = 'var(--accent-emerald)';
-          formFeedback.textContent = `✓ Workspace provisioned for ${teamVal} (${emailVal}). Check your inbox for your instant sandbox link.`;
+          formFeedback.textContent = `♛ Thank you, ${teamVal}! Your Royal Headmistress private concierge reservation has been sent to ${emailVal}.`;
         }
         demoForm.reset();
       });

@@ -1,7 +1,7 @@
 /**
- * Vellum — Apple-Style Scroll-Wipe Cinema Engine
- * Synchronizes scroll position (or auto-scrub playback) with 5 stacked product scenes,
- * clip-path wipes, camera transforms, narrative cards, and a high-DPI HTML5 telemetry canvas.
+ * Royal Headmistress — Apple-Style Scroll-Wipe Cinema Engine
+ * Synchronizes scroll position (or auto-scrub playback) with 5 stacked couture wig & hair scenes,
+ * clip-path wipes, camera transforms, narrative cards, and a silk-wave canvas overlay.
  */
 
 (function () {
@@ -13,40 +13,40 @@
       index: 0,
       id: 'ch-01',
       code: 'CHAPTER 01 / 05',
-      name: 'Command Horizon',
-      urlPath: 'vellum.app/workspace/command-horizon',
+      name: 'Royal Silhouette',
+      urlPath: 'royalheadmistress.com/atelier/01-royal-silhouette',
       range: [0.0, 0.20]
     },
     {
       index: 1,
       id: 'ch-02',
       code: 'CHAPTER 02 / 05',
-      name: 'Signal Ingestion',
-      urlPath: 'vellum.app/workspace/ingestion-matrix',
+      name: 'HD Swiss Lace',
+      urlPath: 'royalheadmistress.com/atelier/02-hd-swiss-lace',
       range: [0.20, 0.40]
     },
     {
       index: 2,
       id: 'ch-03',
       code: 'CHAPTER 03 / 05',
-      name: 'DAG Orchestrator',
-      urlPath: 'vellum.app/workspace/dag-topology',
+      name: 'Raw Virgin Cuticle',
+      urlPath: 'royalheadmistress.com/atelier/03-raw-virgin-bundles',
       range: [0.40, 0.60]
     },
     {
       index: 3,
       id: 'ch-04',
       code: 'CHAPTER 04 / 05',
-      name: 'Spec-to-Ship Gate',
-      urlPath: 'vellum.app/workspace/runbook-gate',
+      name: 'Glueless Crown Cap',
+      urlPath: 'royalheadmistress.com/atelier/04-glueless-cap-fit',
       range: [0.60, 0.80]
     },
     {
       index: 4,
       id: 'ch-05',
       code: 'CHAPTER 05 / 05',
-      name: 'Executive Telemetry',
-      urlPath: 'vellum.app/workspace/executive-ledger',
+      name: 'Royal Unboxing',
+      urlPath: 'royalheadmistress.com/atelier/05-royal-concierge',
       range: [0.80, 1.00]
     }
   ];
@@ -81,11 +81,9 @@
 
     let targetProgress = 0;
     let currentProgress = 0;
-    let lastProgress = 0;
     let isAutoPlaying = false;
     let autoPlaySpeed = 0.0018;
 
-    // Measure scroll position relative to the 460vh track
     function updateTargetFromScroll() {
       if (isAutoPlaying) return;
       const rect = track.getBoundingClientRect();
@@ -98,7 +96,6 @@
     window.addEventListener('resize', updateTargetFromScroll, { passive: true });
     updateTargetFromScroll();
 
-    // Stop autoplay if user manually scrolls with wheel or touch
     window.addEventListener('wheel', () => {
       if (isAutoPlaying) toggleAutoPlay(false);
     }, { passive: true });
@@ -106,7 +103,7 @@
     function toggleAutoPlay(forceState) {
       isAutoPlaying = typeof forceState === 'boolean' ? forceState : !isAutoPlaying;
       if (autoplayBtn) {
-        autoplayBtn.textContent = isAutoPlaying ? '❚❚ PAUSE MOVIE' : '▶ AUTO-SCRUB';
+        autoplayBtn.textContent = isAutoPlaying ? '❚❚ PAUSE RUNWAY' : '▶ AUTO-SCRUB';
         autoplayBtn.setAttribute('aria-pressed', String(isAutoPlaying));
       }
     }
@@ -121,7 +118,6 @@
       });
     }
 
-    // Chapter buttons scrub to chapter start and scroll window smoothly if in scroll mode
     scrubBtns.forEach((btn, idx) => {
       btn.addEventListener('click', () => {
         const chapterStart = CHAPTERS[idx].range[0] + 0.02;
@@ -137,7 +133,6 @@
       });
     });
 
-    // High-DPI Telemetry Canvas setup
     let ctx = null;
     let canvasW = 800;
     let canvasH = 450;
@@ -157,51 +152,29 @@
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas, { passive: true });
 
-    function renderTelemetryCanvas(progress, timeSec) {
+    // Renders flowing champagne-gold silk ribbons synchronized to scroll position
+    function renderSilkWaveCanvas(progress, timeSec) {
       if (!ctx) return;
       ctx.clearRect(0, 0, canvasW, canvasH);
 
-      // Draw subtle horizontal telemetry buses
-      const busCount = 4;
-      for (let i = 0; i < busCount; i++) {
-        const y = ((i + 1) / (busCount + 1)) * canvasH;
-        ctx.strokeStyle = 'rgba(247, 245, 240, 0.05)';
-        ctx.lineWidth = 1;
+      for (let ribbon = 0; ribbon < 3; ribbon++) {
         ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvasW, y);
-        ctx.stroke();
-
-        // Moving signal pulses driven by scroll progress + time
-        const pulseX = ((progress * 1400 + timeSec * (65 + i * 22) + i * 190) % (canvasW + 120)) - 60;
-        const grad = ctx.createLinearGradient(pulseX - 50, y, pulseX + 10, y);
-        grad.addColorStop(0, 'rgba(206, 74, 28, 0)');
-        grad.addColorStop(1, i % 2 === 0 ? 'rgba(206, 74, 28, 0.55)' : 'rgba(27, 125, 90, 0.55)');
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(pulseX - 50, y);
-        ctx.lineTo(pulseX + 10, y);
+        const alpha = 0.14 + ribbon * 0.08;
+        ctx.strokeStyle = `rgba(212, 175, 55, ${alpha})`;
+        ctx.lineWidth = 1.25 + ribbon * 0.4;
+        const baseY = canvasH - 36 + ribbon * 8;
+        for (let x = 0; x <= canvasW; x += 8) {
+          const phase = progress * Math.PI * 8 + timeSec * 1.4 + ribbon * 1.1;
+          const amp = 7 + Math.sin(progress * Math.PI * 3 + ribbon) * 5;
+          const y = baseY + Math.sin(x * 0.018 + phase) * amp;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
         ctx.stroke();
       }
-
-      // Draw scroll-scrubbed harmonic waveform along bottom of stage
-      ctx.beginPath();
-      ctx.strokeStyle = 'rgba(206, 74, 28, 0.28)';
-      ctx.lineWidth = 1.5;
-      const waveBaseY = canvasH - 28;
-      for (let x = 0; x <= canvasW; x += 8) {
-        const phase = progress * Math.PI * 10 + timeSec * 1.8;
-        const amp = 8 + Math.sin(progress * Math.PI * 4) * 6;
-        const y = waveBaseY + Math.sin(x * 0.022 + phase) * amp * Math.cos(x * 0.007 - progress * 5);
-        if (x === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
     }
 
     function applyCinemaTransforms(p) {
-      // Determine active chapter (0..4)
       let activeChapterIdx = 0;
       for (let i = 0; i < CHAPTERS.length; i++) {
         if (p >= CHAPTERS[i].range[0] && p <= CHAPTERS[i].range[1] + 0.001) {
@@ -210,38 +183,27 @@
         }
       }
 
-      // Compute wipe progress for transitions between the 5 scenes
-      // Transition 1 -> 2 happens across [0.16, 0.26] (Vertical Wipe Up)
       const w2 = normRange(p, 0.16, 0.26);
-      // Transition 2 -> 3 happens across [0.36, 0.46] (Horizontal Wipe Left)
       const w3 = normRange(p, 0.36, 0.46);
-      // Transition 3 -> 4 happens across [0.56, 0.66] (Vertical Wipe Up)
       const w4 = normRange(p, 0.56, 0.66);
-      // Transition 4 -> 5 happens across [0.76, 0.86] (Horizontal Wipe Right)
       const w5 = normRange(p, 0.76, 0.86);
 
       if (scene2) {
-        const insetTop = ((1 - w2) * 100).toFixed(2);
-        scene2.style.clipPath = `inset(${insetTop}% 0 0 0)`;
+        scene2.style.clipPath = `inset(${((1 - w2) * 100).toFixed(2)}% 0 0 0)`;
       }
       if (scene3) {
-        const insetLeft = ((1 - w3) * 100).toFixed(2);
-        scene3.style.clipPath = `inset(0 0 0 ${insetLeft}%)`;
+        scene3.style.clipPath = `inset(0 0 0 ${((1 - w3) * 100).toFixed(2)}%)`;
       }
       if (scene4) {
-        const insetTop4 = ((1 - w4) * 100).toFixed(2);
-        scene4.style.clipPath = `inset(${insetTop4}% 0 0 0)`;
+        scene4.style.clipPath = `inset(${((1 - w4) * 100).toFixed(2)}% 0 0 0)`;
       }
       if (scene5) {
-        const insetRight5 = ((1 - w5) * 100).toFixed(2);
-        scene5.style.clipPath = `inset(0 ${insetRight5}% 0 0)`;
+        scene5.style.clipPath = `inset(0 ${((1 - w5) * 100).toFixed(2)}% 0 0)`;
       }
 
-      // Subtle camera zoom/pan across chapters so the stage feels alive
-      const zoomWave = 1 + Math.sin(p * Math.PI * 2) * 0.015;
+      const zoomWave = 1 + Math.sin(p * Math.PI * 2) * 0.014;
       cameraRig.style.transform = `scale(${zoomWave.toFixed(4)})`;
 
-      // Show glowing wipe seam line whenever a wipe transition is actively midway
       if (seamIndicator) {
         if (w2 > 0.02 && w2 < 0.98) {
           seamIndicator.style.opacity = '1';
@@ -272,29 +234,24 @@
         }
       }
 
-      // Update left narrative cards
       narrativeCards.forEach((card, idx) => {
         card.classList.toggle('is-active', idx === activeChapterIdx);
       });
 
-      // Update chapter counter, window URL, and frame readout
       const currentChapter = CHAPTERS[activeChapterIdx];
       if (stepCounterEl) stepCounterEl.textContent = currentChapter.code;
       if (windowUrlEl) windowUrlEl.textContent = currentChapter.urlPath;
 
       const currentFrame = Math.max(1, Math.min(TOTAL_FRAMES, Math.round(p * TOTAL_FRAMES) || 1));
-      const paddedFrame = String(currentFrame).padStart(3, '0');
       if (frameReadoutEl) {
-        frameReadoutEl.textContent = `FRAME ${paddedFrame} / ${TOTAL_FRAMES}`;
+        frameReadoutEl.textContent = `FRAME ${String(currentFrame).padStart(3, '0')} / ${TOTAL_FRAMES}`;
       }
 
-      // Update velocity & percent indicator
       const pct = Math.round(p * 100);
       if (velocityEl) {
-        velocityEl.textContent = `TIMELINE ${String(pct).padStart(3, '0')}%`;
+        velocityEl.textContent = `REEL ${String(pct).padStart(3, '0')}%`;
       }
 
-      // Update bottom filmstrip buttons
       scrubBtns.forEach((btn, idx) => {
         const ch = CHAPTERS[idx];
         const chProgress = normRange(p, ch.range[0], ch.range[1]);
@@ -321,8 +278,7 @@
       }
 
       applyCinemaTransforms(currentProgress);
-      renderTelemetryCanvas(currentProgress, nowMs * 0.001);
-      lastProgress = currentProgress;
+      renderSilkWaveCanvas(currentProgress, nowMs * 0.001);
 
       requestAnimationFrame(tick);
     }
