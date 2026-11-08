@@ -31,21 +31,22 @@
         <ul class="nav-links">
           <li><a href="#hero-cinema-track" class="nav-link active" id="nav-link-cinema">Crown Film</a></li>
           <li><a href="#live-sandbox-section" class="nav-link" id="nav-link-sandbox">Custom Builder</a></li>
-          <li><a href="#architecture-section" class="nav-link" id="nav-link-architecture">The Collection</a></li>
-          <li><a href="#customers-section" class="nav-link" id="nav-link-customers">Client Diaries</a></li>
-          <li><a href="#pricing-section" class="nav-link" id="nav-link-pricing">Bundle Guide &amp; Pricing</a></li>
-          <li><a href="#faq-section" class="nav-link" id="nav-link-faq">Care &amp; FAQ</a></li>
+          <li><a href="#architecture-section" class="nav-link" id="nav-link-architecture">Collection</a></li>
+          <li><a href="#customers-section" class="nav-link" id="nav-link-customers">Reviews</a></li>
+          <li><a href="#pricing-section" class="nav-link" id="nav-link-pricing">Pricing</a></li>
+          <li><a href="#faq-section" class="nav-link" id="nav-link-faq">FAQ</a></li>
         </ul>
       </nav>
 
       <div class="nav-actions">
-        <div class="status-indicator" title="100% Single-Donor Raw Hair Certified">
-          <span class="status-dot"></span>
-          <span>100% RAW CUTICLE</span>
+        <div class="currency-switcher-bar" id="currency-switcher-bar" role="group" aria-label="Select Currency">
+          <button type="button" class="currency-pill active" id="curr-usd" data-currency="USD" aria-pressed="true">$ USD</button>
+          <button type="button" class="currency-pill" id="curr-ngn" data-currency="NGN" aria-pressed="false">₦ NGN</button>
+          <button type="button" class="currency-pill" id="curr-gbp" data-currency="GBP" aria-pressed="false">£ GBP</button>
         </div>
         <button type="button" class="btn btn-secondary" id="nav-bag-btn" aria-label="Open Royal Shopping Bag">♛ Bag (<span id="cart-count-badge">1</span>)</button>
         <button type="button" class="btn btn-secondary" id="nav-signin-btn" data-open-modal="demo">VIP Club</button>
-        <button type="button" class="btn btn-primary" id="nav-book-demo-btn" data-open-modal="demo">Order Custom Crown</button>
+        <button type="button" class="btn btn-primary" id="nav-book-demo-btn" data-open-modal="demo" data-magnetic="true">Order Custom Crown</button>
       </div>
     </div>
   </header>
@@ -555,62 +556,101 @@
           </p>
         </div>
 
-        <div class="editorial-hairline-grid">
-          <article class="capability-column">
+        <div class="editorial-hairline-grid" id="collection">
+          <article class="capability-column feature-card" data-tilt-card>
+            <div class="tilt-spotlight-glare" aria-hidden="true"></div>
             <div>
               <div class="collection-photo-wrap" style="margin-bottom: 1.25rem;">
                 <img src="./assets/atelier-hero.jpg" alt="Custom HD Lace Crown Wigs" />
               </div>
-              <span class="capability-number">COLLECTION 01 // BESPOKE UNITS</span>
+              <div class="collection-meta-row">
+                <span class="capability-number">COLLECTION 01 // BESPOKE UNITS</span>
+                <span class="collection-price-badge" id="card-price-hd-lace" data-usd-price="1250">$1,250</span>
+              </div>
               <h3 class="capability-heading">Sovereign HD Lace Wigs</h3>
               <p style="color: var(--text-secondary); font-size: 0.94rem; margin-top: 0.5rem;">
                 Custom-made 13×6 frontal and 5×5 glueless closure wigs featuring pre-plucked hairlines, bleached single knots, and cascading Hollywood waves.
               </p>
             </div>
-            <ul class="capability-spec-list">
-              <li>→ 180%, 220%, &amp; 250% couture densities</li>
-              <li>→ Glueless piano-key elastic strap included</li>
-              <li>→ Lengths from 16" collarbone to 40" royal train</li>
-            </ul>
-            <button type="button" class="btn btn-secondary" data-add-to-bag="Sovereign 13x6 HD Frontal Wig" data-bag-price="680" style="width: 100%; margin-top: 1rem;">+ Add to Royal Bag ($680)</button>
+            <div>
+              <ul class="capability-spec-list">
+                <li>→ 180%, 220%, &amp; 250% couture densities</li>
+                <li>→ Glueless piano-key elastic strap included</li>
+                <li>→ Lengths from 16" collarbone to 40" royal train</li>
+              </ul>
+              <div class="collection-card-actions">
+                <button type="button" class="btn btn-quick-view" id="quick-view-hd-lace" data-quick-view="hd-lace">
+                  ✦ Quick View &amp; Shade Match
+                </button>
+                <button type="button" class="btn btn-secondary" data-add-to-bag="Sovereign 13x6 HD Frontal Wig" data-bag-price="680" style="width: 100%;">
+                  + Add to Royal Bag (<span data-usd-price="680">$680</span>)
+                </button>
+              </div>
+            </div>
           </article>
 
-          <article class="capability-column">
+          <article class="capability-column feature-card" data-tilt-card>
+            <div class="tilt-spotlight-glare" aria-hidden="true"></div>
             <div>
               <div class="collection-photo-wrap" style="margin-bottom: 1.25rem;">
                 <img src="./assets/hd-lace-closeup.jpg" alt="0.10mm Ultra-Thin Swiss HD Frontals and Closures" />
               </div>
-              <span class="capability-number">COLLECTION 02 // ILLUSION LACE</span>
+              <div class="collection-meta-row">
+                <span class="capability-number">COLLECTION 02 // ILLUSION LACE</span>
+                <span class="collection-price-badge" id="card-price-cambodian" data-usd-price="890">$890</span>
+              </div>
               <h3 class="capability-heading">0.10mm Swiss HD Lace</h3>
               <p style="color: var(--text-secondary); font-size: 0.94rem; margin-top: 0.5rem;">
                 Our ultra-fine Swiss HD lace melts effortlessly into every skin complexion without harsh adhesives, creating a natural scalp illusion up close.
               </p>
             </div>
-            <ul class="capability-spec-list">
-              <li>→ 5×5, 6×6, 13×4, &amp; 13×6 HD lace options</li>
-              <li>→ Hand-ventilated directional baby hairs</li>
-              <li>→ Breathable, tear-resistant Swiss mesh</li>
-            </ul>
-            <button type="button" class="btn btn-secondary" data-add-to-bag="0.10mm Swiss HD Lace Frontal" data-bag-price="240" style="width: 100%; margin-top: 1rem;">+ Add to Royal Bag ($240)</button>
+            <div>
+              <ul class="capability-spec-list">
+                <li>→ 5×5, 6×6, 13×4, &amp; 13×6 HD lace options</li>
+                <li>→ Hand-ventilated directional baby hairs</li>
+                <li>→ Breathable, tear-resistant Swiss mesh</li>
+              </ul>
+              <div class="collection-card-actions">
+                <button type="button" class="btn btn-quick-view" id="quick-view-cambodian" data-quick-view="cambodian">
+                  ✦ Quick View &amp; Shade Match
+                </button>
+                <button type="button" class="btn btn-secondary" data-add-to-bag="0.10mm Swiss HD Lace Frontal" data-bag-price="240" style="width: 100%;">
+                  + Add to Royal Bag (<span data-usd-price="240">$240</span>)
+                </button>
+              </div>
+            </div>
           </article>
 
-          <article class="capability-column">
+          <article class="capability-column feature-card" data-tilt-card>
+            <div class="tilt-spotlight-glare" aria-hidden="true"></div>
             <div>
               <div class="collection-photo-wrap" style="margin-bottom: 1.25rem;">
                 <img src="./assets/raw-bundles.jpg" alt="Single-Donor Raw Virgin Hair Bundles" />
               </div>
-              <span class="capability-number">COLLECTION 03 // RAW BUNDLES</span>
+              <div class="collection-meta-row">
+                <span class="capability-number">COLLECTION 03 // RAW BUNDLES</span>
+                <span class="collection-price-badge" id="card-price-blonde" data-usd-price="1420">$1,420</span>
+              </div>
               <h3 class="capability-heading">Single-Donor Luxury Bundles</h3>
               <p style="color: var(--text-secondary); font-size: 0.94rem; margin-top: 0.5rem;">
                 Unprocessed raw Vietnamese bone-straight, Cambodian body wave, and Burmese deep wave bundles with intact cuticles and full 100g weight.
               </p>
             </div>
-            <ul class="capability-spec-list">
-              <li>→ Lifts cleanly to #613 platinum blonde</li>
-              <li>→ Triple-reinforced flat wefts prevent shedding</li>
-              <li>→ 5+ years of reusable luxury wear</li>
-            </ul>
-            <button type="button" class="btn btn-secondary" data-add-to-bag="Single-Donor Raw 3-Bundle Set" data-bag-price="490" style="width: 100%; margin-top: 1rem;">+ Add to Royal Bag ($490)</button>
+            <div>
+              <ul class="capability-spec-list">
+                <li>→ Lifts cleanly to #613 platinum blonde</li>
+                <li>→ Triple-reinforced flat wefts prevent shedding</li>
+                <li>→ 5+ years of reusable luxury wear</li>
+              </ul>
+              <div class="collection-card-actions">
+                <button type="button" class="btn btn-quick-view" id="quick-view-blonde" data-quick-view="blonde">
+                  ✦ Quick View &amp; Shade Match
+                </button>
+                <button type="button" class="btn btn-secondary" data-add-to-bag="Single-Donor Raw 3-Bundle Set" data-bag-price="490" style="width: 100%;">
+                  + Add to Royal Bag (<span data-usd-price="490">$490</span>)
+                </button>
+              </div>
+            </div>
           </article>
         </div>
       </div>
@@ -963,7 +1003,89 @@
     </div>
   </aside>
 
+  <!-- Interactive Wig Quick-View & Lace Tint Shade Matcher Studio (<WigQuickViewStudio />) -->
+  <div class="modal-backdrop quickview-backdrop" id="royal-quickview-modal" role="dialog" aria-modal="true" aria-labelledby="qv-product-title" aria-hidden="true">
+    <div class="quickview-studio-dialog">
+      <div class="quickview-header">
+        <div>
+          <span class="eyebrow">ROYAL ATELIER SHADE &amp; SPEC STUDIO</span>
+          <h2 id="qv-product-title" class="quickview-title">Sovereign 13×6 Swiss HD Frontal Wig</h2>
+          <p id="qv-product-subtitle" class="quickview-subtitle">0.10mm Swiss HD Lace • Pre-Plucked Single Knots • 100% Raw Cuticle</p>
+        </div>
+        <button type="button" id="qv-close-btn" class="btn-ghost" aria-label="Close Quick View Studio">✕</button>
+      </div>
+
+      <div class="quickview-grid">
+        <div class="quickview-visual-pane">
+          <div class="quickview-image-frame">
+            <img id="qv-preview-image" src="./assets/atelier-hero.jpg" alt="Sovereign 13×6 Swiss HD Frontal Wig Preview" />
+            <span class="quickview-shade-badge" id="qv-shade-badge">♛ Lace Tint: Warm Honey • 18" • 180% Natural</span>
+          </div>
+          <div class="quickview-price-card">
+            <div>
+              <span class="mono-tag" style="color: var(--text-muted);">LIVE BESPOKE ESTIMATE</span>
+              <div class="quickview-live-price" id="qv-live-price" data-usd-total="1250">$1,250</div>
+            </div>
+            <span class="badge-pill badge-gold qv-ready-badge">READY IN 48 HRS</span>
+          </div>
+        </div>
+
+        <div class="quickview-controls-pane">
+          <!-- 1. HD Lace Tint Shade Matcher -->
+          <div class="qv-control-group">
+            <span class="mono-tag qv-control-label">01 // SELECT 0.10MM SWISS HD LACE TINT SHADE</span>
+            <div class="shade-swatches-grid" id="qv-shade-selector" role="group" aria-label="HD Lace Tint Shade Matcher">
+              <button type="button" class="shade-swatch-btn" id="shade-porcelain" data-shade="Porcelain Ivory" aria-pressed="false">
+                <span class="shade-dot" style="background-color: #F3D6C6;"></span>
+                <span>Porcelain Ivory</span>
+              </button>
+              <button type="button" class="shade-swatch-btn active" id="shade-honey" data-shade="Warm Honey" aria-pressed="true">
+                <span class="shade-dot" style="background-color: #D29B72;"></span>
+                <span>Warm Honey</span>
+              </button>
+              <button type="button" class="shade-swatch-btn" id="shade-caramel" data-shade="Rich Caramel" aria-pressed="false">
+                <span class="shade-dot" style="background-color: #9C5E38;"></span>
+                <span>Rich Caramel</span>
+              </button>
+              <button type="button" class="shade-swatch-btn" id="shade-espresso" data-shade="Deep Espresso" aria-pressed="false">
+                <span class="shade-dot" style="background-color: #4E2B18;"></span>
+                <span>Deep Espresso</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Couture Length Selector -->
+          <div class="qv-control-group">
+            <span class="mono-tag qv-control-label">02 // SELECT COUTURE HAIR LENGTH</span>
+            <div class="spec-pills-row" id="qv-length-selector" role="group" aria-label="Couture Length Selector">
+              <button type="button" class="spec-pill-btn active" id="qv-len-18" data-length="18&quot;" data-price-delta="0" aria-pressed="true">18" (+$0)</button>
+              <button type="button" class="spec-pill-btn" id="qv-len-22" data-length="22&quot;" data-price-delta="60" aria-pressed="false">22" (+$60)</button>
+              <button type="button" class="spec-pill-btn" id="qv-len-26" data-length="26&quot;" data-price-delta="120" aria-pressed="false">26" (+$120)</button>
+              <button type="button" class="spec-pill-btn" id="qv-len-30" data-length="30&quot;" data-price-delta="180" aria-pressed="false">30" (+$180)</button>
+              <button type="button" class="spec-pill-btn" id="qv-len-36" data-length="36&quot;" data-price-delta="240" aria-pressed="false">36" (+$240)</button>
+            </div>
+          </div>
+
+          <!-- 3. Artisan Density Selector -->
+          <div class="qv-control-group">
+            <span class="mono-tag qv-control-label">03 // SELECT ARTISAN CROWN DENSITY</span>
+            <div class="spec-pills-row" id="qv-density-selector" role="group" aria-label="Artisan Density Selector">
+              <button type="button" class="spec-pill-btn active" id="qv-den-180" data-density="180% Natural" data-price-delta="0" aria-pressed="true">180% Natural (+$0)</button>
+              <button type="button" class="spec-pill-btn" id="qv-den-220" data-density="220% Royal" data-price-delta="50" aria-pressed="false">220% Royal (+$50)</button>
+              <button type="button" class="spec-pill-btn" id="qv-den-250" data-density="250% Red Carpet" data-price-delta="100" aria-pressed="false">250% Red Carpet (+$100)</button>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary btn-gold" id="qv-add-to-bag-btn" data-magnetic="true" style="width: 100%; margin-top: 0.5rem;">
+            ♛ Add Custom Crown to Royal Bag →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="./scripts/scroll-cinema.js"></script>
+  <script src="./scripts/react-luxury-components.js"></script>
   <script src="./scripts/interactions.js"></script>
 </body>
 </html>

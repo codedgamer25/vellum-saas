@@ -207,6 +207,13 @@
 
     let isVipMember = true;
 
+    function formatPrice(usdAmount) {
+      if (typeof window.formatRoyalCurrency === 'function') {
+        return window.formatRoyalCurrency(usdAmount);
+      }
+      return `$${Math.round(Number(usdAmount || 0)).toLocaleString('en-US')}`;
+    }
+
     function updatePricingAndRoi() {
       const lengthInches = teamSlider ? parseInt(teamSlider.value, 10) : 26;
       if (teamCountOut) teamCountOut.textContent = `${lengthInches}" Couture Length`;
@@ -220,8 +227,8 @@
 
       const closurePrice = isVipMember ? 420 : 495;
       const frontalPrice = isVipMember ? 680 : 795;
-      if (priceGrowthEl) priceGrowthEl.textContent = `$${closurePrice}`;
-      if (priceScaleEl) priceScaleEl.textContent = `$${frontalPrice}`;
+      if (priceGrowthEl) priceGrowthEl.textContent = formatPrice(closurePrice);
+      if (priceScaleEl) priceScaleEl.textContent = formatPrice(frontalPrice);
       if (billingToggleBtn) {
         billingToggleBtn.textContent = isVipMember
           ? '♛ Royal Crown Club Pricing (15% Off) — Switch to Standard'
@@ -335,7 +342,7 @@
       const totalAmount = bagItems.reduce((acc, item) => acc + item.price * item.qty, 0);
 
       if (cartCountBadge) cartCountBadge.textContent = String(totalCount);
-      if (cartSubtotalAmount) cartSubtotalAmount.textContent = `$${totalAmount.toLocaleString()}`;
+      if (cartSubtotalAmount) cartSubtotalAmount.textContent = formatPrice(totalAmount);
 
       if (!cartItemsList) return;
       if (bagItems.length === 0) {
@@ -347,7 +354,7 @@
         <div class="cart-item-row" data-cart-index="${idx}">
           <div>
             <div class="cart-item-title">${item.name}</div>
-            <div class="cart-item-meta">QTY: ${item.qty} × $${item.price} — 100% RAW CUTICLE</div>
+            <div class="cart-item-meta">QTY: ${item.qty} × ${formatPrice(item.price)} — 100% RAW CUTICLE</div>
           </div>
           <button type="button" class="cart-item-remove" data-remove-bag-idx="${idx}" aria-label="Remove ${item.name}">REMOVE</button>
         </div>
@@ -375,6 +382,24 @@
       cartDrawer.setAttribute('aria-hidden', 'true');
     }
 
+    function addToRoyalBag(name, priceUsd, shouldOpen = true) {
+      const cleanPrice = parseInt(String(priceUsd || '490'), 10);
+      const existing = bagItems.find(item => item.name === name);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        bagItems.push({ name, price: cleanPrice, qty: 1 });
+      }
+      renderBag();
+      if (shouldOpen) openCartDrawer();
+    }
+
+    window.addToRoyalBag = addToRoyalBag;
+    window.refreshRoyalPrices = function () {
+      updatePricingAndRoi();
+      renderBag();
+    };
+
     if (navBagBtn) navBagBtn.addEventListener('click', openCartDrawer);
     if (cartCloseBtn) cartCloseBtn.addEventListener('click', closeCartDrawer);
     if (cartDrawer) {
@@ -387,14 +412,7 @@
       btn.addEventListener('click', () => {
         const name = btn.getAttribute('data-add-to-bag') || 'Royal Couture Piece';
         const price = parseInt(btn.getAttribute('data-bag-price') || '490', 10);
-        const existing = bagItems.find(item => item.name === name);
-        if (existing) {
-          existing.qty += 1;
-        } else {
-          bagItems.push({ name, price, qty: 1 });
-        }
-        renderBag();
-        openCartDrawer();
+        addToRoyalBag(name, price, true);
       });
     });
 

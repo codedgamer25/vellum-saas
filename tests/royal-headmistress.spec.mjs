@@ -150,27 +150,36 @@ async function runSuite() {
       mobile: false
     });
 
-    // Wait for page readyState === 'complete' and all images loaded
-    for (let i = 0; i < 30; i++) {
-      const ready = await cdp.evaluate(`document.readyState === 'complete'`);
+    for (let i = 0; i < 40; i++) {
+      const ready = await cdp.evaluate(`(() => {
+        if (document.readyState !== 'complete') return false;
+        const imgs = Array.from(document.querySelectorAll('img'));
+        return imgs.length > 0 && imgs.every(img => img.complete && img.naturalWidth > 0);
+      })()`);
       if (ready) break;
       await sleep(150);
     }
-    await sleep(400);
+    await sleep(250);
 
-    // 1. Verify title & all images loaded with naturalWidth > 0
+    // 1. Verify title, zero horizontal overflow, & all 11+ images loaded with naturalWidth > 0
     const pageDiagnostics = await cdp.evaluate(`(() => {
       const imgs = Array.from(document.querySelectorAll('img'));
+      const navInner = document.querySelector('.nav-inner');
       return {
         title: document.title,
         totalImages: imgs.length,
         loadedImages: imgs.filter(img => img.complete && img.naturalWidth > 0).length,
-        sources: imgs.map(img => ({ src: img.getAttribute('src'), width: img.naturalWidth }))
+        docScrollWidth: document.documentElement.scrollWidth,
+        winInnerWidth: window.innerWidth,
+        navOverflow: navInner ? (navInner.scrollWidth > navInner.clientWidth) : false
       };
     })()`);
 
     assert.equal(pageDiagnostics.title, 'Royal Headmistress — Premium Wigs • Luxury Hair');
+    assert.ok(pageDiagnostics.totalImages >= 11, `Expected at least 11 images, found ${pageDiagnostics.totalImages}`);
     assert.equal(pageDiagnostics.loadedImages, pageDiagnostics.totalImages, 'All couture images and official logo must load cleanly');
+    assert.ok(pageDiagnostics.docScrollWidth <= pageDiagnostics.winInnerWidth, `Expected zero horizontal overflow (${pageDiagnostics.docScrollWidth} <= ${pageDiagnostics.winInnerWidth})`);
+    assert.equal(pageDiagnostics.navOverflow, false, 'Top navigation bar must fit on a single horizontal line without overflow');
 
     // Screenshot 1: Hero & Scroll-Wipe Cinema
     const shotHero = path.join(ARTIFACT_DIR, 'proof_hero_cinema.png');
@@ -179,7 +188,7 @@ async function runSuite() {
     // 2. Test Scroll-Wipe Cinema chapter scrubbing across all 5 chapters
     for (let ch = 0; ch < 5; ch++) {
       await cdp.evaluate(`document.getElementById('scrub-ch-${ch}').click()`);
-      await sleep(350);
+      await sleep(300);
     }
     const chapterCounter = await cdp.evaluate(`document.getElementById('chapter-step-counter').textContent.trim()`);
     assert.equal(chapterCounter, 'CHAPTER 05 / 05', 'Scrubbing to chapter 5 must activate CHAPTER 05 / 05');
@@ -198,35 +207,123 @@ async function runSuite() {
     const shotBuilder = path.join(ARTIFACT_DIR, 'proof_custom_builder.png');
     await cdp.screenshot(shotBuilder);
 
-    // 4. Test Bundle Length Calculator & Royal Shopping Bag Drawer + capture screenshot 3
+    // 4. Test v3.0 Multi-Currency Switcher (USD -> NGN -> GBP -> USD)
+    const currencyCheck = await cdp.evaluate(`(() => {
+      const cardPriceEl = document.getElementById('card-price-hd-lace');
+      const growthEl = document.getElementById('price-tier-growth');
+      const bagSubEl = document.getElementById('cart-subtotal-amount');
+
+      const usdInitial = cardPriceEl.textContent.trim();
+
+      document.getElementById('curr-ngn').click();
+      const ngnCard = cardPriceEl.textContent.trim();
+      const ngnGrowth = growthEl.textContent.trim();
+      const ngnBag = bagSubEl.textContent.trim();
+
+      document.getElementById('curr-gbp').click();
+      const gbpCard = cardPriceEl.textContent.trim();
+      const gbpGrowth = growthEl.textContent.trim();
+
+      document.getElementById('curr-usd').click();
+      const usdRestored = cardPriceEl.textContent.trim();
+
+      return { usdInitial, ngnCard, ngnGrowth, ngnBag, gbpCard, gbpGrowth, usdRestored };
+    })()`);
+
+    assert.equal(currencyCheck.usdInitial, '$1,250');
+    assert.equal(currencyCheck.ngnCard, '₦2,000,000', '#curr-ngn must convert $1,250 to ₦2,000,000');
+    assert.ok(currencyCheck.ngnGrowth.startsWith('₦'), 'Calculator price must convert to ₦');
+    assert.ok(currencyCheck.ngnBag.startsWith('₦'), 'Shopping Bag subtotal must convert to ₦');
+    assert.equal(currencyCheck.gbpCard, '£988', '#curr-gbp must convert $1,250 to £988');
+    assert.ok(currencyCheck.gbpGrowth.startsWith('£'), 'Calculator price must convert to £');
+    assert.equal(currencyCheck.usdRestored, '$1,250', '#curr-usd must restore $1,250');
+
+    // 5. Test 3D Tilt Spotlight Cards ([data-tilt-card] & .tilt-spotlight-glare)
+    const tiltCheck = await cdp.evaluate(`(() => {
+      const cards = Array.from(document.querySelectorAll('#collection [data-tilt-card]'));
+      const first = cards[0];
+      const rect = first.getBoundingClientRect();
+      first.dispatchEvent(new PointerEvent('pointermove', {
+        clientX: rect.left + rect.width * 0.75,
+        clientY: rect.top + rect.height * 0.25,
+        bubbles: true
+      }));
+      const activeTransform = first.style.transform;
+      const spotX = first.style.getPropertyValue('--spot-x');
+      first.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
+      return {
+        cardCount: cards.length,
+        glareCount: cards.filter(c => c.querySelector('.tilt-spotlight-glare')).length,
+        activeTransform,
+        spotX
+      };
+    })()`);
+
+    assert.equal(tiltCheck.cardCount, 3, 'All 3 collection cards must have [data-tilt-card]');
+    assert.equal(tiltCheck.glareCount, 3, 'All 3 collection cards must contain .tilt-spotlight-glare');
+    assert.ok(tiltCheck.activeTransform.includes('perspective(900px)'), 'Pointermove must apply 3D perspective transform');
+    assert.ok(tiltCheck.spotX.endsWith('px'), 'Pointermove must set --spot-x CSS custom property');
+
+    // 6. Test Interactive Wig Quick-View & Shade Matcher Studio + capture proof_quickview_studio.png
+    await cdp.evaluate(`(() => {
+      document.getElementById('architecture-section').scrollIntoView({ behavior: 'instant' });
+      document.getElementById('quick-view-hd-lace').click();
+      document.getElementById('shade-caramel').click();
+      const len30Btn = Array.from(document.querySelectorAll('#qv-length-selector [data-length]')).find(
+        (b) => b.getAttribute('data-length') === '30"'
+      );
+      if (len30Btn) len30Btn.click();
+      const den250Btn = document.querySelector('#qv-density-selector [data-density="250% Red Carpet"]');
+      if (den250Btn) den250Btn.click();
+    })()`);
+    await sleep(300);
+
+    const quickViewState = await cdp.evaluate(`(() => ({
+      isOpen: document.getElementById('royal-quickview-modal').classList.contains('is-open'),
+      shadeBadge: document.getElementById('qv-shade-badge').textContent.trim(),
+      livePrice: document.getElementById('qv-live-price').textContent.trim()
+    }))()`);
+
+    assert.equal(quickViewState.isOpen, true, 'Clicking #quick-view-hd-lace must open #royal-quickview-modal');
+    assert.ok(quickViewState.shadeBadge.includes('Rich Caramel'), 'Shade badge must reflect Rich Caramel');
+    assert.ok(quickViewState.shadeBadge.includes('30"'), 'Shade badge must reflect 30" length');
+    assert.ok(quickViewState.shadeBadge.includes('250% Red Carpet'), 'Shade badge must reflect 250% Red Carpet');
+    assert.equal(quickViewState.livePrice, '$1,530', 'Quick-View live price must equal $1,250 + $180 + $100 = $1,530');
+
+    const shotQuickView = path.join(ARTIFACT_DIR, 'proof_quickview_studio.png');
+    await cdp.screenshot(shotQuickView);
+
+    // 7. Click #qv-add-to-bag-btn & test Bundle Length Calculator + Royal Shopping Bag Drawer + capture proof_collection_bag.png
     await cdp.evaluate(`(() => {
       const slider = document.getElementById('roi-team-slider');
       slider.value = '32';
       slider.dispatchEvent(new Event('input', { bubbles: true }));
-      document.getElementById('architecture-section').scrollIntoView({ behavior: 'instant' });
-      const addBtn = document.querySelector('[data-add-to-bag="0.10mm Swiss HD Lace Frontal"]');
-      addBtn.click();
+      document.getElementById('qv-add-to-bag-btn').click();
     })()`);
     await sleep(300);
 
     const bagState = await cdp.evaluate(`(() => ({
+      quickViewClosed: !document.getElementById('royal-quickview-modal').classList.contains('is-open'),
       isOpen: document.getElementById('royal-cart-drawer').classList.contains('is-open'),
       badge: document.getElementById('cart-count-badge').textContent.trim(),
       subtotal: document.getElementById('cart-subtotal-amount').textContent.trim(),
+      itemsText: document.getElementById('cart-items-list').textContent,
       roiWeight: document.getElementById('roi-hours-saved').textContent.trim(),
       roiDensity: document.getElementById('roi-dollar-saved').textContent.trim()
     }))()`);
 
-    assert.equal(bagState.isOpen, true, 'Clicking Add to Royal Bag must open #royal-cart-drawer');
+    assert.equal(bagState.quickViewClosed, true, 'Clicking #qv-add-to-bag-btn must close #royal-quickview-modal');
+    assert.equal(bagState.isOpen, true, 'Clicking #qv-add-to-bag-btn must open #royal-cart-drawer');
     assert.equal(bagState.badge, '2', 'Cart badge must increment from 1 to 2');
-    assert.equal(bagState.subtotal, '$920', 'Cart subtotal must update from $680 to $920');
+    assert.equal(bagState.subtotal, '$2,210', 'Cart subtotal must equal $680 + $1,530 = $2,210');
+    assert.ok(bagState.itemsText.includes('Rich Caramel'), 'Cart items must include customized Rich Caramel crown');
     assert.equal(bagState.roiWeight, '5 Bundles (500g)');
     assert.equal(bagState.roiDensity, '250% Red Carpet');
 
     const shotBag = path.join(ARTIFACT_DIR, 'proof_collection_bag.png');
     await cdp.screenshot(shotBag);
 
-    // 5. Test Checkout -> Concierge Modal Submission
+    // 8. Test Checkout -> Concierge Modal Submission
     const modalResult = await cdp.evaluate(`(() => {
       document.getElementById('cart-checkout-btn').click();
       document.getElementById('demo-company-name').value = 'Queen Amina';
@@ -241,7 +338,7 @@ async function runSuite() {
     assert.equal(modalResult.modalOpen, true);
     assert.ok(modalResult.feedback.includes('Thank you, Queen Amina!'));
 
-    // 6. Assert zero console errors and zero uncaught page errors
+    // 9. Assert zero console errors and zero uncaught page errors
     assert.equal(cdp.consoleErrors.length, 0, `Expected 0 console errors, got: ${cdp.consoleErrors.join('; ')}`);
     assert.equal(cdp.pageErrors.length, 0, `Expected 0 page errors, got: ${cdp.pageErrors.join('; ')}`);
 
@@ -250,8 +347,15 @@ async function runSuite() {
       consoleErrors: cdp.consoleErrors.length,
       pageErrors: cdp.pageErrors.length,
       imagesVerified: pageDiagnostics.loadedImages,
-      bagState,
-      screenshots: [shotHero, shotBuilder, shotBag]
+      currencyCheck,
+      tiltCheck,
+      quickViewState,
+      bagState: {
+        isOpen: bagState.isOpen,
+        badge: bagState.badge,
+        subtotal: bagState.subtotal
+      },
+      screenshots: [shotHero, shotQuickView, shotBuilder, shotBag]
     }, null, 2));
   } finally {
     if (cdp) cdp.close();
