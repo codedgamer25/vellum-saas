@@ -120,15 +120,17 @@
 
     scrubBtns.forEach((btn, idx) => {
       btn.addEventListener('click', () => {
-        const chapterStart = CHAPTERS[idx].range[0] + 0.02;
-        targetProgress = clamp(chapterStart, 0, 1);
+        const offset = idx === 0 ? 0.02 : 0.08;
+        const chapterTarget = CHAPTERS[idx].range[0] + offset;
+        targetProgress = clamp(chapterTarget, 0, 1);
+        currentProgress = targetProgress;
 
         const rect = track.getBoundingClientRect();
         const trackTopDoc = window.scrollY + rect.top;
         const scrollableDistance = Math.max(1, rect.height - window.innerHeight);
         window.scrollTo({
           top: trackTopDoc + targetProgress * scrollableDistance,
-          behavior: 'smooth'
+          behavior: 'instant'
         });
       });
     });
@@ -177,9 +179,8 @@
     function applyCinemaTransforms(p) {
       let activeChapterIdx = 0;
       for (let i = 0; i < CHAPTERS.length; i++) {
-        if (p >= CHAPTERS[i].range[0] && p <= CHAPTERS[i].range[1] + 0.001) {
+        if (p >= CHAPTERS[i].range[0]) {
           activeChapterIdx = i;
-          break;
         }
       }
 

@@ -43,6 +43,7 @@
           <span class="status-dot"></span>
           <span>100% RAW CUTICLE</span>
         </div>
+        <button type="button" class="btn btn-secondary" id="nav-bag-btn" aria-label="Open Royal Shopping Bag">♛ Bag (<span id="cart-count-badge">1</span>)</button>
         <button type="button" class="btn btn-secondary" id="nav-signin-btn" data-open-modal="demo">VIP Club</button>
         <button type="button" class="btn btn-primary" id="nav-book-demo-btn" data-open-modal="demo">Order Custom Crown</button>
       </div>
@@ -571,6 +572,7 @@
               <li>→ Glueless piano-key elastic strap included</li>
               <li>→ Lengths from 16" collarbone to 40" royal train</li>
             </ul>
+            <button type="button" class="btn btn-secondary" data-add-to-bag="Sovereign 13x6 HD Frontal Wig" data-bag-price="680" style="width: 100%; margin-top: 1rem;">+ Add to Royal Bag ($680)</button>
           </article>
 
           <article class="capability-column">
@@ -589,6 +591,7 @@
               <li>→ Hand-ventilated directional baby hairs</li>
               <li>→ Breathable, tear-resistant Swiss mesh</li>
             </ul>
+            <button type="button" class="btn btn-secondary" data-add-to-bag="0.10mm Swiss HD Lace Frontal" data-bag-price="240" style="width: 100%; margin-top: 1rem;">+ Add to Royal Bag ($240)</button>
           </article>
 
           <article class="capability-column">
@@ -607,6 +610,7 @@
               <li>→ Triple-reinforced flat wefts prevent shedding</li>
               <li>→ 5+ years of reusable luxury wear</li>
             </ul>
+            <button type="button" class="btn btn-secondary" data-add-to-bag="Single-Donor Raw 3-Bundle Set" data-bag-price="490" style="width: 100%; margin-top: 1rem;">+ Add to Royal Bag ($490)</button>
           </article>
         </div>
       </div>
@@ -928,6 +932,36 @@
       </form>
     </div>
   </div>
+
+  <!-- Interactive Slide-Over Royal Shopping Bag Drawer -->
+  <aside class="cart-drawer-backdrop" id="royal-cart-drawer" role="dialog" aria-modal="true" aria-labelledby="cart-drawer-title" aria-hidden="true">
+    <div class="cart-drawer-panel">
+      <div class="cart-drawer-header">
+        <div>
+          <span class="eyebrow">ROYAL SHOPPING BAG</span>
+          <h2 id="cart-drawer-title" style="font-family: var(--font-serif); font-size: 1.65rem; line-height: 1.1;">Your Couture Selection</h2>
+        </div>
+        <button type="button" id="cart-close-btn" class="btn-ghost" aria-label="Close Royal Shopping Bag">✕</button>
+      </div>
+
+      <div class="cart-items-container" id="cart-items-list">
+        <!-- Populated dynamically by scripts/interactions.js -->
+      </div>
+
+      <div class="cart-drawer-footer">
+        <div class="cart-subtotal-row">
+          <span class="mono-tag">ESTIMATED SUBTOTAL (DHL VIP INSURED)</span>
+          <strong class="cart-subtotal-val" id="cart-subtotal-amount">$680</strong>
+        </div>
+        <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 1rem;">
+          ♛ Includes complimentary embroidered satin crown pouch, crystal detangling comb, and pre-bleached knots.
+        </p>
+        <button type="button" class="btn btn-primary" id="cart-checkout-btn" style="width: 100%;">
+          Proceed to Royal Concierge Checkout →
+        </button>
+      </div>
+    </div>
+  </aside>
 
   <script src="./scripts/scroll-cinema.js"></script>
   <script src="./scripts/interactions.js"></script>

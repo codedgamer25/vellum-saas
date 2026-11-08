@@ -1284,6 +1284,113 @@ button {
   background-color: var(--bg-canvas);
 }
 
+/* ==========================================================================
+   Royal Shopping Bag Slide-Over Drawer
+   ========================================================================== */
+
+.cart-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  background-color: hsla(240, 15%, 6%, 0.65);
+  backdrop-filter: blur(6px);
+  display: none;
+  justify-content: flex-end;
+}
+
+.cart-drawer-backdrop.is-open {
+  display: flex;
+}
+
+.cart-drawer-panel {
+  width: 100%;
+  max-width: 440px;
+  height: 100%;
+  background-color: var(--bg-elevated);
+  border-left: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-cinema);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+.cart-drawer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.cart-items-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.cart-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+}
+
+.cart-item-title {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cart-item-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--accent-primary);
+  margin-top: 0.15rem;
+}
+
+.cart-item-remove {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-elevated);
+}
+
+.cart-item-remove:hover {
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+.cart-drawer-footer {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-hairline);
+}
+
+.cart-subtotal-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.cart-subtotal-val {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
 @media (max-width: 1080px) {
   .hero-editorial-intro {
     grid-template-columns: 1fr;

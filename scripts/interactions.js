@@ -315,6 +315,97 @@
         demoForm.reset();
       });
     }
+
+    // 6. Interactive Royal Shopping Bag Drawer
+    const cartDrawer = document.getElementById('royal-cart-drawer');
+    const navBagBtn = document.getElementById('nav-bag-btn');
+    const cartCloseBtn = document.getElementById('cart-close-btn');
+    const cartCheckoutBtn = document.getElementById('cart-checkout-btn');
+    const cartItemsList = document.getElementById('cart-items-list');
+    const cartCountBadge = document.getElementById('cart-count-badge');
+    const cartSubtotalAmount = document.getElementById('cart-subtotal-amount');
+    const addToBagBtns = Array.from(document.querySelectorAll('[data-add-to-bag]'));
+
+    const bagItems = [
+      { name: 'Sovereign 13×6 HD Frontal Wig (26")', price: 680, qty: 1 }
+    ];
+
+    function renderBag() {
+      const totalCount = bagItems.reduce((acc, item) => acc + item.qty, 0);
+      const totalAmount = bagItems.reduce((acc, item) => acc + item.price * item.qty, 0);
+
+      if (cartCountBadge) cartCountBadge.textContent = String(totalCount);
+      if (cartSubtotalAmount) cartSubtotalAmount.textContent = `$${totalAmount.toLocaleString()}`;
+
+      if (!cartItemsList) return;
+      if (bagItems.length === 0) {
+        cartItemsList.innerHTML = `<div style="padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">Your Royal Shopping Bag is currently empty. Select a signature wig or raw bundle set to begin.</div>`;
+        return;
+      }
+
+      cartItemsList.innerHTML = bagItems.map((item, idx) => `
+        <div class="cart-item-row" data-cart-index="${idx}">
+          <div>
+            <div class="cart-item-title">${item.name}</div>
+            <div class="cart-item-meta">QTY: ${item.qty} × $${item.price} — 100% RAW CUTICLE</div>
+          </div>
+          <button type="button" class="cart-item-remove" data-remove-bag-idx="${idx}" aria-label="Remove ${item.name}">REMOVE</button>
+        </div>
+      `).join('');
+
+      const removeBtns = Array.from(cartItemsList.querySelectorAll('[data-remove-bag-idx]'));
+      removeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.getAttribute('data-remove-bag-idx') || '0', 10);
+          bagItems.splice(idx, 1);
+          renderBag();
+        });
+      });
+    }
+
+    function openCartDrawer() {
+      if (!cartDrawer) return;
+      cartDrawer.classList.add('is-open');
+      cartDrawer.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeCartDrawer() {
+      if (!cartDrawer) return;
+      cartDrawer.classList.remove('is-open');
+      cartDrawer.setAttribute('aria-hidden', 'true');
+    }
+
+    if (navBagBtn) navBagBtn.addEventListener('click', openCartDrawer);
+    if (cartCloseBtn) cartCloseBtn.addEventListener('click', closeCartDrawer);
+    if (cartDrawer) {
+      cartDrawer.addEventListener('click', (e) => {
+        if (e.target === cartDrawer) closeCartDrawer();
+      });
+    }
+
+    addToBagBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.getAttribute('data-add-to-bag') || 'Royal Couture Piece';
+        const price = parseInt(btn.getAttribute('data-bag-price') || '490', 10);
+        const existing = bagItems.find(item => item.name === name);
+        if (existing) {
+          existing.qty += 1;
+        } else {
+          bagItems.push({ name, price, qty: 1 });
+        }
+        renderBag();
+        openCartDrawer();
+      });
+    });
+
+    if (cartCheckoutBtn) {
+      cartCheckoutBtn.addEventListener('click', () => {
+        closeCartDrawer();
+        openModal();
+      });
+    }
+
+    renderBag();
   }
 
   if (document.readyState === 'loading') {
@@ -323,3 +414,4 @@
     initInteractions();
   }
 })();
+
