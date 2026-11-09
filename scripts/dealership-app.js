@@ -190,8 +190,9 @@
           911 GT3 RS
         </div>
 
-        <!-- Full-Bleed 3D WebGL Canvas / Iframe -->
+        <!-- Full-Bleed 3D WebGL Canvas / Iframe with Studio Backdrop -->
         <div class="hero-3d-fullbleed-wrapper">
+          <div class="hero-3d-poster-backdrop" id="hero-3d-poster" style="background-image: url('https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1600&q=80');"></div>
           <iframe 
             id="hero-3d-iframe" 
             class="hero-3d-iframe"
@@ -634,7 +635,8 @@
         accentColor: '#F59E0B',
         nextCarId: 'ferrari-roma-2023',
         nextCarName: 'Ferrari Roma V8',
-        nextCarThumb: 'https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=300&q=80'
+        nextCarThumb: 'https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=300&q=80',
+        posterImage: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1600&q=80'
       },
       'ferrari-roma-2023': {
         watermark: 'ROMA V8',
@@ -642,7 +644,8 @@
         accentColor: '#EF4444',
         nextCarId: 'mercedes-amg-g63-2024',
         nextCarName: 'Mercedes-AMG G63',
-        nextCarThumb: 'https://images.unsplash.com/photo-1520031441872-265e4ff70366?auto=format&fit=crop&w=300&q=80'
+        nextCarThumb: 'https://images.unsplash.com/photo-1520031441872-265e4ff70366?auto=format&fit=crop&w=300&q=80',
+        posterImage: 'https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=1600&q=80'
       },
       'mercedes-amg-g63-2024': {
         watermark: 'AMG G63',
@@ -650,7 +653,8 @@
         accentColor: '#10B981',
         nextCarId: 'audi-rs6-avant-2024',
         nextCarName: 'Audi RS6 Avant',
-        nextCarThumb: 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=300&q=80'
+        nextCarThumb: 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=300&q=80',
+        posterImage: 'https://images.unsplash.com/photo-1520031441872-265e4ff70366?auto=format&fit=crop&w=1600&q=80'
       },
       'audi-rs6-avant-2024': {
         watermark: 'RS6 AVANT',
@@ -658,7 +662,8 @@
         accentColor: '#06B6D4',
         nextCarId: 'porsche-gt3-rs-2024',
         nextCarName: 'Porsche 911 GT3 RS',
-        nextCarThumb: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=300&q=80'
+        nextCarThumb: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=300&q=80',
+        posterImage: 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=1600&q=80'
       }
     };
 
@@ -674,7 +679,8 @@
         accentColor: '#D4AF37',
         nextCarId: 'porsche-gt3-rs-2024',
         nextCarName: 'Porsche 911 GT3 RS',
-        nextCarThumb: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=300&q=80'
+        nextCarThumb: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=300&q=80',
+        posterImage: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1600&q=80'
       };
 
       // 1. Dynamic Atmosphere Theme Melt on Viewport Container
@@ -687,6 +693,12 @@
       const watermarkEl = main.querySelector('#hero-watermark');
       if (watermarkEl) {
         watermarkEl.textContent = atmosphere.watermark;
+      }
+
+      // 2b. Update Studio Poster Backdrop Image
+      const posterEl = main.querySelector('#hero-3d-poster');
+      if (posterEl && atmosphere.posterImage) {
+        posterEl.style.backgroundImage = `url('${atmosphere.posterImage}')`;
       }
 
       // 3. Update Apple Segmented Switcher Buttons
