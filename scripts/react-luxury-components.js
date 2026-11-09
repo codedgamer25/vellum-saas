@@ -87,6 +87,7 @@
 
   const store = createLuxuryStore({
     currency: 'USD',
+    activeStudioTab: 'obsidian',
     quickViewOpen: false,
     activeProductKey: 'hd-lace',
     selectedShade: 'Warm Honey',
@@ -345,7 +346,153 @@
     renderQuickView(store.getState());
   }
 
+  const STUDIO_PRESETS = {
+    'obsidian': {
+      key: 'obsidian',
+      eyebrow: 'STUDIO FINISH 01 // SIGNATURE SOVEREIGN CROWN',
+      title: 'Noir Hollywood Wave — 28" Couture Unit',
+      desc: 'Double-drawn from root to tip with 100% aligned single-donor cuticles and pre-plucked invisible single knots.',
+      islandSpec: '13×6 SWISS HD FRONTAL • 220% DENSITY',
+      usdPrice: 1250,
+      imgAfter: './assets/atelier-hero.jpg',
+      imgBefore: './assets/hd-lace-closeup.jpg',
+      quickViewId: 'hd-lace'
+    },
+    'hd-lace': {
+      key: 'hd-lace',
+      eyebrow: 'STUDIO FINISH 02 // INVISIBLE SCALP ARCHITECTURE',
+      title: '0.10mm Swiss HD Melt — Invisible Single-Knot Hairline',
+      desc: 'Micro-ventilated single-strand knots with pre-plucked directional baby hairs that melt seamlessly into every skin complexion.',
+      islandSpec: '0.10MM SWISS HD LACE • INVISIBLE SINGLE KNOTS',
+      usdPrice: 320,
+      imgAfter: './assets/hd-lace-closeup.jpg',
+      imgBefore: './assets/atelier-hero.jpg',
+      quickViewId: 'cambodian'
+    },
+    'cambodian': {
+      key: 'cambodian',
+      eyebrow: 'STUDIO FINISH 03 // UNPROCESSED TEMPLE ORIGIN',
+      title: 'Raw Cambodian Bundles — 100% Unidirectional Cuticle',
+      desc: 'Cut directly from a single healthy donor ponytail with intact unidirectional cuticles and triple-reinforced flat wefts.',
+      islandSpec: '100% UNIDIRECTIONAL CUTICLE • TRIPLE WEFTED',
+      usdPrice: 420,
+      imgAfter: './assets/raw-bundles.jpg',
+      imgBefore: './assets/hd-lace-closeup.jpg',
+      quickViewId: 'blonde'
+    },
+    'blonde': {
+      key: 'blonde',
+      eyebrow: 'STUDIO FINISH 04 // HIGH-LIFT COLOR ALCHEMY',
+      title: '613 Champagne Blonde — High-Lift Platinum Silk',
+      desc: 'Single-session custom toned #613 champagne blonde crafted from raw virgin hair that retains full silk bounce and luster.',
+      islandSpec: '#613 CHAMPAGNE LIFT • 250% RED CARPET DENSITY',
+      usdPrice: 1380,
+      imgAfter: './assets/raw-bundles.jpg',
+      imgBefore: './assets/atelier-hero.jpg',
+      quickViewId: 'blonde'
+    }
+  };
+
+  // 5. Mount <AppleProBentoStudio /> (#apple-showcase)
+  function initAppleProBentoStudio() {
+    const showcase = document.getElementById('apple-showcase');
+    if (!showcase) return;
+
+    const segBtns = Array.from(showcase.querySelectorAll('.apple-seg-btn[data-studio-tab]'));
+    const islandSpecEl = document.getElementById('apple-island-spec');
+    const stagePriceEl = document.getElementById('apple-stage-price');
+    const stageEyebrowEl = document.getElementById('apple-stage-eyebrow');
+    const stageTitleEl = document.getElementById('apple-stage-title');
+    const stageDescEl = document.getElementById('apple-stage-desc');
+    const imgAfterEl = document.getElementById('apple-stage-img-after');
+    const imgBeforeEl = document.getElementById('apple-stage-img-before');
+    const addBtn = document.getElementById('apple-stage-add-btn');
+    const customizeBtn = document.getElementById('apple-stage-customize-btn');
+
+    const sliderContainer = document.getElementById('lace-xray-slider-container');
+    const rangeInput = document.getElementById('lace-xray-range');
+    const meltReadout = document.getElementById('xray-melt-readout');
+
+    function renderAppleBentoStudio(state) {
+      const tabKey = state.activeStudioTab || 'obsidian';
+      const preset = STUDIO_PRESETS[tabKey] || STUDIO_PRESETS['obsidian'];
+
+      segBtns.forEach((btn) => {
+        const isCurrent = btn.getAttribute('data-studio-tab') === preset.key;
+        btn.classList.toggle('active', isCurrent);
+        btn.setAttribute('aria-selected', isCurrent ? 'true' : 'false');
+      });
+
+      if (islandSpecEl) islandSpecEl.textContent = preset.islandSpec;
+      if (stageEyebrowEl) stageEyebrowEl.textContent = preset.eyebrow;
+      if (stageTitleEl) stageTitleEl.textContent = preset.title;
+      if (stageDescEl) stageDescEl.textContent = preset.desc;
+
+      if (stagePriceEl) {
+        stagePriceEl.setAttribute('data-usd-price', String(preset.usdPrice));
+        stagePriceEl.textContent = formatRoyalCurrency(preset.usdPrice, state.currency);
+      }
+
+      if (imgAfterEl && preset.imgAfter) {
+        imgAfterEl.setAttribute('src', preset.imgAfter);
+      }
+      if (imgBeforeEl && preset.imgBefore) {
+        imgBeforeEl.setAttribute('src', preset.imgBefore);
+      }
+    }
+
+    segBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const key = btn.getAttribute('data-studio-tab') || 'obsidian';
+        if (STUDIO_PRESETS[key]) {
+          store.setState({ activeStudioTab: key });
+        }
+      });
+    });
+
+    function handleXrayUpdate() {
+      if (!rangeInput) return;
+      const val = Math.max(0, Math.min(100, Number(rangeInput.value || 55)));
+      if (sliderContainer) {
+        sliderContainer.style.setProperty('--xray-pos', `${val}%`);
+      }
+      if (meltReadout) {
+        meltReadout.textContent = `${val}% HD Melt Reveal`;
+      }
+    }
+
+    if (rangeInput) {
+      rangeInput.addEventListener('input', handleXrayUpdate);
+      rangeInput.addEventListener('change', handleXrayUpdate);
+    }
+
+    if (addBtn) {
+      addBtn.addEventListener('click', () => {
+        const st = store.getState();
+        const preset = STUDIO_PRESETS[st.activeStudioTab || 'obsidian'] || STUDIO_PRESETS['obsidian'];
+        if (typeof window.addToRoyalBag === 'function') {
+          window.addToRoyalBag(preset.title, preset.usdPrice, true);
+        }
+      });
+    }
+
+    if (customizeBtn) {
+      customizeBtn.addEventListener('click', () => {
+        const st = store.getState();
+        const preset = STUDIO_PRESETS[st.activeStudioTab || 'obsidian'] || STUDIO_PRESETS['obsidian'];
+        store.setState({
+          quickViewOpen: true,
+          activeProductKey: QUICK_VIEW_CATALOG[preset.quickViewId] ? preset.quickViewId : 'hd-lace'
+        });
+      });
+    }
+
+    store.subscribe(renderAppleBentoStudio);
+    renderAppleBentoStudio(store.getState());
+  }
+
   function mountReactLuxurySuite() {
+    initAppleProBentoStudio();
     initCurrencySwitcher();
     initTiltedSpotlightCards();
     initMagneticButtons();
@@ -358,3 +505,4 @@
     mountReactLuxurySuite();
   }
 })();
+

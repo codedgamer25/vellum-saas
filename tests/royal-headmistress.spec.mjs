@@ -181,19 +181,98 @@ async function runSuite() {
     assert.ok(pageDiagnostics.docScrollWidth <= pageDiagnostics.winInnerWidth, `Expected zero horizontal overflow (${pageDiagnostics.docScrollWidth} <= ${pageDiagnostics.winInnerWidth})`);
     assert.equal(pageDiagnostics.navOverflow, false, 'Top navigation bar must fit on a single horizontal line without overflow');
 
-    // Screenshot 1: Hero & Scroll-Wipe Cinema
+    // 2. Verify #scroll-cinema is removed and #apple-showcase is visible
+    const showcasePresence = await cdp.evaluate(`(() => {
+      const oldScrollCinema = document.getElementById('scroll-cinema');
+      const appleShowcase = document.getElementById('apple-showcase');
+      const rect = appleShowcase ? appleShowcase.getBoundingClientRect() : null;
+      return {
+        hasScrollCinema: Boolean(oldScrollCinema),
+        hasAppleShowcase: Boolean(appleShowcase),
+        showcaseVisible: Boolean(rect && rect.width > 600 && rect.height > 300)
+      };
+    })()`);
+
+    assert.equal(showcasePresence.hasScrollCinema, false, '#scroll-cinema must not exist in DOM');
+    assert.equal(showcasePresence.hasAppleShowcase, true, '#apple-showcase must exist in DOM');
+    assert.equal(showcasePresence.showcaseVisible, true, '#apple-showcase must be visibly rendered');
+
+    // Screenshot 1: Hero & Apple Pro Bento Showcase
     const shotHero = path.join(ARTIFACT_DIR, 'proof_hero_cinema.png');
     await cdp.screenshot(shotHero);
 
-    // 2. Test Scroll-Wipe Cinema chapter scrubbing across all 5 chapters
-    for (let ch = 0; ch < 5; ch++) {
-      await cdp.evaluate(`document.getElementById('scrub-ch-${ch}').click()`);
-      await sleep(300);
-    }
-    const chapterCounter = await cdp.evaluate(`document.getElementById('chapter-step-counter').textContent.trim()`);
-    assert.equal(chapterCounter, 'CHAPTER 05 / 05', 'Scrubbing to chapter 5 must activate CHAPTER 05 / 05');
+    // 3. Test Apple Segmented Pill Finish Tabs (#tab-finish-hd-lace, #tab-finish-cambodian, #tab-finish-blonde, #tab-finish-obsidian)
+    const studioTabsCheck = await cdp.evaluate(`(() => {
+      const getStageState = () => ({
+        title: document.getElementById('apple-stage-title').textContent.trim(),
+        spec: document.getElementById('apple-island-spec').textContent.trim(),
+        price: document.getElementById('apple-stage-price').textContent.trim()
+      });
 
-    // 3. Test Custom Crown Configurator & capture screenshot 2
+      document.getElementById('tab-finish-hd-lace').click();
+      const hdLace = getStageState();
+
+      document.getElementById('tab-finish-cambodian').click();
+      const cambodian = getStageState();
+
+      document.getElementById('tab-finish-blonde').click();
+      const blonde = getStageState();
+
+      document.getElementById('tab-finish-obsidian').click();
+      const obsidian = getStageState();
+
+      return { hdLace, cambodian, blonde, obsidian };
+    })()`);
+
+    assert.ok(studioTabsCheck.hdLace.title.includes('0.10mm Swiss HD Melt'), 'HD Lace tab must update stage title');
+    assert.ok(studioTabsCheck.hdLace.spec.includes('0.10MM SWISS HD LACE'), 'HD Lace tab must update Dynamic Island spec');
+    assert.equal(studioTabsCheck.hdLace.price, '$320', 'HD Lace tab must update stage price to $320');
+
+    assert.ok(studioTabsCheck.cambodian.title.includes('Raw Cambodian Bundles'), 'Cambodian tab must update stage title');
+    assert.ok(studioTabsCheck.cambodian.spec.includes('100% UNIDIRECTIONAL CUTICLE'), 'Cambodian tab must update Dynamic Island spec');
+    assert.equal(studioTabsCheck.cambodian.price, '$420', 'Cambodian tab must update stage price to $420');
+
+    assert.ok(studioTabsCheck.blonde.title.includes('613 Champagne Blonde'), 'Blonde tab must update stage title');
+    assert.ok(studioTabsCheck.blonde.spec.includes('#613 CHAMPAGNE LIFT'), 'Blonde tab must update Dynamic Island spec');
+    assert.equal(studioTabsCheck.blonde.price, '$1,380', 'Blonde tab must update stage price to $1,380');
+
+    assert.ok(studioTabsCheck.obsidian.title.includes('Noir Hollywood Wave'), 'Obsidian tab must restore stage title');
+    assert.ok(studioTabsCheck.obsidian.spec.includes('13×6 SWISS HD FRONTAL'), 'Obsidian tab must restore Dynamic Island spec');
+    assert.equal(studioTabsCheck.obsidian.price, '$1,250', 'Obsidian tab must restore stage price to $1,250');
+
+    // 4. Test Interactive Before/After HD Lace X-Ray Slider (#lace-xray-range -> 82%)
+    const xraySliderCheck = await cdp.evaluate(`(() => {
+      const range = document.getElementById('lace-xray-range');
+      const container = document.getElementById('lace-xray-slider-container');
+      const readout = document.getElementById('xray-melt-readout');
+      range.value = '82';
+      range.dispatchEvent(new Event('input', { bubbles: true }));
+      return {
+        xrayPos: container.style.getPropertyValue('--xray-pos').trim(),
+        readoutText: readout.textContent.trim()
+      };
+    })()`);
+
+    assert.equal(xraySliderCheck.xrayPos, '82%', 'Setting #lace-xray-range to 82 must update --xray-pos to 82%');
+    assert.equal(xraySliderCheck.readoutText, '82% HD Melt Reveal', 'Setting #lace-xray-range to 82 must update #xray-melt-readout');
+
+    // 5. Test #apple-stage-add-btn adds active studio crown to #royal-cart-drawer
+    const studioAddCheck = await cdp.evaluate(`(() => {
+      document.getElementById('apple-stage-add-btn').click();
+      const isOpen = document.getElementById('royal-cart-drawer').classList.contains('is-open');
+      const badge = document.getElementById('cart-count-badge').textContent.trim();
+      const subtotal = document.getElementById('cart-subtotal-amount').textContent.trim();
+      const itemsText = document.getElementById('cart-items-list').textContent;
+      document.getElementById('cart-close-btn').click();
+      return { isOpen, badge, subtotal, itemsText };
+    })()`);
+
+    assert.equal(studioAddCheck.isOpen, true, 'Clicking #apple-stage-add-btn must open #royal-cart-drawer');
+    assert.equal(studioAddCheck.badge, '2', 'Clicking #apple-stage-add-btn must increment cart badge to 2');
+    assert.equal(studioAddCheck.subtotal, '$1,930', 'Cart subtotal must equal $680 + $1,250 = $1,930');
+    assert.ok(studioAddCheck.itemsText.includes('Noir Hollywood Wave'), 'Cart items must include Noir Hollywood Wave studio crown');
+
+    // 6. Test Custom Crown Configurator & capture screenshot 2
     await cdp.evaluate(`(() => {
       document.getElementById('live-sandbox-section').scrollIntoView({ behavior: 'instant' });
       document.getElementById('tab-scenario-migration').click();
@@ -207,38 +286,47 @@ async function runSuite() {
     const shotBuilder = path.join(ARTIFACT_DIR, 'proof_custom_builder.png');
     await cdp.screenshot(shotBuilder);
 
-    // 4. Test v3.0 Multi-Currency Switcher (USD -> NGN -> GBP -> USD)
+    // 7. Test Multi-Currency Switcher (USD -> NGN -> GBP -> USD) including #apple-stage-price
     const currencyCheck = await cdp.evaluate(`(() => {
+      const stagePriceEl = document.getElementById('apple-stage-price');
       const cardPriceEl = document.getElementById('card-price-hd-lace');
       const growthEl = document.getElementById('price-tier-growth');
       const bagSubEl = document.getElementById('cart-subtotal-amount');
 
       const usdInitial = cardPriceEl.textContent.trim();
+      const usdStageInitial = stagePriceEl.textContent.trim();
 
       document.getElementById('curr-ngn').click();
+      const ngnStage = stagePriceEl.textContent.trim();
       const ngnCard = cardPriceEl.textContent.trim();
       const ngnGrowth = growthEl.textContent.trim();
       const ngnBag = bagSubEl.textContent.trim();
 
       document.getElementById('curr-gbp').click();
+      const gbpStage = stagePriceEl.textContent.trim();
       const gbpCard = cardPriceEl.textContent.trim();
       const gbpGrowth = growthEl.textContent.trim();
 
       document.getElementById('curr-usd').click();
       const usdRestored = cardPriceEl.textContent.trim();
+      const usdStageRestored = stagePriceEl.textContent.trim();
 
-      return { usdInitial, ngnCard, ngnGrowth, ngnBag, gbpCard, gbpGrowth, usdRestored };
+      return { usdInitial, usdStageInitial, ngnStage, ngnCard, ngnGrowth, ngnBag, gbpStage, gbpCard, gbpGrowth, usdRestored, usdStageRestored };
     })()`);
 
     assert.equal(currencyCheck.usdInitial, '$1,250');
+    assert.equal(currencyCheck.usdStageInitial, '$1,250');
+    assert.equal(currencyCheck.ngnStage, '₦2,000,000', '#curr-ngn must convert #apple-stage-price $1,250 to ₦2,000,000');
     assert.equal(currencyCheck.ngnCard, '₦2,000,000', '#curr-ngn must convert $1,250 to ₦2,000,000');
     assert.ok(currencyCheck.ngnGrowth.startsWith('₦'), 'Calculator price must convert to ₦');
     assert.ok(currencyCheck.ngnBag.startsWith('₦'), 'Shopping Bag subtotal must convert to ₦');
+    assert.equal(currencyCheck.gbpStage, '£988', '#curr-gbp must convert #apple-stage-price $1,250 to £988');
     assert.equal(currencyCheck.gbpCard, '£988', '#curr-gbp must convert $1,250 to £988');
     assert.ok(currencyCheck.gbpGrowth.startsWith('£'), 'Calculator price must convert to £');
     assert.equal(currencyCheck.usdRestored, '$1,250', '#curr-usd must restore $1,250');
+    assert.equal(currencyCheck.usdStageRestored, '$1,250', '#curr-usd must restore #apple-stage-price to $1,250');
 
-    // 5. Test 3D Tilt Spotlight Cards ([data-tilt-card] & .tilt-spotlight-glare)
+    // 8. Test 3D Tilt Spotlight Cards ([data-tilt-card] & .tilt-spotlight-glare)
     const tiltCheck = await cdp.evaluate(`(() => {
       const cards = Array.from(document.querySelectorAll('#collection [data-tilt-card]'));
       const first = cards[0];
@@ -264,7 +352,7 @@ async function runSuite() {
     assert.ok(tiltCheck.activeTransform.includes('perspective(900px)'), 'Pointermove must apply 3D perspective transform');
     assert.ok(tiltCheck.spotX.endsWith('px'), 'Pointermove must set --spot-x CSS custom property');
 
-    // 6. Test Interactive Wig Quick-View & Shade Matcher Studio + capture proof_quickview_studio.png
+    // 9. Test Interactive Wig Quick-View & Shade Matcher Studio + capture proof_quickview_studio.png
     await cdp.evaluate(`(() => {
       document.getElementById('architecture-section').scrollIntoView({ behavior: 'instant' });
       document.getElementById('quick-view-hd-lace').click();
@@ -293,7 +381,7 @@ async function runSuite() {
     const shotQuickView = path.join(ARTIFACT_DIR, 'proof_quickview_studio.png');
     await cdp.screenshot(shotQuickView);
 
-    // 7. Click #qv-add-to-bag-btn & test Bundle Length Calculator + Royal Shopping Bag Drawer + capture proof_collection_bag.png
+    // 10. Click #qv-add-to-bag-btn & test Bundle Length Calculator + Royal Shopping Bag Drawer + capture proof_collection_bag.png
     await cdp.evaluate(`(() => {
       const slider = document.getElementById('roi-team-slider');
       slider.value = '32';
@@ -314,8 +402,8 @@ async function runSuite() {
 
     assert.equal(bagState.quickViewClosed, true, 'Clicking #qv-add-to-bag-btn must close #royal-quickview-modal');
     assert.equal(bagState.isOpen, true, 'Clicking #qv-add-to-bag-btn must open #royal-cart-drawer');
-    assert.equal(bagState.badge, '2', 'Cart badge must increment from 1 to 2');
-    assert.equal(bagState.subtotal, '$2,210', 'Cart subtotal must equal $680 + $1,530 = $2,210');
+    assert.equal(bagState.badge, '3', 'Cart badge must increment to 3');
+    assert.equal(bagState.subtotal, '$3,460', 'Cart subtotal must equal $680 + $1,250 + $1,530 = $3,460');
     assert.ok(bagState.itemsText.includes('Rich Caramel'), 'Cart items must include customized Rich Caramel crown');
     assert.equal(bagState.roiWeight, '5 Bundles (500g)');
     assert.equal(bagState.roiDensity, '250% Red Carpet');
@@ -323,7 +411,7 @@ async function runSuite() {
     const shotBag = path.join(ARTIFACT_DIR, 'proof_collection_bag.png');
     await cdp.screenshot(shotBag);
 
-    // 8. Test Checkout -> Concierge Modal Submission
+    // 11. Test Checkout -> Concierge Modal Submission
     const modalResult = await cdp.evaluate(`(() => {
       document.getElementById('cart-checkout-btn').click();
       document.getElementById('demo-company-name').value = 'Queen Amina';
@@ -338,7 +426,7 @@ async function runSuite() {
     assert.equal(modalResult.modalOpen, true);
     assert.ok(modalResult.feedback.includes('Thank you, Queen Amina!'));
 
-    // 9. Assert zero console errors and zero uncaught page errors
+    // 12. Assert zero console errors and zero uncaught page errors
     assert.equal(cdp.consoleErrors.length, 0, `Expected 0 console errors, got: ${cdp.consoleErrors.join('; ')}`);
     assert.equal(cdp.pageErrors.length, 0, `Expected 0 page errors, got: ${cdp.pageErrors.join('; ')}`);
 
@@ -347,6 +435,9 @@ async function runSuite() {
       consoleErrors: cdp.consoleErrors.length,
       pageErrors: cdp.pageErrors.length,
       imagesVerified: pageDiagnostics.loadedImages,
+      showcasePresence,
+      studioTabsCheck,
+      xraySliderCheck,
       currencyCheck,
       tiltCheck,
       quickViewState,
