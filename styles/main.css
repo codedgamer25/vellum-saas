@@ -148,10 +148,11 @@ button {
   letter-spacing: 0.12em;
   transition: transform 0.2s var(--ease-out-expo), background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   white-space: nowrap;
+  transition: transform 180ms cubic-bezier(.2, .7, .2, 1), background-color 180ms ease, box-shadow 180ms ease;
 }
 
 .btn:active {
-  transform: translateY(1px);
+  transform: scale(0.97);
 }
 
 .btn-primary {
@@ -1814,5 +1815,28 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   Tobia Donadon's Claude Design Blueprint (Hack 03): Micro-Motion & Accessibility
+   ========================================================================== */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 
 
