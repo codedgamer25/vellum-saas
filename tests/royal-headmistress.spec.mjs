@@ -256,21 +256,53 @@ async function runSuite() {
     assert.equal(xraySliderCheck.xrayPos, '82%', 'Setting #lace-xray-range to 82 must update --xray-pos to 82%');
     assert.equal(xraySliderCheck.readoutText, '82% HD Melt Reveal', 'Setting #lace-xray-range to 82 must update #xray-melt-readout');
 
-    // 5. Test #apple-stage-add-btn adds active studio crown to #royal-cart-drawer
-    const studioAddCheck = await cdp.evaluate(`(() => {
+    // 5. Test #apple-stage-add-btn creates a .royal-toast inside #royal-toast-container with .visible, and action button opens #royal-cart-drawer
+    await cdp.evaluate(`(() => {
       document.getElementById('apple-stage-add-btn').click();
-      const isOpen = document.getElementById('royal-cart-drawer').classList.contains('is-open');
+    })()`);
+    await sleep(60);
+
+    const toastCheck = await cdp.evaluate(`(() => {
+      const container = document.getElementById('royal-toast-container');
+      const toast = container ? container.querySelector('.royal-toast') : null;
+      const isVisible = toast ? toast.classList.contains('visible') : false;
+      const title = toast ? toast.querySelector('.royal-toast-title')?.textContent.trim() : '';
+      const actionBtn = toast ? toast.querySelector('.royal-toast-action') : null;
+      const initialDrawerOpen = document.getElementById('royal-cart-drawer').classList.contains('is-open');
+
+      if (actionBtn) {
+        actionBtn.click();
+      }
+
+      const postActionDrawerOpen = document.getElementById('royal-cart-drawer').classList.contains('is-open');
       const badge = document.getElementById('cart-count-badge').textContent.trim();
       const subtotal = document.getElementById('cart-subtotal-amount').textContent.trim();
       const itemsText = document.getElementById('cart-items-list').textContent;
       document.getElementById('cart-close-btn').click();
-      return { isOpen, badge, subtotal, itemsText };
+
+      return {
+        hasContainer: Boolean(container),
+        hasToast: Boolean(toast),
+        isVisible,
+        title,
+        hasActionBtn: Boolean(actionBtn),
+        initialDrawerOpen,
+        postActionDrawerOpen,
+        badge,
+        subtotal,
+        itemsText
+      };
     })()`);
 
-    assert.equal(studioAddCheck.isOpen, true, 'Clicking #apple-stage-add-btn must open #royal-cart-drawer');
-    assert.equal(studioAddCheck.badge, '2', 'Clicking #apple-stage-add-btn must increment cart badge to 2');
-    assert.equal(studioAddCheck.subtotal, '$1,930', 'Cart subtotal must equal $680 + $1,250 = $1,930');
-    assert.ok(studioAddCheck.itemsText.includes('Noir Hollywood Wave'), 'Cart items must include Noir Hollywood Wave studio crown');
+    assert.equal(toastCheck.hasContainer, true, '#royal-toast-container must exist in DOM');
+    assert.equal(toastCheck.hasToast, true, 'Clicking #apple-stage-add-btn must create .royal-toast');
+    assert.equal(toastCheck.isVisible, true, '.royal-toast must have class .visible');
+    assert.ok(toastCheck.title.includes('Crown Added to Royal Bag'), 'Toast title must indicate Crown Added to Royal Bag');
+    assert.equal(toastCheck.hasActionBtn, true, '.royal-toast must include action button');
+    assert.equal(toastCheck.postActionDrawerOpen, true, 'Clicking toast action button must open #royal-cart-drawer');
+    assert.equal(toastCheck.badge, '2', 'Clicking #apple-stage-add-btn must increment cart badge to 2');
+    assert.equal(toastCheck.subtotal, '$1,930', 'Cart subtotal must equal $680 + $1,250 = $1,930');
+    assert.ok(toastCheck.itemsText.includes('Noir Hollywood Wave'), 'Cart items must include Noir Hollywood Wave studio crown');
 
     // 6. Test Custom Crown Configurator & capture screenshot 2
     await cdp.evaluate(`(() => {
@@ -352,7 +384,13 @@ async function runSuite() {
     assert.ok(tiltCheck.activeTransform.includes('perspective(900px)'), 'Pointermove must apply 3D perspective transform');
     assert.ok(tiltCheck.spotX.endsWith('px'), 'Pointermove must set --spot-x CSS custom property');
 
-    // 9. Test Interactive Wig Quick-View & Shade Matcher Studio + capture proof_quickview_studio.png
+    // 9. Verify #royal-quickview-modal card has scale(0.95) natural entrance base transform, then test Interactive Wig Quick-View & Shade Matcher Studio + capture proof_quickview_studio.png
+    const qvBaseTransform = await cdp.evaluate(`(() => {
+      const qvCard = document.querySelector('#royal-quickview-modal .quickview-card') || document.querySelector('#royal-quickview-modal .quickview-studio-dialog');
+      return window.getComputedStyle(qvCard).transform;
+    })()`);
+    assert.ok(qvBaseTransform.includes('0.95'), `#royal-quickview-modal card must have scale(0.95) entrance base transform, got: ${qvBaseTransform}`);
+
     await cdp.evaluate(`(() => {
       document.getElementById('architecture-section').scrollIntoView({ behavior: 'instant' });
       document.getElementById('quick-view-hd-lace').click();
@@ -368,11 +406,13 @@ async function runSuite() {
 
     const quickViewState = await cdp.evaluate(`(() => ({
       isOpen: document.getElementById('royal-quickview-modal').classList.contains('is-open'),
+      cardTransform: window.getComputedStyle(document.querySelector('#royal-quickview-modal .quickview-card') || document.querySelector('#royal-quickview-modal .quickview-studio-dialog')).transform,
       shadeBadge: document.getElementById('qv-shade-badge').textContent.trim(),
       livePrice: document.getElementById('qv-live-price').textContent.trim()
     }))()`);
 
     assert.equal(quickViewState.isOpen, true, 'Clicking #quick-view-hd-lace must open #royal-quickview-modal');
+    assert.ok(quickViewState.cardTransform === 'matrix(1, 0, 0, 1, 0, 0)' || quickViewState.cardTransform === 'none', `Active modal card must scale to 1, got: ${quickViewState.cardTransform}`);
     assert.ok(quickViewState.shadeBadge.includes('Rich Caramel'), 'Shade badge must reflect Rich Caramel');
     assert.ok(quickViewState.shadeBadge.includes('30"'), 'Shade badge must reflect 30" length');
     assert.ok(quickViewState.shadeBadge.includes('250% Red Carpet'), 'Shade badge must reflect 250% Red Carpet');
@@ -429,6 +469,17 @@ async function runSuite() {
     // 12. Assert zero console errors and zero uncaught page errors
     assert.equal(cdp.consoleErrors.length, 0, `Expected 0 console errors, got: ${cdp.consoleErrors.join('; ')}`);
     assert.equal(cdp.pageErrors.length, 0, `Expected 0 page errors, got: ${cdp.pageErrors.join('; ')}`);
+
+    // 13. Verify node --check passes on all JS files
+    const jsFiles = ['scripts/interactions.js', 'scripts/react-luxury-components.js', 'scripts/scroll-cinema.js'];
+    for (const relJs of jsFiles) {
+      const fullJs = path.join(ROOT_DIR, relJs);
+      const syntaxResult = await new Promise((resolve) => {
+        const proc = spawn(process.execPath, ['--check', fullJs]);
+        proc.on('close', (code) => resolve(code));
+      });
+      assert.equal(syntaxResult, 0, `node --check must pass for ${relJs}`);
+    }
 
     console.log(JSON.stringify({
       status: 'PASSED',

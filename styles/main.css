@@ -434,7 +434,7 @@ button {
   font-size: 0.73rem;
   font-weight: 600;
   color: var(--text-secondary);
-  transition: all 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: color var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out);
   white-space: nowrap;
 }
 
@@ -479,6 +479,7 @@ button {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: border-color var(--t-med) var(--ease-out), box-shadow var(--t-med) var(--ease-out);
 }
 
 .bento-card-stage {
@@ -982,7 +983,7 @@ button {
   font-size: var(--text-xs);
   font-weight: 600;
   color: var(--text-secondary);
-  transition: all 0.2s ease;
+  transition: color var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out);
 }
 
 .scenario-tab.active,
@@ -1087,6 +1088,7 @@ button {
   flex-direction: column;
   justify-content: space-between;
   gap: var(--space-5);
+  transition: box-shadow var(--t-med) var(--ease-out);
 }
 
 .capability-column:last-child {
@@ -1109,8 +1111,8 @@ button {
   transition: transform 0.5s var(--ease-out-expo);
 }
 
-.capability-column:hover .collection-photo-wrap img {
-  transform: scale(1.04);
+.capability-column .collection-photo-wrap img {
+  transform: scale(1);
 }
 
 .capability-number {
@@ -1238,6 +1240,7 @@ button {
   flex-direction: column;
   justify-content: space-between;
   gap: var(--space-6);
+  transition: transform var(--t-med) var(--ease-out), border-color var(--t-med) var(--ease-out), box-shadow var(--t-med) var(--ease-out);
 }
 
 .pricing-card.featured-tier {
@@ -1317,13 +1320,21 @@ button {
   z-index: 200;
   background-color: hsla(240, 15%, 6%, 0.65);
   backdrop-filter: blur(6px);
-  display: none;
+  -webkit-backdrop-filter: blur(6px);
+  display: grid;
   place-items: center;
   padding: var(--space-4);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity var(--t-med) var(--ease-out), visibility var(--t-med);
 }
 
-.modal-backdrop.is-open {
-  display: grid;
+.modal-backdrop.is-open,
+.modal-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
 }
 
 .modal-dialog {
@@ -1360,12 +1371,20 @@ button {
   z-index: 220;
   background-color: hsla(240, 15%, 6%, 0.65);
   backdrop-filter: blur(6px);
-  display: none;
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
   justify-content: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity var(--t-drawer) var(--ease-drawer), visibility var(--t-drawer);
 }
 
-.cart-drawer-backdrop.is-open {
-  display: flex;
+.cart-drawer-backdrop.is-open,
+.cart-drawer-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
 }
 
 .cart-drawer-panel {
@@ -1380,6 +1399,13 @@ button {
   flex-direction: column;
   justify-content: space-between;
   gap: var(--space-5);
+  transform: translateX(100%);
+  transition: transform var(--t-drawer) var(--ease-drawer);
+}
+
+.cart-drawer-backdrop.active .cart-drawer-panel,
+.cart-drawer-backdrop.is-open .cart-drawer-panel {
+  transform: translateX(0);
 }
 
 .cart-drawer-header {
@@ -1480,7 +1506,7 @@ button {
   padding: 0.28rem 0.55rem;
   border-radius: 3px;
   color: var(--text-secondary);
-  transition: all 0.2s ease;
+  transition: color var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out);
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
@@ -1583,6 +1609,7 @@ button {
   z-index: 240;
 }
 
+.quickview-card,
 .quickview-studio-dialog {
   width: 100%;
   max-width: 880px;
@@ -1591,6 +1618,17 @@ button {
   border-radius: var(--radius-md);
   padding: clamp(1.5rem, 3vw, 2.5rem);
   box-shadow: var(--shadow-cinema);
+  transform: scale(0.95);
+  opacity: 0;
+  transition: transform var(--t-med) var(--ease-out), opacity var(--t-med) var(--ease-out);
+}
+
+#royal-quickview-modal.active .quickview-card,
+#royal-quickview-modal.active .quickview-studio-dialog,
+#royal-quickview-modal.is-open .quickview-card,
+#royal-quickview-modal.is-open .quickview-studio-dialog {
+  transform: scale(1);
+  opacity: 1;
 }
 
 .quickview-header {
@@ -1722,7 +1760,7 @@ button {
   font-size: var(--text-xs);
   font-weight: 600;
   color: var(--text-secondary);
-  transition: all 0.2s ease;
+  transition: color var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out);
 }
 
 .shade-swatch-btn:hover {
@@ -1760,7 +1798,7 @@ button {
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-secondary);
-  transition: all 0.2s ease;
+  transition: color var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out);
 }
 
 .spec-pill-btn:hover {
@@ -1836,6 +1874,116 @@ button {
     opacity: 1 !important;
     transform: none !important;
   }
+}
+
+/* ==========================================================================
+   Emil Kowalski Gated Hover Interactions (No Mobile Sticky Hovers)
+   ========================================================================== */
+
+@media (hover: hover) and (pointer: fine) {
+  .feature-card:hover,
+  .capability-column:hover {
+    box-shadow: var(--shadow-cinema);
+  }
+
+  .capability-column:hover .collection-photo-wrap img {
+    transform: scale(1.04);
+  }
+
+  .bento-card:hover {
+    border-color: hsla(40, 62%, 50%, 0.45);
+    box-shadow: 0 16px 40px -12px hsla(240, 15%, 8%, 0.16);
+  }
+
+  .review-card:hover,
+  .case-tab-btn:hover {
+    background-color: var(--bg-surface);
+  }
+
+  .pricing-card:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-cinema);
+  }
+
+  [data-tilt-card]:hover .tilt-spotlight-glare {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   Sonner-Style Luxury Toast Styling (#royal-toast-container & .royal-toast)
+   ========================================================================== */
+
+#royal-toast-container {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  pointer-events: none;
+}
+
+.royal-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1.25rem;
+  background: rgba(13, 11, 10, 0.94);
+  border: 1px solid rgba(197, 155, 79, 0.35);
+  border-radius: 9999px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  color: #FAF7F2;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transform: translateY(-20px) scale(0.95);
+  opacity: 0;
+  transition: transform var(--t-med) var(--ease-drawer), opacity var(--t-med) var(--ease-out);
+}
+
+.royal-toast.visible {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.royal-toast-icon {
+  color: #C59B4F;
+  font-size: 1rem;
+}
+
+.royal-toast-title {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #FAF7F2;
+}
+
+.royal-toast-desc {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: #D8B499;
+  margin-left: 0.25rem;
+}
+
+.royal-toast-action {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #C59B4F;
+  border: 1px solid rgba(197, 155, 79, 0.4);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(197, 155, 79, 0.12);
+  cursor: pointer;
+  transition: background 160ms ease;
+  margin-left: auto;
+}
+
+.royal-toast-action:hover {
+  background: rgba(197, 155, 79, 0.24);
 }
 
 

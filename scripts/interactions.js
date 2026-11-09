@@ -373,14 +373,19 @@
     function openCartDrawer() {
       if (!cartDrawer) return;
       cartDrawer.classList.add('is-open');
+      cartDrawer.classList.add('active');
       cartDrawer.setAttribute('aria-hidden', 'false');
     }
 
     function closeCartDrawer() {
       if (!cartDrawer) return;
       cartDrawer.classList.remove('is-open');
+      cartDrawer.classList.remove('active');
       cartDrawer.setAttribute('aria-hidden', 'true');
     }
+
+    window.openRoyalCartDrawer = openCartDrawer;
+    window.closeRoyalCartDrawer = closeCartDrawer;
 
     function addToRoyalBag(name, priceUsd, shouldOpen = true) {
       const cleanPrice = parseInt(String(priceUsd || '490'), 10);
@@ -413,6 +418,16 @@
         const name = btn.getAttribute('data-add-to-bag') || 'Royal Couture Piece';
         const price = parseInt(btn.getAttribute('data-bag-price') || '490', 10);
         addToRoyalBag(name, price, true);
+        if (typeof window.showRoyalToast === 'function') {
+          window.showRoyalToast({
+            title: '♛ Crown Added to Royal Bag',
+            desc: name,
+            actionLabel: 'View Bag',
+            onAction: () => {
+              openCartDrawer();
+            }
+          });
+        }
       });
     });
 

@@ -227,6 +227,7 @@
       const totalUsd = computeActiveUsdTotal(state);
 
       modal.classList.toggle('is-open', Boolean(state.quickViewOpen));
+      modal.classList.toggle('active', Boolean(state.quickViewOpen));
       modal.setAttribute('aria-hidden', state.quickViewOpen ? 'false' : 'true');
 
       if (previewImg && product.image) {
@@ -339,6 +340,22 @@
         if (typeof window.addToRoyalBag === 'function') {
           window.addToRoyalBag(customName, totalUsd, true);
         }
+        showRoyalToast({
+          title: '♛ Custom Crown Configured',
+          desc: `${st.selectedShade} • ${st.selectedLength}`,
+          actionLabel: 'View Bag',
+          onAction: () => {
+            if (typeof window.openRoyalCartDrawer === 'function') {
+              window.openRoyalCartDrawer();
+            } else {
+              const drawer = document.getElementById('royal-cart-drawer');
+              if (drawer) {
+                drawer.classList.add('is-open', 'active');
+                drawer.setAttribute('aria-hidden', 'false');
+              }
+            }
+          }
+        });
       });
     }
 
@@ -471,8 +488,24 @@
         const st = store.getState();
         const preset = STUDIO_PRESETS[st.activeStudioTab || 'obsidian'] || STUDIO_PRESETS['obsidian'];
         if (typeof window.addToRoyalBag === 'function') {
-          window.addToRoyalBag(preset.title, preset.usdPrice, true);
+          window.addToRoyalBag(preset.title, preset.usdPrice, false);
         }
+        showRoyalToast({
+          title: '♛ Crown Added to Royal Bag',
+          desc: preset.title,
+          actionLabel: 'View Bag',
+          onAction: () => {
+            if (typeof window.openRoyalCartDrawer === 'function') {
+              window.openRoyalCartDrawer();
+            } else {
+              const drawer = document.getElementById('royal-cart-drawer');
+              if (drawer) {
+                drawer.classList.add('is-open', 'active');
+                drawer.setAttribute('aria-hidden', 'false');
+              }
+            }
+          }
+        });
       });
     }
 
@@ -491,12 +524,98 @@
     renderAppleBentoStudio(store.getState());
   }
 
+  // 6. Mount <SonnerToastManager /> (Emil Kowalski Sonner-Style Luxury Toast System)
+  function showRoyalToast({ title, desc, actionLabel, onAction }) {
+    let container = document.getElementById('royal-toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'royal-toast-container';
+      container.setAttribute('aria-live', 'polite');
+      container.setAttribute('aria-atomic', 'true');
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'royal-toast';
+    toast.setAttribute('role', 'status');
+
+    const icon = document.createElement('span');
+    icon.className = 'royal-toast-icon';
+    icon.textContent = '♛';
+    toast.appendChild(icon);
+
+    const titleEl = document.createElement('span');
+    titleEl.className = 'royal-toast-title';
+    titleEl.textContent = title || '♛ Crown Added to Royal Bag';
+    toast.appendChild(titleEl);
+
+    if (desc) {
+      const descEl = document.createElement('span');
+      descEl.className = 'royal-toast-desc';
+      descEl.textContent = desc;
+      toast.appendChild(descEl);
+    }
+
+    let removeTimer = null;
+    const dismiss = () => {
+      if (removeTimer) {
+        clearTimeout(removeTimer);
+        removeTimer = null;
+      }
+      toast.classList.remove('visible');
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 240);
+    };
+
+    if (actionLabel) {
+      const actionBtn = document.createElement('button');
+      actionBtn.type = 'button';
+      actionBtn.className = 'royal-toast-action';
+      actionBtn.textContent = actionLabel;
+      actionBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (typeof onAction === 'function') {
+          onAction();
+        }
+        dismiss();
+      });
+      toast.appendChild(actionBtn);
+    }
+
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+      toast.classList.add('visible');
+    });
+
+    removeTimer = setTimeout(dismiss, 4000);
+
+    return toast;
+  }
+
+  window.showRoyalToast = showRoyalToast;
+
+  function initSonnerToastManager() {
+    let container = document.getElementById('royal-toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'royal-toast-container';
+      container.setAttribute('aria-live', 'polite');
+      container.setAttribute('aria-atomic', 'true');
+      document.body.appendChild(container);
+    }
+  }
+
   function mountReactLuxurySuite() {
     initAppleProBentoStudio();
     initCurrencySwitcher();
     initTiltedSpotlightCards();
     initMagneticButtons();
     initQuickViewStudio();
+    initSonnerToastManager();
   }
 
   if (document.readyState === 'loading') {
