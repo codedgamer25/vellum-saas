@@ -71,6 +71,10 @@ Apex Auto Lounge is engineered for ultra-luxury exotic automobile sales and inve
 ## Design Pillars
 1. **Titanium & Obsidian Stage**: Dark obsidian canvas (`#0A0A0C`) with satin titanium cards (`#141419`) and brushed champagne gold highlights (`#D4AF37`) creates an atmosphere of prestige and high-octane engineering.
 2. **Instant Micro-Feedback**: Every state transition uses Emil Kowalski spring micro-motion tokens (`--ease-out: cubic-bezier(0.16, 1, 0.3, 1)`).
-3. **Dual Reality Layout**:
+3. **Apple Keynote 3D Hero Stage**:
+   - Live 360° WebGL interactive viewport featuring 4 flagship hypercars: Porsche 911 GT3 RS, Ferrari Roma V8, Mercedes-AMG G63, and Audi RS6 Avant Performance.
+   - Floating Apple Dynamic Island telemetry capsule with glassmorphic backdrop (`rgba(10,10,12,0.88)` with `backdrop-filter: blur(20px)`), real-time engine metrics, and instant multi-currency conversion.
+   - Segmented iOS-style pill switcher with brushed gold glow and zero-layout-shift transition.
+4. **Dual Reality Layout**:
    - **Buyer View**: 3-column cinematic car cards, multi-criteria hero search, live multi-currency switcher (`USD`, `NGN`, `GBP`, `EUR`), vehicle detail inspection modal, and instant WhatsApp inquiry.
    - **Owner Admin Portal**: Protected by 4-digit PIN (`2026`), instant inventory telemetry KPIs, 1-click status toggles (`[Available]`, `[Reserved]`, `[Sold]`), live Add/Edit modal, and deletion with toast feedback.

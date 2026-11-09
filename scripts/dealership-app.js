@@ -24,7 +24,8 @@
       sortBy: 'featured'
     },
     activeDetailVehicleId: null,
-    editingVehicleId: null
+    editingVehicleId: null,
+    active3DCarId: 'porsche-gt3-rs-2024'
   };
 
   // Toast Notification Helper (Sonner style)
@@ -194,6 +195,97 @@
           <p class="hero-subtitle">
             Direct access to authenticated, low-mileage exotic supercars and executive transport. Available for immediate private acquisition or worldwide white-glove transport.
           </p>
+        </div>
+
+        <!-- Apple Keynote 3D Hero Stage -->
+        <div class="hero-3d-stage-wrapper" id="hero-3d-stage">
+          <div class="hero-3d-header">
+            <div class="hero-3d-kicker">
+              <span>✦</span> APPLE KEYNOTE 3D SHOWROOM • 360° LIVE ORBIT
+            </div>
+            <!-- Apple Segmented Control Car Switcher -->
+            <div id="hero-car-switcher" role="tablist" aria-label="3D Hero Car Switcher">
+              <button type="button" class="apple-switcher-btn active" id="switcher-porsche" data-car="porsche-gt3-rs-2024">
+                Porsche 911 GT3 RS
+              </button>
+              <button type="button" class="apple-switcher-btn" id="switcher-ferrari" data-car="ferrari-roma-2023">
+                Ferrari Roma V8
+              </button>
+              <button type="button" class="apple-switcher-btn" id="switcher-amg" data-car="mercedes-amg-g63-2024">
+                Mercedes-AMG G63
+              </button>
+              <button type="button" class="apple-switcher-btn" id="switcher-audi" data-car="audi-rs6-avant-2024">
+                Audi RS6 Avant
+              </button>
+            </div>
+          </div>
+
+          <!-- 3D Canvas Stage -->
+          <div class="hero-3d-stage-canvas">
+            <!-- Floating Apple Dynamic Island -->
+            <div class="hero-dynamic-island">
+              <div class="island-pill-left">
+                <span class="island-car-badge" id="island-car-name">2024 Porsche 911 GT3 RS</span>
+                <span class="island-divider"></span>
+                <div class="telemetry-metrics">
+                  <span class="metric-item"><strong id="island-hp">518 HP</strong></span>
+                  <span class="metric-item">0-60: <strong id="island-acceleration">3.0s</strong></span>
+                  <span class="metric-item">V-Max: <strong id="island-topspeed">184 MPH</strong></span>
+                </div>
+              </div>
+
+              <div class="island-pill-right" id="island-price">
+                ${STORE.formatPrice(248000)}
+              </div>
+            </div>
+
+            <!-- Sketchfab WebGL Iframe Embed -->
+            <iframe 
+              id="hero-3d-iframe" 
+              class="hero-3d-iframe"
+              title="3D Showroom Keynote Model"
+              src="https://sketchfab.com/models/456b3d9d60b646369d76667848d6d027/embed?autostart=1&camera=0&preload=1&ui_theme=dark&ui_infos=0&ui_controls=1&ui_stop=0"
+              frameborder="0"
+              allowfullscreen
+              mozallowfullscreen="true"
+              webkitallowfullscreen="true"
+              allow="autoplay; fullscreen; xr-spatial-tracking"
+              xr-spatial-tracking
+              execution-while-out-of-viewport
+              execution-while-not-rendered
+              web-share
+            ></iframe>
+
+            <!-- Gesture Hint Overlay -->
+            <div class="hero-gesture-hint">
+              <span>🖱️ Drag to Orbit 360°</span>
+              <span>•</span>
+              <span>🔍 Pinch / Scroll to Zoom</span>
+              <span>•</span>
+              <span>⚡ Apple Keynote Stage</span>
+            </div>
+
+            <!-- Floating Action Bar -->
+            <div class="hero-3d-floating-actions">
+              <a 
+                href="https://wa.me/15550192834?text=Hi%20Apex%20Auto%20Lounge%2C%20I%20am%20inquiring%20about%20the%202024%20Porsche%20911%20GT3%20RS%20featured%20on%20the%203D%20Showroom."
+                target="_blank"
+                rel="noopener noreferrer"
+                class="hero-action-pill hero-action-whatsapp"
+                id="hero-whatsapp-reserve"
+              >
+                <span>💬</span> WhatsApp VIP Reservation
+              </a>
+              <button 
+                type="button" 
+                class="hero-action-pill hero-action-dossier" 
+                id="hero-inspect-dossier"
+                data-id="apex-car-01"
+              >
+                <span>📄</span> Inspect Technical Dossier
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Filter Bar -->
@@ -433,6 +525,90 @@
         openVehicleModal(id, '3d');
       });
     });
+
+    // Wire Hero 3D Stage Keynote Controls
+    function updateHero3DStage(carId) {
+      state.active3DCarId = carId;
+      const car = STORE.getFeatured3DCar(carId);
+      if (!car) return;
+
+      // Update button active state
+      main.querySelectorAll('.apple-switcher-btn').forEach((btn) => {
+        if (btn.getAttribute('data-car') === carId) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // Update Iframe Embed URL
+      const iframe = main.querySelector('#hero-3d-iframe');
+      if (iframe) {
+        const targetSrc = `https://sketchfab.com/models/${car.sketchfabId}/embed?autostart=1&camera=0&preload=1&ui_theme=dark&ui_infos=0&ui_controls=1&ui_stop=0`;
+        if (iframe.getAttribute('src') !== targetSrc) {
+          iframe.setAttribute('src', targetSrc);
+        }
+      }
+
+      // Update Dynamic Island Telemetry
+      const nameEl = main.querySelector('#island-car-name');
+      if (nameEl) nameEl.textContent = `${car.year} ${car.make} ${car.model}`;
+
+      const hpEl = main.querySelector('#island-hp');
+      if (hpEl) hpEl.textContent = `${car.hp} HP`;
+
+      const accelEl = main.querySelector('#island-acceleration');
+      if (accelEl) accelEl.textContent = car.zeroToSixty;
+
+      const topSpeedEl = main.querySelector('#island-topspeed');
+      if (topSpeedEl) topSpeedEl.textContent = car.topSpeed;
+
+      const priceEl = main.querySelector('#island-price');
+      if (priceEl) priceEl.textContent = STORE.formatPrice(car.priceUSD);
+
+      // Update WhatsApp VIP Reservation Link
+      const waBtn = main.querySelector('#hero-whatsapp-reserve');
+      if (waBtn) {
+        const encoded = encodeURIComponent(
+          `Hi Apex Auto Lounge, I am inquiring about the ${car.year} ${car.make} ${car.model} featured on the 3D Showroom (${STORE.formatPrice(car.priceUSD)}). Is it available for private acquisition?`
+        );
+        waBtn.setAttribute('href', `https://wa.me/15550192834?text=${encoded}`);
+      }
+
+      // Update Dossier Button target vehicle ID
+      const dossierBtn = main.querySelector('#hero-inspect-dossier');
+      if (dossierBtn) {
+        // Map featured car to catalog vehicle ID if available
+        const catalogVehicle = STORE.getVehicles().find(
+          (v) => v.make.toLowerCase() === car.make.toLowerCase() && v.model.toLowerCase().includes(car.model.toLowerCase().split(' ')[0])
+        ) || STORE.getVehicles()[0];
+        if (catalogVehicle) {
+          dossierBtn.setAttribute('data-id', catalogVehicle.id);
+        }
+      }
+    }
+
+    // Attach Switcher Listeners
+    main.querySelectorAll('.apple-switcher-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const carId = e.currentTarget.getAttribute('data-car');
+        updateHero3DStage(carId);
+      });
+    });
+
+    // Attach Dossier Button Listener
+    const dossierBtn = main.querySelector('#hero-inspect-dossier');
+    if (dossierBtn) {
+      dossierBtn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id') || 'apex-car-01';
+        openVehicleModal(id, '3d');
+      });
+    }
+
+    // Sync active car state on render
+    if (state.active3DCarId) {
+      updateHero3DStage(state.active3DCarId);
+    }
   }
 
   // Render Admin Owner Panel

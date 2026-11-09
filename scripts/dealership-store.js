@@ -30,6 +30,69 @@
     return match ? match[1].toLowerCase() : trimmed;
   }
 
+  const FEATURED_3D_CARS = [
+    {
+      id: 'porsche-gt3-rs-2024',
+      make: 'Porsche',
+      model: '911 GT3 RS',
+      year: 2024,
+      edition: 'Weissach Package',
+      priceUSD: 248000,
+      sketchfabId: '456b3d9d60b646369d76667848d6d027',
+      hp: 518,
+      zeroToSixty: '3.0s',
+      topSpeed: '184 MPH',
+      engine: '4.0L Naturally Aspirated Boxer-6',
+      color: 'Arctic Grey / Pyro Red',
+      transmission: '7-Speed PDK'
+    },
+    {
+      id: 'ferrari-roma-2023',
+      make: 'Ferrari',
+      model: 'Roma V8',
+      year: 2023,
+      edition: 'Atelier Tailor Made',
+      priceUSD: 238000,
+      sketchfabId: 'fedadda2bb6c4bf481636121548c6a47',
+      hp: 612,
+      zeroToSixty: '3.2s',
+      topSpeed: '199 MPH',
+      engine: '3.9L Twin-Turbo V8',
+      color: 'Rosso Corsa',
+      transmission: '8-Speed F1 Dual-Clutch'
+    },
+    {
+      id: 'mercedes-amg-g63-2024',
+      make: 'Mercedes-Benz',
+      model: 'Mercedes-AMG G63',
+      year: 2024,
+      edition: 'Edition 55 Magno',
+      priceUSD: 195000,
+      sketchfabId: '27ec2645ed95471395370a6650b38296',
+      hp: 577,
+      zeroToSixty: '4.5s',
+      topSpeed: '149 MPH',
+      engine: 'Handcrafted AMG 4.0L V8 Biturbo',
+      color: 'Obsidian Black Metallic',
+      transmission: 'AMG SPEEDSHIFT 9G'
+    },
+    {
+      id: 'audi-rs6-avant-2024',
+      make: 'Audi',
+      model: 'RS6 Avant Performance',
+      year: 2024,
+      edition: 'Carbon Dynamic Package',
+      priceUSD: 142000,
+      sketchfabId: 'b432bb3ad006442c88a915d6718dffef',
+      hp: 621,
+      zeroToSixty: '3.3s',
+      topSpeed: '190 MPH',
+      engine: '4.0L Twin-Turbo V8 MHEV',
+      color: 'Nardo Grey',
+      transmission: '8-Speed Tiptronic Quattro'
+    }
+  ];
+
   const INITIAL_VEHICLES = [
     {
       id: 'apex-car-01',
@@ -508,6 +571,15 @@
         totalValueUSD,
         totalValueFormatted: this.formatPrice(totalValueUSD)
       };
+    }
+
+    // Featured 3D Showcase Models (Apple Keynote Stage)
+    getFeatured3DCars() {
+      return [...FEATURED_3D_CARS];
+    }
+
+    getFeatured3DCar(id) {
+      return FEATURED_3D_CARS.find((c) => c.id === id) || FEATURED_3D_CARS[0];
     }
   }
 
