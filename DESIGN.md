@@ -1,108 +1,76 @@
 ---
 version: alpha
-name: Royal Headmistress
-description: Luxury bespoke wig and raw hair atelier combining couture craftsmanship with Apple Pro industrial precision.
+name: Apex Auto Lounge
+description: Premier exotic and luxury automobile showroom and dealership inventory platform with instant buyer inquiry and protected owner management.
 colors:
-  primary: "#0D0B0A"      # Main obsidian ink for headlines and body
-  secondary: "#786B63"    # Muted bronze/taupe for subtitles, borders, and captions
-  tertiary: "#C59B4F"     # Single champagne-gold accent: badges, active pills, and primary CTAs
-  neutral: "#FAF7F2"      # Warm pearl atelier canvas background
-  surface: "#FFFFFF"      # Crisp white card surfaces
-  surface-dark: "#141210" # Deep obsidian glass for Apple Dynamic Island and Bento Studio stage
-  on-tertiary: "#0D0B0A"  # Deep contrast ink on gold fills
+  primary: "#0A0A0C"       # Deep Obsidian canvas and backdrop
+  surface: "#141419"       # Titanium dark card surface and container backdrop
+  surface-elevated: "#1C1C24" # Elevated modal / dropdown surface
+  border: "#22222B"        # Subtle precision titanium border
+  border-subtle: "#191921" # Divider border
+  accent: "#D4AF37"        # Hand-brushed champagne gold primary accent
+  accent-hover: "#E5C158"  # Gold hover luminescence
+  accent-subtle: "rgba(212, 175, 55, 0.12)" # Gold subtle tint for pills
+  status-emerald: "#10B981" # In stock / Available
+  status-amber: "#F59E0B"   # Reserved / Sale Pending
+  status-slate: "#64748B"   # Sold unit archive
+  text-primary: "#F8FAFC"   # High-contrast bright titanium text
+  text-secondary: "#94A3B8" # Muted technical slate text
+  text-muted: "#64748B"     # Caption / watermark text
 typography:
-  headline-lg:
-    fontFamily: "Playfair Display"
+  display-lg:
+    fontFamily: "Syne, sans-serif"
     fontSize: 48px
-    fontWeight: 600
-    lineHeight: 1.15
+    fontWeight: 700
+    lineHeight: 1.1
+    letterSpacing: -0.03em
+  display-md:
+    fontFamily: "Syne, sans-serif"
+    fontSize: 32px
+    fontWeight: 700
+    lineHeight: 1.2
     letterSpacing: -0.02em
-  headline-md:
-    fontFamily: "Playfair Display"
-    fontSize: 28px
+  headline:
+    fontFamily: "Space Grotesk, sans-serif"
+    fontSize: 22px
     fontWeight: 600
-    lineHeight: 1.25
-    letterSpacing: -0.015em
-  body-md:
-    fontFamily: "Inter"
-    fontSize: 16px
+    lineHeight: 1.3
+    letterSpacing: -0.01em
+  body:
+    fontFamily: "Inter, sans-serif"
+    fontSize: 15px
     fontWeight: 400
     lineHeight: 1.6
-  label-md:
-    fontFamily: "Inter"
+  spec-mono:
+    fontFamily: "Space Grotesk, monospace"
     fontSize: 13px
-    fontWeight: 600
-    lineHeight: 1
-    letterSpacing: 0.04em
+    fontWeight: 500
+    letterSpacing: 0.05em
 rounded:
-  sm: 4px
-  md: 8px
+  sm: 6px
+  md: 10px
   lg: 16px
   full: 9999px
-spacing:
-  sm: 8px
-  md: 16px
-  lg: 24px
-  xl: 32px
-  xxl: 64px
-components:
-  page:
-    backgroundColor: "{colors.neutral}"
-    textColor: "{colors.primary}"
-    typography: "{typography.body-md}"
-  button-primary:
-    backgroundColor: "{colors.tertiary}"
-    textColor: "{colors.on-tertiary}"
-    typography: "{typography.label-md}"
-    rounded: "{rounded.md}"
-    padding: 12px 24px
-  button-primary-hover:
-    backgroundColor: "#B3893F"
-    textColor: "{colors.on-tertiary}"
-  card:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.primary}"
-    rounded: "{rounded.lg}"
-    padding: 32px
-  dynamic-island:
-    backgroundColor: "{colors.surface-dark}"
-    textColor: "#FAF7F2"
-    rounded: "{rounded.full}"
+motion:
+  ease-out: cubic-bezier(0.16, 1, 0.3, 1)
+  ease-drawer: cubic-bezier(0.32, 0.72, 0, 1)
+  duration-fast: 150ms
+  duration-normal: 250ms
+  duration-slow: 400ms
+  rules:
+    - Zero transition: all
+    - Only transform and opacity animated on interactive transitions
+    - Hover lift restricted to @media (hover: hover) and (pointer: fine)
+    - Active click feedback scale(0.97) on all interactive buttons and pills
 ---
 
-# Royal Headmistress — Atelier Design Specification
+# Apex Auto Lounge Design System
 
-Official DESIGN.md specification formatted in accordance with Google Labs and Tobia Donadon's Claude Design Blueprint standards.
+Apex Auto Lounge is engineered for ultra-luxury exotic automobile sales and inventory management. The interface merges the high-end digital precision of modern hypercar configurators with the operational efficiency of an executive showroom ERP.
 
-## Overview
-Royal Headmistress represents the pinnacle of luxury hair artistry and 0.10mm Swiss HD lace custom units. The visual atmosphere balances Parisian couture elegance with Apple Pro industrial precision.
-
-## Colors
-- **Primary (`#0D0B0A`):** Obsidian black ink used for headlines, high-contrast borders, and primary dark actions.
-- **Secondary (`#786B63`):** Muted bronze-taupe for specifications, micro-copy, and secondary borders (`#E8DFD5`).
-- **Tertiary (`#C59B4F`):** The ONE accent. Royal champagne gold for primary CTAs, active status dots, live price tags, and slider dividers.
-- **Neutral (`#FAF7F2`):** Warm silk background canvas across the storefront.
-- **Surface (`#FFFFFF` & `#141210`):** White porcelain cards for client reviews/pricing, and deep obsidian glass for the Apple Pro Bento Studio.
-
-## Typography
-Two fonts strictly enforced:
-- **Playfair Display (600, 700):** Headlines and editorial statements.
-- **Inter (400, 500, 600, 700):** UI controls, specifications, monospaced kickers, and body prose.
-
-## Layout & Bento Grid
-- 12-column responsive grid with a 1440px desktop canvas.
-- Spacing scale: `8px`, `16px`, `24px`, `32px`, `64px`. Sections are strictly separated by 64px–96px padding.
-
-## Micro-Motion Rules (Blueprint Hack 03)
-- **Hover Lift:** Cards lift 4px on hover (`transition: transform 260ms cubic-bezier(.2, .7, .2, 1)`).
-- **Soft Press:** Interactive buttons scale to `0.97` on active press.
-- **Stagger Reveal:** Elements animate in with a 40ms stagger delay (`calc(var(--i) * 40ms)`).
-- **Accessibility:** Strict `prefers-reduced-motion` override (motion disabled for users requesting reduced motion). Never move text while reading.
-
-## Do's and Don'ts
-- **DO** use the champagne-gold accent (`#C59B4F`) for high-intent actions, active pills, and divider bars.
-- **DO** maintain 4.5:1+ contrast on all text elements.
-- **DO** keep the top navigation on a single horizontal line at 1440px.
-- **DON'T** add competing bright accent colors (e.g. no neon blue, purple, or green).
-- **DON'T** introduce a third typography family.
-- **DON'T** reintroduce scroll-jacking or frame-scrubbing reels.
+## Design Pillars
+1. **Titanium & Obsidian Stage**: Dark obsidian canvas (`#0A0A0C`) with satin titanium cards (`#141419`) and brushed champagne gold highlights (`#D4AF37`) creates an atmosphere of prestige and high-octane engineering.
+2. **Instant Micro-Feedback**: Every state transition uses Emil Kowalski spring micro-motion tokens (`--ease-out: cubic-bezier(0.16, 1, 0.3, 1)`).
+3. **Dual Reality Layout**:
+   - **Buyer View**: 3-column cinematic car cards, multi-criteria hero search, live multi-currency switcher (`USD`, `NGN`, `GBP`, `EUR`), vehicle detail inspection modal, and instant WhatsApp inquiry.
+   - **Owner Admin Portal**: Protected by 4-digit PIN (`2026`), instant inventory telemetry KPIs, 1-click status toggles (`[Available]`, `[Reserved]`, `[Sold]`), live Add/Edit modal, and deletion with toast feedback.
