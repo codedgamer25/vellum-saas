@@ -71,10 +71,20 @@ Apex Auto Lounge is engineered for ultra-luxury exotic automobile sales and inve
 ## Design Pillars
 1. **Titanium & Obsidian Stage**: Dark obsidian canvas (`#0A0A0C`) with satin titanium cards (`#141419`) and brushed champagne gold highlights (`#D4AF37`) creates an atmosphere of prestige and high-octane engineering.
 2. **Instant Micro-Feedback**: Every state transition uses Emil Kowalski spring micro-motion tokens (`--ease-out: cubic-bezier(0.16, 1, 0.3, 1)`).
-3. **Apple Keynote 3D Hero Stage**:
-   - Live 360° WebGL interactive viewport featuring 4 flagship hypercars: Porsche 911 GT3 RS, Ferrari Roma V8, Mercedes-AMG G63, and Audi RS6 Avant Performance.
-   - Floating Apple Dynamic Island telemetry capsule with glassmorphic backdrop (`rgba(10,10,12,0.88)` with `backdrop-filter: blur(20px)`), real-time engine metrics, and instant multi-currency conversion.
-   - Segmented iOS-style pill switcher with brushed gold glow and zero-layout-shift transition.
+3. **Full-Bleed 3D Hero Stage Viewport (Apple Keynote & Brune / WebLoved Aesthetic)**:
+   - Full-bleed viewport canvas (`min-height: calc(100vh - 72px)`) with WebGL 3D center stage and seamless vignette edge-blends (`.hero-vignette-overlay`) melting into obsidian darkness with zero harsh borders.
+   - **Dynamic Vehicle Atmosphere Themes**: Each car triggers a 700ms cubic-bezier signature atmospheric gradient melt (`transition: background 700ms cubic-bezier(0.16, 1, 0.3, 1)`):
+     - `porsche-gt3-rs-2024`: `--theme-glow: rgba(245, 158, 11, 0.22); --theme-accent: #F59E0B; --theme-accent-tint: rgba(245, 158, 11, 0.12);`
+     - `ferrari-roma-2023`: `--theme-glow: rgba(239, 68, 68, 0.22); --theme-accent: #EF4444; --theme-accent-tint: rgba(239, 68, 68, 0.12);`
+     - `mercedes-amg-g63-2024`: `--theme-glow: rgba(16, 185, 129, 0.22); --theme-accent: #10B981; --theme-accent-tint: rgba(16, 185, 129, 0.12);`
+     - `audi-rs6-avant-2024`: `--theme-glow: rgba(6, 182, 212, 0.22); --theme-accent: #06B6D4; --theme-accent-tint: rgba(6, 182, 212, 0.12);`
+   - **Colossal Typographic Watermark**: Low-contrast background headline (`clamp(3.5rem, 12vw, 11rem)`, 5% opacity, `letter-spacing: -0.04em`) dynamically synchronizing with active vehicle name (`911 GT3 RS`, `ROMA V8`, `AMG G63`, `RS6 AVANT`).
+   - **Floating Apple-Grade Glassmorphic Controls**:
+     - `.hero-stage-top-bar`: Live showroom status indicator with pulsing dot, Apple segmented car switcher, and delivery badge.
+     - `.hero-aura-card`: Interactive color swatch dots with active ring feedback and instant vehicle + gradient switching.
+     - `.hero-next-vehicle-card`: Interactive preview teaser card displaying thumbnail and title of next hypercar in rotation.
+     - `.hero-stage-bottom-island`: Floating telemetry capsule with vehicle badge, live HP, 0-60, top speed, pagination dots, and multi-currency pricing pill.
+     - Direct manipulation cues: `🖱️ HOLD & DRAG TO ORBIT 360° • 🔍 PINCH TO ZOOM` and smooth scroll hint `EXPLORE SHOWROOM INVENTORY ↓` linking directly to `#catalog`.
 4. **Dual Reality Layout**:
    - **Buyer View**: 3-column cinematic car cards, multi-criteria hero search, live multi-currency switcher (`USD`, `NGN`, `GBP`, `EUR`), vehicle detail inspection modal, and instant WhatsApp inquiry.
    - **Owner Admin Portal**: Protected by 4-digit PIN (`2026`), instant inventory telemetry KPIs, 1-click status toggles (`[Available]`, `[Reserved]`, `[Sold]`), live Add/Edit modal, and deletion with toast feedback.
