@@ -260,30 +260,50 @@ img {
 /* Morphing Gradient Themes */
 .hero-stage-viewport[data-hero-theme="porsche-gt3-rs-2024"] .hero-stage-card,
 .hero-stage-card[data-hero-theme="porsche-gt3-rs-2024"],
-.hero-stage-card[data-color-theme="glacier"] {
-  background: radial-gradient(ellipse at 50% 50%, #4A7AB0 0%, #1A334E 100%);
-  --theme-accent: #6BA4D9;
+.hero-stage-card[data-color-theme="glacier"],
+.hero-stage-card[data-color-theme="raven-poppy"] {
+  --triad-base-dark: #0B0D12;
+  --triad-base-soft: #8BB4D0;
+  --triad-pop: #FF3B30;
+  --triad-pop-glow: rgba(255, 59, 48, 0.4);
+  --theme-accent: #FF3B30;
+  background: radial-gradient(ellipse at 50% 45%, #25394B 0%, #0F1A24 60%, #070B0E 100%);
 }
 
 .hero-stage-viewport[data-hero-theme="ferrari-roma-2023"] .hero-stage-card,
 .hero-stage-card[data-hero-theme="ferrari-roma-2023"],
-.hero-stage-card[data-color-theme="rosso"] {
-  background: radial-gradient(ellipse at 50% 50%, #B83226 0%, #4D120B 100%);
-  --theme-accent: #E24738;
+.hero-stage-card[data-color-theme="rosso"],
+.hero-stage-card[data-color-theme="midnight-coral"] {
+  --triad-base-dark: #00243A;
+  --triad-base-soft: #B6DFED;
+  --triad-pop: #FD6E6E;
+  --triad-pop-glow: rgba(253, 110, 110, 0.4);
+  --theme-accent: #FD6E6E;
+  background: radial-gradient(ellipse at 50% 45%, #0A3554 0%, #001C30 65%, #00101C 100%);
 }
 
 .hero-stage-viewport[data-hero-theme="mercedes-amg-g63-2024"] .hero-stage-card,
 .hero-stage-card[data-hero-theme="mercedes-amg-g63-2024"],
-.hero-stage-card[data-color-theme="emerald"] {
-  background: radial-gradient(ellipse at 50% 50%, #2A6844 0%, #102B1C 100%);
-  --theme-accent: #34D399;
+.hero-stage-card[data-color-theme="emerald"],
+.hero-stage-card[data-color-theme="pine-butter"] {
+  --triad-base-dark: #1A3528;
+  --triad-base-soft: #4A121A;
+  --triad-pop: #FCE788;
+  --triad-pop-glow: rgba(252, 231, 136, 0.4);
+  --theme-accent: #FCE788;
+  background: radial-gradient(ellipse at 50% 45%, #422630 0%, #29151C 60%, #12090C 100%);
 }
 
 .hero-stage-viewport[data-hero-theme="audi-rs6-avant-2024"] .hero-stage-card,
 .hero-stage-card[data-hero-theme="audi-rs6-avant-2024"],
-.hero-stage-card[data-color-theme="amber"] {
-  background: radial-gradient(ellipse at 50% 50%, #C96818 0%, #522405 100%);
-  --theme-accent: #E67A2E;
+.hero-stage-card[data-color-theme="amber"],
+.hero-stage-card[data-color-theme="obsidian-gold"] {
+  --triad-base-dark: #0A0A0C;
+  --triad-base-soft: #1A1A24;
+  --triad-pop: #D4AF37;
+  --triad-pop-glow: rgba(212, 175, 55, 0.4);
+  --theme-accent: #D4AF37;
+  background: radial-gradient(ellipse at 50% 45%, #232332 0%, #111118 65%, #0A0A0C 100%);
 }
 
 /* Colossal Debossed Typographic Watermark */
@@ -304,7 +324,7 @@ img {
   z-index: 1;
   white-space: nowrap;
   transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
-  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
 
 /* 3D Model Stage Canvas & Instant Fallback */
@@ -470,6 +490,12 @@ img {
   word-break: break-word;
 }
 
+.hero-headline strong,
+.hero-headline .theme-accent-text {
+  color: var(--triad-pop, #FD6E6E);
+  transition: color var(--duration-normal) var(--ease-out);
+}
+
 .hero-editorial-desc {
   font-family: var(--font-body);
   font-size: 0.98rem;
@@ -500,13 +526,13 @@ img {
   text-decoration: none;
   border: 1px solid #FFFFFF;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 24px var(--triad-pop-glow, rgba(253, 110, 110, 0.35));
   transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
 }
 
 .btn-hero-primary-pill:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 12px 32px var(--triad-pop-glow, rgba(253, 110, 110, 0.45));
 }
 
 .btn-hero-secondary-pill {
@@ -627,7 +653,82 @@ img {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Color Swatches matching frame_01 / frame_04 */
+/* Marco Perez Color Triads Selector (2-Base + 1-Pop Principle) */
+.triad-swatch-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.triad-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0.85rem;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  color: #FFFFFF;
+  text-align: left;
+  transition: transform var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
+}
+
+.triad-pill:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.01);
+}
+
+.triad-pill.active {
+  background: rgba(0, 0, 0, 0.65);
+  border-color: var(--triad-pop, #FD6E6E);
+  box-shadow: 0 0 16px var(--triad-pop-glow, rgba(253, 110, 110, 0.4)), inset 0 0 8px rgba(255, 255, 255, 0.08);
+  transform: scale(1.02);
+}
+
+.triad-base-bar {
+  display: flex;
+  width: 28px;
+  height: 14px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+}
+
+.triad-base-half {
+  flex: 1;
+  height: 100%;
+}
+
+.triad-pop-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid #FFFFFF;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.triad-name {
+  font-family: var(--font-headline);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+}
+
+.triad-pill.active .triad-name {
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+/* Color Swatches matching frame_01 / frame_04 (Backward compatibility) */
 .color-swatches-row {
   display: flex;
   align-items: center;
@@ -812,7 +913,8 @@ img {
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
 }
 
-.island-pill-right {
+.island-pill-right,
+.hero-stage-price-pill {
   pointer-events: auto;
   display: flex;
   align-items: center;
@@ -821,14 +923,15 @@ img {
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--triad-pop, #FD6E6E);
   border-radius: var(--radius-pill);
-  color: #FFFFFF;
+  color: var(--triad-pop, #FD6E6E);
   font-weight: 800;
   font-family: var(--font-display);
   font-size: 1.15rem;
   white-space: nowrap;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 16px var(--triad-pop-glow, rgba(253, 110, 110, 0.2));
+  transition: border-color var(--duration-normal) var(--ease-out), color var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal) var(--ease-out);
 }
 
 .hero-stage-footer-row {

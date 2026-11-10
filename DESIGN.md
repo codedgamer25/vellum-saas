@@ -17,6 +17,28 @@ colors:
   text-primary: "#F8FAFC"   # High-contrast bright titanium text
   text-secondary: "#94A3B8" # Muted technical slate text
   text-muted: "#64748B"     # Caption / watermark text
+  # Marco Perez Triadic Harmony (2-Base + 1-Pop Principle)
+  triads:
+    midnight-coral:
+      base-dark: "#00243A"    # Midnight Navy
+      base-soft: "#B6DFED"    # Soft Sky Blue
+      pop: "#FD6E6E"          # Coral Orange (The Pop Accent)
+      tagline: "Soft blue & midnight navy. Add coral orange, now it feels like a brand."
+    raven-poppy:
+      base-dark: "#0B0D12"    # Raven Black
+      base-soft: "#8BB4D0"    # Powder Ice Blue
+      pop: "#FF3B30"          # Poppy Red (The Pop Accent)
+      tagline: "Raven black & powder blue. Add Poppy red, now it is impossible to ignore."
+    pine-butter:
+      base-dark: "#1A3528"    # Pale Pine Green
+      base-soft: "#4A121A"    # Deep Burgundy
+      pop: "#FCE788"          # Butter Yellow (The Pop Accent)
+      tagline: "Pale pine & deep burgundy. Add butter yellow, now look at the packaging."
+    obsidian-gold:
+      base-dark: "#0A0A0C"    # Obsidian Black
+      base-soft: "#1A1A24"    # Deep Slate
+      pop: "#D4AF37"          # Champagne Gold (The Pop Accent)
+      tagline: "The smallest color can make the biggest difference."
 typography:
   display-lg:
     fontFamily: "Syne, sans-serif"
@@ -73,17 +95,18 @@ Apex Auto Lounge is engineered for ultra-luxury exotic automobile sales and inve
 2. **Instant Micro-Feedback**: Every state transition uses Emil Kowalski spring micro-motion tokens (`--ease-out: cubic-bezier(0.16, 1, 0.3, 1)`).
 3. **Full-Bleed 3D Hero Stage Viewport (Apple Keynote & Brune / WebLoved Aesthetic)**:
    - Full-bleed viewport canvas (`min-height: calc(100vh - 72px)`) with WebGL 3D center stage and seamless vignette edge-blends (`.hero-vignette-overlay`) melting into obsidian darkness with zero harsh borders.
-   - **Dynamic Vehicle Atmosphere Themes**: Each car triggers a 700ms cubic-bezier signature atmospheric gradient melt (`transition: background 700ms cubic-bezier(0.16, 1, 0.3, 1)`):
-     - `porsche-gt3-rs-2024`: `--theme-glow: rgba(245, 158, 11, 0.22); --theme-accent: #F59E0B; --theme-accent-tint: rgba(245, 158, 11, 0.12);`
-     - `ferrari-roma-2023`: `--theme-glow: rgba(239, 68, 68, 0.22); --theme-accent: #EF4444; --theme-accent-tint: rgba(239, 68, 68, 0.12);`
-     - `mercedes-amg-g63-2024`: `--theme-glow: rgba(16, 185, 129, 0.22); --theme-accent: #10B981; --theme-accent-tint: rgba(16, 185, 129, 0.12);`
-     - `audi-rs6-avant-2024`: `--theme-glow: rgba(6, 182, 212, 0.22); --theme-accent: #06B6D4; --theme-accent-tint: rgba(6, 182, 212, 0.12);`
-   - **Colossal Typographic Watermark**: Low-contrast background headline (`clamp(3.5rem, 12vw, 11rem)`, 5% opacity, `letter-spacing: -0.04em`) dynamically synchronizing with active vehicle name (`911 GT3 RS`, `ROMA V8`, `AMG G63`, `RS6 AVANT`).
+   - **Marco Perez 2-Base + 1-Pop Color Triads**:
+     Each hypercar atmosphere is governed by the Marco Perez Triadic Harmony Principle: *Two base grounding tones create atmospheric depth and tension; a single high-chroma pop accent transforms the composition into an unforgettable brand identity.*
+     - **Midnight & Coral** (`midnight-coral`): Base dark (`#00243A`), Base soft (`#B6DFED`), Pop accent (`#FD6E6E`). Tagline: *"Soft blue & midnight navy. Add coral orange, now it feels like a brand."*
+     - **Raven & Poppy** (`raven-poppy`): Base dark (`#0B0D12`), Base soft (`#8BB4D0`), Pop accent (`#FF3B30`). Tagline: *"Raven black & powder blue. Add Poppy red, now it is impossible to ignore."*
+     - **Pine & Butter** (`pine-butter`): Base dark (`#1A3528`), Base soft (`#4A121A`), Pop accent (`#FCE788`). Tagline: *"Pale pine & deep burgundy. Add butter yellow, now look at the packaging."*
+     - **Obsidian & Gold** (`obsidian-gold`): Base dark (`#0A0A0C`), Base soft (`#1A1A24`), Pop accent (`#D4AF37`). Tagline: *"The smallest color can make the biggest difference."*
+   - **Colossal Typographic Watermark**: Low-contrast background headline (`clamp(3.5rem, 12vw, 11rem)`, 12% opacity, `letter-spacing: -0.04em`, `text-shadow: 0 4px 30px rgba(0, 0, 0, 0.4)`) dynamically synchronizing with active vehicle name (`911 GT3 RS`, `ROMA V8`, `AMG G63`, `RS6 AVANT`).
    - **Floating Apple-Grade Glassmorphic Controls**:
-     - `.hero-stage-top-bar`: Live showroom status indicator with pulsing dot, Apple segmented car switcher, and delivery badge.
-     - `.hero-aura-card`: Interactive color swatch dots with active ring feedback and instant vehicle + gradient switching.
+     - `.hero-stage-top-row`: Live curated badge and Apple segmented car switcher.
+     - `.triad-swatch-group` & `.triad-pill`: Interactive color triad selector pills showcasing dual-tone base bars and glowing pop accent dots.
      - `.hero-next-vehicle-card`: Interactive preview teaser card displaying thumbnail and title of next hypercar in rotation.
-     - `.hero-stage-bottom-island`: Floating telemetry capsule with vehicle badge, live HP, 0-60, top speed, pagination dots, and multi-currency pricing pill.
+     - `.hero-stage-bottom-island`: Floating telemetry capsule with vehicle badge, live HP, 0-60, top speed, pagination dots, and multi-currency pricing pill with glowing pop border.
      - Direct manipulation cues: `🖱️ HOLD & DRAG TO ORBIT 360° • 🔍 PINCH TO ZOOM` and smooth scroll hint `EXPLORE SHOWROOM INVENTORY ↓` linking directly to `#catalog`.
 4. **Dual Reality Layout**:
    - **Buyer View**: 3-column cinematic car cards, multi-criteria hero search, live multi-currency switcher (`USD`, `NGN`, `GBP`, `EUR`), vehicle detail inspection modal, and instant WhatsApp inquiry.

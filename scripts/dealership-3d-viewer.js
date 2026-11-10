@@ -13,7 +13,7 @@
       scale: 1.0,
       positionY: 0,
       paintMaterialNames: ['Body_Color', 'Ferrari_Yellow', '_0098_DodgerBlue'],
-      defaultColor: '#E24738', // Rosso Corsa Crimson
+      defaultColor: '#FD6E6E', // Marco Perez Coral Orange
       cameraPos: [-3.2, 1.4, -4.2],
       targetPos: [0, 0.4, 0]
     },
@@ -22,7 +22,7 @@
       scale: 1.0,
       positionY: 0,
       paintMaterialNames: ['paint', 'coat'],
-      defaultColor: '#6BA4D9', // Glacier Cyan
+      defaultColor: '#FF3B30', // Marco Perez Poppy Red
       cameraPos: [4.2, 1.8, 4.6],
       targetPos: [0, 0.4, 0]
     },
@@ -31,11 +31,17 @@
       scale: 1.0,
       positionY: 0,
       paintMaterialNames: ['mMAT_Carpaint_Blue1'],
-      defaultColor: '#2A6844', // Emerald
+      defaultColor: '#FCE788', // Marco Perez Butter Yellow
       cameraPos: [4.0, 1.7, 4.5],
       targetPos: [0, 0.4, 0]
     }
   };
+
+  // CarId to Model config aliases for direct carId loadModel calls
+  MODEL_CONFIG['porsche-gt3-rs-2024'] = MODEL_CONFIG.porsche;
+  MODEL_CONFIG['ferrari-roma-2023'] = MODEL_CONFIG.ferrari;
+  MODEL_CONFIG['mercedes-amg-g63-2024'] = MODEL_CONFIG.bmw;
+  MODEL_CONFIG['audi-rs6-avant-2024'] = MODEL_CONFIG.ferrari;
 
   class Apex3DViewer {
     constructor(containerId = 'hero-3d-stage-container', options = {}) {
@@ -101,7 +107,9 @@
         this.loadModel(this.currentModelKey, this.currentColor);
 
         this.isInitialized = true;
+        Apex3DViewer.activeInstance = this;
       } catch (err) {
+        Apex3DViewer.activeInstance = this;
         console.warn('Apex3DViewer: Error initializing WebGL pipeline, running studio fallback:', err);
         this.enableInteractiveTilt();
       }
@@ -448,11 +456,26 @@
       if (this.renderer) {
         this.renderer.dispose();
       }
-      if (this.dracoLoader) {
-        this.dracoLoader.dispose();
+      if (Apex3DViewer.activeInstance === this) {
+        Apex3DViewer.activeInstance = null;
       }
     }
   }
+
+  // Active instance reference for global access
+  Apex3DViewer.activeInstance = null;
+
+  Apex3DViewer.changeCarColor = function (color) {
+    if (Apex3DViewer.activeInstance && typeof Apex3DViewer.activeInstance.changeCarColor === 'function') {
+      Apex3DViewer.activeInstance.changeCarColor(color);
+    }
+  };
+
+  Apex3DViewer.loadModel = function (modelKeyOrCarId, color) {
+    if (Apex3DViewer.activeInstance && typeof Apex3DViewer.activeInstance.loadModel === 'function') {
+      Apex3DViewer.activeInstance.loadModel(modelKeyOrCarId, color);
+    }
+  };
 
   // Export to window
   window.Apex3DViewer = Apex3DViewer;

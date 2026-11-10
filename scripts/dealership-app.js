@@ -12,6 +12,54 @@
     return;
   }
 
+  // Marco Perez 2-Base + 1-Pop Color Triads
+  const MARCO_PEREZ_TRIADS = {
+    'midnight-coral': {
+      id: 'midnight-coral',
+      name: 'Midnight & Coral',
+      fullName: 'Midnight Navy & Coral Orange',
+      carId: 'ferrari-roma-2023',
+      watermark: 'ROMA V8',
+      popColor: '#FD6E6E',
+      baseDark: '#00243A',
+      baseSoft: '#B6DFED',
+      tagline: 'Soft blue & midnight navy. Add coral orange, now it feels like a brand.'
+    },
+    'raven-poppy': {
+      id: 'raven-poppy',
+      name: 'Raven & Poppy',
+      fullName: 'Raven Black & Poppy Red',
+      carId: 'porsche-gt3-rs-2024',
+      watermark: '911 GT3 RS',
+      popColor: '#FF3B30',
+      baseDark: '#0B0D12',
+      baseSoft: '#8BB4D0',
+      tagline: 'Raven black & powder blue. Add Poppy red, now it is impossible to ignore.'
+    },
+    'pine-butter': {
+      id: 'pine-butter',
+      name: 'Pine & Butter',
+      fullName: 'Pale Pine & Butter Yellow',
+      carId: 'mercedes-amg-g63-2024',
+      watermark: 'AMG G63',
+      popColor: '#FCE788',
+      baseDark: '#1A3528',
+      baseSoft: '#4A121A',
+      tagline: 'Pale pine & deep burgundy. Add butter yellow, now look at the packaging.'
+    },
+    'obsidian-gold': {
+      id: 'obsidian-gold',
+      name: 'Obsidian & Gold',
+      fullName: 'Obsidian Black & Champagne Gold',
+      carId: 'audi-rs6-avant-2024',
+      watermark: 'RS6 AVANT',
+      popColor: '#D4AF37',
+      baseDark: '#0A0A0C',
+      baseSoft: '#1A1A24',
+      tagline: 'The smallest color can make the biggest difference.'
+    }
+  };
+
   // App State
   const state = {
     view: 'public', // 'public' | 'admin'
@@ -25,9 +73,10 @@
     },
     activeDetailVehicleId: null,
     editingVehicleId: null,
-    active3DCarId: 'porsche-gt3-rs-2024',
+    active3DCarId: 'ferrari-roma-2023',
+    activeTriadId: 'midnight-coral',
     activeSpec: 'TRACK',
-    activeColorHex: '#6BA4D9',
+    activeColorHex: '#FD6E6E',
     heroViewer: null
   };
 
@@ -185,13 +234,16 @@
     const filtered = getFilteredVehicles();
     const makes = ['all', 'Porsche', 'Mercedes-Benz', 'BMW', 'Audi', 'Range Rover', 'Ferrari', 'Tesla', 'Aston Martin'];
 
+    const currentTriad = MARCO_PEREZ_TRIADS[state.activeTriadId] || MARCO_PEREZ_TRIADS['midnight-coral'];
+    const currentCar = STORE.getFeatured3DCar(state.active3DCarId) || STORE.getFeatured3DCar(currentTriad.carId);
+
     main.innerHTML = `
       <!-- Hero Stage — Pinterest Inspired Luxury Rounded 3D Showroom Card -->
-      <section class="hero-stage-viewport" id="hero-stage-viewport" data-hero-theme="${state.active3DCarId || 'porsche-gt3-rs-2024'}">
-        <div class="hero-stage-card" id="hero-stage-card" data-hero-theme="${state.active3DCarId || 'porsche-gt3-rs-2024'}" data-color-theme="glacier">
+      <section class="hero-stage-viewport" id="hero-stage-viewport" data-hero-theme="${currentCar.id}">
+        <div class="hero-stage-card" id="hero-stage-card" data-hero-theme="${currentCar.id}" data-color-theme="${currentTriad.id}">
           <!-- Colossal Typographic Background Watermark -->
           <div class="hero-watermark-text" id="hero-watermark" aria-hidden="true">
-            911 GT3 RS
+            ${currentTriad.watermark}
           </div>
 
           <!-- Local Three.js 3D Model Stage Canvas & Instant High-Res Visual Fallback -->
@@ -218,16 +270,16 @@
 
               <!-- Segmented Control Car Switcher -->
               <div class="hero-car-switcher" id="hero-car-switcher" role="tablist" aria-label="3D Hero Car Switcher">
-                <button type="button" class="apple-switcher-btn active" id="switcher-porsche" data-car="porsche-gt3-rs-2024">
+                <button type="button" class="apple-switcher-btn ${currentCar.id === 'porsche-gt3-rs-2024' ? 'active' : ''}" id="switcher-porsche" data-car="porsche-gt3-rs-2024">
                   Porsche 911 GT3 RS
                 </button>
-                <button type="button" class="apple-switcher-btn" id="switcher-ferrari" data-car="ferrari-roma-2023">
+                <button type="button" class="apple-switcher-btn ${currentCar.id === 'ferrari-roma-2023' ? 'active' : ''}" id="switcher-ferrari" data-car="ferrari-roma-2023">
                   Ferrari Roma V8
                 </button>
-                <button type="button" class="apple-switcher-btn" id="switcher-amg" data-car="mercedes-amg-g63-2024">
+                <button type="button" class="apple-switcher-btn ${currentCar.id === 'mercedes-amg-g63-2024' ? 'active' : ''}" id="switcher-amg" data-car="mercedes-amg-g63-2024">
                   Mercedes-AMG G63
                 </button>
-                <button type="button" class="apple-switcher-btn" id="switcher-audi" data-car="audi-rs6-avant-2024">
+                <button type="button" class="apple-switcher-btn ${currentCar.id === 'audi-rs6-avant-2024' ? 'active' : ''}" id="switcher-audi" data-car="audi-rs6-avant-2024">
                   Audi RS6 Avant
                 </button>
               </div>
@@ -294,60 +346,78 @@
                   </div>
                 </div>
 
-                <!-- Select Color Swatches Block -->
+                <!-- Marco Perez Color Triads Block (2-Base + 1-Pop Principle) -->
                 <div class="selector-panel-block">
                   <div style="display: flex; justify-content: space-between; width: 100%; gap: 1rem;">
-                    <span class="selector-label">SELECT COLOR</span>
-                    <span class="aura-car-name" id="aura-car-name" style="font-family: var(--font-mono); font-size: 0.72rem; color: #FFFFFF; opacity: 0.85;">Glacier Cyan</span>
+                    <span class="selector-label">COLOR TRIAD (MARCO PEREZ)</span>
+                    <span class="aura-car-name" id="aura-car-name" style="font-family: var(--font-mono); font-size: 0.72rem; color: #FFFFFF; opacity: 0.85;">Midnight &amp; Coral</span>
                   </div>
-                  <div class="color-swatches-row" role="group" aria-label="Paint Color Swatches">
-                    <button 
-                      type="button" 
-                      class="color-swatch-circle aura-swatch-dot active" 
-                      data-car="porsche-gt3-rs-2024"
-                      data-theme="glacier" 
-                      data-color="#6BA4D9" 
-                      data-aura="Glacier Cyan"
-                      data-model="porsche"
-                      style="--swatch-color: #6BA4D9;" 
-                      title="Glacier Cyan"
-                      aria-label="Glacier Cyan"
-                    ></button>
+                  <div class="triad-swatch-group" role="group" aria-label="Marco Perez Color Triads">
+                    ${Object.values(MARCO_PEREZ_TRIADS).map(triad => `
+                      <button 
+                        type="button" 
+                        class="triad-pill ${state.activeTriadId === triad.id ? 'active' : ''}" 
+                        data-triad="${triad.id}" 
+                        data-car="${triad.carId}" 
+                        data-color="${triad.popColor}" 
+                        title="${triad.fullName}: &quot;${triad.tagline}&quot;"
+                        aria-label="${triad.name}"
+                      >
+                        <div class="triad-base-bar" title="Base Colors: ${triad.baseDark} &amp; ${triad.baseSoft}">
+                          <div class="triad-base-half" style="background-color: ${triad.baseDark};"></div>
+                          <div class="triad-base-half" style="background-color: ${triad.baseSoft};"></div>
+                        </div>
+                        <div class="triad-pop-dot" style="background-color: ${triad.popColor}; box-shadow: 0 0 10px ${triad.popColor};" title="Accent Pop: ${triad.popColor}"></div>
+                        <span class="triad-name">${triad.name}</span>
+                      </button>
+                    `).join('')}
+                  </div>
+
+                  <!-- Backward-compatible aura dots (hidden visually or synchronized) -->
+                  <div class="color-swatches-row" style="display: none;" role="group" aria-label="Paint Color Swatches">
                     <button 
                       type="button" 
                       class="color-swatch-circle aura-swatch-dot" 
+                      data-car="porsche-gt3-rs-2024"
+                      data-theme="raven-poppy" 
+                      data-color="#FF3B30" 
+                      data-aura="Raven Black &amp; Poppy Red"
+                      style="--swatch-color: #FF3B30;" 
+                      title="Raven &amp; Poppy"
+                      aria-label="Raven &amp; Poppy"
+                    ></button>
+                    <button 
+                      type="button" 
+                      class="color-swatch-circle aura-swatch-dot active" 
                       data-car="ferrari-roma-2023"
-                      data-theme="rosso" 
-                      data-color="#E24738" 
-                      data-aura="Rosso Corsa"
-                      data-model="ferrari"
-                      style="--swatch-color: #E24738;" 
-                      title="Rosso Corsa Crimson"
-                      aria-label="Rosso Corsa Crimson"
+                      data-theme="midnight-coral" 
+                      data-color="#FD6E6E" 
+                      data-aura="Midnight Navy &amp; Coral Orange"
+                      style="--swatch-color: #FD6E6E;" 
+                      title="Midnight &amp; Coral"
+                      aria-label="Midnight &amp; Coral"
                     ></button>
                     <button 
                       type="button" 
                       class="color-swatch-circle aura-swatch-dot" 
                       data-car="mercedes-amg-g63-2024"
-                      data-theme="emerald" 
-                      data-color="#2A6844" 
-                      data-aura="Emerald Green"
-                      data-model="bmw"
-                      style="--swatch-color: #2A6844;" 
-                      title="Emerald Green"
-                      aria-label="Emerald Green"
+                      data-theme="pine-butter" 
+                      data-color="#FCE788" 
+                      data-aura="Pale Pine &amp; Butter Yellow"
+                      style="--swatch-color: #FCE788;" 
+                      title="Pine &amp; Butter"
+                      aria-label="Pine &amp; Butter"
                     ></button>
                     <button 
                       type="button" 
                       class="color-swatch-circle aura-swatch-dot" 
                       data-car="audi-rs6-avant-2024"
-                      data-theme="amber" 
-                      data-color="#E67A2E" 
-                      data-aura="Sunset Amber"
-                      data-model="ferrari"
-                      style="--swatch-color: #E67A2E;" 
-                      title="Sunset Amber Gold"
-                      aria-label="Sunset Amber Gold"
+                      data-theme="obsidian-gold" 
+                      data-color="#D4AF37" 
+                      data-aura="Obsidian Black &amp; Champagne Gold"
+                      style="--swatch-color: #D4AF37;" 
+                      title="Obsidian &amp; Gold"
+                      aria-label="Obsidian &amp; Gold"
                     ></button>
                   </div>
                 </div>
@@ -675,9 +745,10 @@
     const HERO_ATMOSPHERE_CONFIG = {
       'porsche-gt3-rs-2024': {
         watermark: '911 GT3 RS',
-        auraName: 'Glacier Cyan',
-        accentColor: '#6BA4D9',
-        colorTheme: 'glacier',
+        auraName: 'Raven & Poppy',
+        accentColor: '#FF3B30',
+        colorTheme: 'raven-poppy',
+        triadId: 'raven-poppy',
         modelKey: 'porsche',
         nextCarId: 'ferrari-roma-2023',
         nextCarName: 'Ferrari Roma V8',
@@ -685,9 +756,10 @@
       },
       'ferrari-roma-2023': {
         watermark: 'ROMA V8',
-        auraName: 'Rosso Corsa',
-        accentColor: '#E24738',
-        colorTheme: 'rosso',
+        auraName: 'Midnight & Coral',
+        accentColor: '#FD6E6E',
+        colorTheme: 'midnight-coral',
+        triadId: 'midnight-coral',
         modelKey: 'ferrari',
         nextCarId: 'mercedes-amg-g63-2024',
         nextCarName: 'Mercedes-AMG G63',
@@ -695,9 +767,10 @@
       },
       'mercedes-amg-g63-2024': {
         watermark: 'AMG G63',
-        auraName: 'Emerald Green',
-        accentColor: '#2A6844',
-        colorTheme: 'emerald',
+        auraName: 'Pine & Butter',
+        accentColor: '#FCE788',
+        colorTheme: 'pine-butter',
+        triadId: 'pine-butter',
         modelKey: 'bmw',
         nextCarId: 'audi-rs6-avant-2024',
         nextCarName: 'Audi RS6 Avant',
@@ -705,9 +778,10 @@
       },
       'audi-rs6-avant-2024': {
         watermark: 'RS6 AVANT',
-        auraName: 'Sunset Amber',
-        accentColor: '#E67A2E',
-        colorTheme: 'amber',
+        auraName: 'Obsidian & Gold',
+        accentColor: '#D4AF37',
+        colorTheme: 'obsidian-gold',
+        triadId: 'obsidian-gold',
         modelKey: 'ferrari',
         nextCarId: 'porsche-gt3-rs-2024',
         nextCarName: 'Porsche 911 GT3 RS',
@@ -723,9 +797,10 @@
 
       const atmosphere = HERO_ATMOSPHERE_CONFIG[carId] || {
         watermark: car.model.toUpperCase(),
-        auraName: 'Signature Aura',
-        accentColor: '#6BA4D9',
-        colorTheme: 'glacier',
+        auraName: 'Midnight & Coral',
+        accentColor: '#FD6E6E',
+        colorTheme: 'midnight-coral',
+        triadId: 'midnight-coral',
         modelKey: 'ferrari',
         nextCarId: 'porsche-gt3-rs-2024',
         nextCarName: 'Porsche 911 GT3 RS',
@@ -735,6 +810,7 @@
       const appliedColor = targetHex || atmosphere.accentColor;
       const appliedTheme = targetTheme || atmosphere.colorTheme;
       state.activeColorHex = appliedColor;
+      state.activeTriadId = targetTheme || atmosphere.triadId;
 
       // 1. Dynamic Atmosphere Theme & Background Gradient Melt on Card Container
       const heroViewport = main.querySelector('#hero-stage-viewport');
@@ -762,7 +838,18 @@
         }
       });
 
-      // 4. Update Aura Color Dots / Swatches
+      // 4. Update Marco Perez Triad Pills
+      main.querySelectorAll('.triad-pill').forEach((pill) => {
+        const triadId = pill.getAttribute('data-triad');
+        const pillCar = pill.getAttribute('data-car');
+        if (triadId === state.activeTriadId || pillCar === carId || triadId === appliedTheme) {
+          pill.classList.add('active');
+        } else {
+          pill.classList.remove('active');
+        }
+      });
+
+      // Update Legacy / Hidden Aura Color Dots / Swatches
       main.querySelectorAll('.color-swatch-circle, .aura-swatch-dot').forEach((dot) => {
         if (dot.getAttribute('data-car') === carId || dot.getAttribute('data-theme') === appliedTheme) {
           dot.classList.add('active');
@@ -773,7 +860,8 @@
 
       const auraNameEl = main.querySelector('#aura-car-name');
       if (auraNameEl) {
-        auraNameEl.textContent = atmosphere.auraName;
+        const currentTriad = MARCO_PEREZ_TRIADS[state.activeTriadId];
+        auraNameEl.textContent = currentTriad ? currentTriad.name : atmosphere.auraName;
       }
 
       // 5. Update Model Pagination Dots
@@ -800,7 +888,7 @@
         nextVehicleBtn.setAttribute('data-next-car', atmosphere.nextCarId);
       }
 
-      // 7. Update Dynamic Island Telemetry
+      // 7. Update Dynamic Island Telemetry & Price Pill
       const nameEl = main.querySelector('#island-car-name');
       if (nameEl) nameEl.textContent = `${car.year} ${car.make} ${car.model}`;
 
@@ -836,8 +924,15 @@
         }
       }
 
-      // 10. Direct Local Three.js 3D Viewer Update (No iframe, No loading delay!)
-      if (state.heroViewer) {
+      // 10. Direct Local Three.js 3D Viewer Update (via instance and global API)
+      if (window.Apex3DViewer) {
+        if (typeof window.Apex3DViewer.loadModel === 'function') {
+          window.Apex3DViewer.loadModel(atmosphere.modelKey, appliedColor);
+        }
+        if (typeof window.Apex3DViewer.changeCarColor === 'function') {
+          window.Apex3DViewer.changeCarColor(appliedColor);
+        }
+      } else if (state.heroViewer) {
         if (state.heroViewer.currentModelKey !== atmosphere.modelKey) {
           state.heroViewer.loadModel(atmosphere.modelKey, appliedColor);
         } else {
@@ -854,7 +949,19 @@
       });
     });
 
-    // Attach Color Swatch Listeners (Instant Paint & Gradient Morph)
+    // Attach Marco Perez Triad Pill Listeners
+    main.querySelectorAll('.triad-pill').forEach((pill) => {
+      pill.addEventListener('click', (e) => {
+        const triadId = e.currentTarget.getAttribute('data-triad');
+        const triad = MARCO_PEREZ_TRIADS[triadId];
+        if (!triad) return;
+
+        updateHero3DStage(triad.carId, triad.popColor, triad.id);
+        showToast(`✦ ${triad.fullName}: "${triad.tagline}"`, 'info');
+      });
+    });
+
+    // Attach Color Swatch Listeners (Instant Paint & Gradient Morph backward compatibility)
     main.querySelectorAll('.color-swatch-circle, .aura-swatch-dot').forEach((dot) => {
       dot.addEventListener('click', (e) => {
         const carId = e.currentTarget.getAttribute('data-car') || state.active3DCarId;

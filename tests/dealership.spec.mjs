@@ -214,74 +214,84 @@ async function runDealershipTestSuite() {
     assert.ok(heroStageInfo.height >= 500, '#hero-stage-viewport must have height >= 500px');
     assert.ok(heroStageInfo.hasCanvas, '#hero-3d-canvas must be rendered');
     assert.ok(heroStageInfo.hasViewer, 'window.Apex3DViewer must be exported');
-    assert.equal(heroStageInfo.theme, 'porsche-gt3-rs-2024', 'Default theme must be porsche-gt3-rs-2024');
-    assert.equal(heroStageInfo.watermark, '911 GT3 RS', 'Watermark text must match 911 GT3 RS');
+    const triadPillCount = await cdp.evaluate("document.querySelectorAll('.triad-pill').length");
+    console.log(`[PASS] Found ${triadPillCount} Marco Perez Triad Pills`);
+    assert.equal(triadPillCount, 4, 'Must render 4 Marco Perez Triad Pills');
+    assert.equal(heroStageInfo.cardTheme, 'midnight-coral', 'Default theme must be midnight-coral');
+    assert.equal(heroStageInfo.watermark, 'ROMA V8', 'Watermark text must match ROMA V8');
 
-    // Test 1d: Click Ferrari Switcher (#switcher-ferrari)
-    await cdp.evaluate(`document.getElementById('switcher-ferrari').click();`);
+    // Test 1d: Click Raven & Poppy Triad Pill (.triad-pill[data-triad="raven-poppy"])
+    await cdp.evaluate(`document.querySelector('.triad-pill[data-triad="raven-poppy"]').click();`);
     await sleep(300);
 
-    const ferrariName = await cdp.evaluate(`document.getElementById('island-car-name')?.textContent.trim()`);
-    const ferrariHP = await cdp.evaluate(`document.getElementById('island-hp')?.textContent.trim()`);
-    const ferrariTheme = await cdp.evaluate(`document.getElementById('hero-stage-viewport')?.getAttribute('data-hero-theme')`);
-    const ferrariCardColor = await cdp.evaluate(`document.getElementById('hero-stage-card')?.getAttribute('data-color-theme')`);
-    const ferrariWatermark = await cdp.evaluate(`document.getElementById('hero-watermark')?.textContent.trim()`);
-    const ferrariAuraName = await cdp.evaluate(`document.getElementById('aura-car-name')?.textContent.trim()`);
+    const ravenName = await cdp.evaluate(`document.getElementById('island-car-name')?.textContent.trim()`);
+    const ravenHP = await cdp.evaluate(`document.getElementById('island-hp')?.textContent.trim()`);
+    const ravenTheme = await cdp.evaluate(`document.getElementById('hero-stage-viewport')?.getAttribute('data-hero-theme')`);
+    const ravenCardColor = await cdp.evaluate(`document.getElementById('hero-stage-card')?.getAttribute('data-color-theme')`);
+    const ravenWatermark = await cdp.evaluate(`document.getElementById('hero-watermark')?.textContent.trim()`);
 
-    console.log(`[PASS] Ferrari Switcher: theme="${ferrariTheme}", cardColor="${ferrariCardColor}", watermark="${ferrariWatermark}", aura="${ferrariAuraName}", hp="${ferrariHP}"`);
-    assert.equal(ferrariTheme, 'ferrari-roma-2023', 'Theme attribute must be ferrari-roma-2023');
-    assert.equal(ferrariCardColor, 'rosso', 'Card color theme must update to rosso');
-    assert.equal(ferrariWatermark, 'ROMA V8', 'Watermark text must update to ROMA V8');
-    assert.equal(ferrariAuraName, 'Rosso Corsa', 'Aura name must update to Rosso Corsa');
-    assert.ok(ferrariName.includes('2023 Ferrari Roma V8'), 'Dynamic Island name must update to 2023 Ferrari Roma V8');
-    assert.equal(ferrariHP, '612 HP', 'Dynamic Island HP must update to 612 HP');
+    console.log(`[PASS] Raven & Poppy: theme="${ravenTheme}", cardColor="${ravenCardColor}", watermark="${ravenWatermark}", hp="${ravenHP}"`);
+    assert.equal(ravenTheme, 'porsche-gt3-rs-2024', 'Theme attribute must be porsche-gt3-rs-2024');
+    assert.equal(ravenCardColor, 'raven-poppy', 'Card color theme must update to raven-poppy');
+    assert.equal(ravenWatermark, '911 GT3 RS', 'Watermark text must update to 911 GT3 RS');
+    assert.ok(ravenName.includes('Porsche 911 GT3 RS'), 'Dynamic Island name must update to Porsche 911 GT3 RS');
+    assert.equal(ravenHP, '518 HP', 'Dynamic Island HP must update to 518 HP');
 
-    // Capture proof: Hero 3D Stage with Ferrari Roma active & proof_hero_fullbleed_3d.png
+    // Capture proof: Hero 3D Stage with Porsche GT3 RS / Raven & Poppy active
     const hero3DProofPath = path.join(ARTIFACT_DIR, 'proof_dealership_hero_3d.png');
     await cdp.screenshot(hero3DProofPath);
     const fullbleedHeroProofPath = path.join(ARTIFACT_DIR, 'proof_hero_fullbleed_3d.png');
     await cdp.screenshot(fullbleedHeroProofPath);
 
-    // Test 1e: Click Mercedes-AMG Swatch Dot (.color-swatch-circle[data-car="mercedes-amg-g63-2024"])
-    await cdp.evaluate(`document.querySelector('.color-swatch-circle[data-car="mercedes-amg-g63-2024"]').click();`);
+    // Test 1e: Click Pine & Butter Triad Pill (.triad-pill[data-triad="pine-butter"])
+    await cdp.evaluate(`document.querySelector('.triad-pill[data-triad="pine-butter"]').click();`);
     await sleep(250);
-    const amgName = await cdp.evaluate(`document.getElementById('island-car-name')?.textContent.trim()`);
-    const amgHP = await cdp.evaluate(`document.getElementById('island-hp')?.textContent.trim()`);
-    const amgTheme = await cdp.evaluate(`document.getElementById('hero-stage-viewport')?.getAttribute('data-hero-theme')`);
-    const amgCardColor = await cdp.evaluate(`document.getElementById('hero-stage-card')?.getAttribute('data-color-theme')`);
-    const amgWatermark = await cdp.evaluate(`document.getElementById('hero-watermark')?.textContent.trim()`);
-    console.log(`[PASS] AMG Switcher via Swatch: theme="${amgTheme}", cardColor="${amgCardColor}", watermark="${amgWatermark}", hp="${amgHP}"`);
-    assert.equal(amgTheme, 'mercedes-amg-g63-2024', 'Theme attribute must be mercedes-amg-g63-2024');
-    assert.equal(amgCardColor, 'emerald', 'Card color theme must be emerald');
-    assert.equal(amgWatermark, 'AMG G63', 'Watermark text must update to AMG G63');
-    assert.ok(amgName.includes('Mercedes-AMG G63'), 'Dynamic Island name must update to Mercedes-AMG G63');
-    assert.equal(amgHP, '577 HP', 'Dynamic Island HP must update to 577 HP');
+    const pineName = await cdp.evaluate(`document.getElementById('island-car-name')?.textContent.trim()`);
+    const pineHP = await cdp.evaluate(`document.getElementById('island-hp')?.textContent.trim()`);
+    const pineTheme = await cdp.evaluate(`document.getElementById('hero-stage-viewport')?.getAttribute('data-hero-theme')`);
+    const pineCardColor = await cdp.evaluate(`document.getElementById('hero-stage-card')?.getAttribute('data-color-theme')`);
+    const pineWatermark = await cdp.evaluate(`document.getElementById('hero-watermark')?.textContent.trim()`);
+    console.log(`[PASS] Pine & Butter: theme="${pineTheme}", cardColor="${pineCardColor}", watermark="${pineWatermark}", hp="${pineHP}"`);
+    assert.equal(pineTheme, 'mercedes-amg-g63-2024', 'Theme attribute must be mercedes-amg-g63-2024');
+    assert.equal(pineCardColor, 'pine-butter', 'Card color theme must be pine-butter');
+    assert.equal(pineWatermark, 'AMG G63', 'Watermark text must update to AMG G63');
+    assert.ok(pineName.includes('Mercedes-AMG G63'), 'Dynamic Island name must update to Mercedes-AMG G63');
+    assert.equal(pineHP, '577 HP', 'Dynamic Island HP must update to 577 HP');
 
-    // Test 1f: Click Next Vehicle Teaser Card to advance to Audi RS6
+    // Test 1f: Click Obsidian & Gold Triad Pill (.triad-pill[data-triad="obsidian-gold"])
+    await cdp.evaluate(`document.querySelector('.triad-pill[data-triad="obsidian-gold"]').click();`);
+    await sleep(250);
+    const obsName = await cdp.evaluate(`document.getElementById('island-car-name')?.textContent.trim()`);
+    const obsHP = await cdp.evaluate(`document.getElementById('island-hp')?.textContent.trim()`);
+    const obsTheme = await cdp.evaluate(`document.getElementById('hero-stage-viewport')?.getAttribute('data-hero-theme')`);
+    const obsCardColor = await cdp.evaluate(`document.getElementById('hero-stage-card')?.getAttribute('data-color-theme')`);
+    const obsWatermark = await cdp.evaluate(`document.getElementById('hero-watermark')?.textContent.trim()`);
+    console.log(`[PASS] Obsidian & Gold: theme="${obsTheme}", cardColor="${obsCardColor}", watermark="${obsWatermark}", hp="${obsHP}"`);
+    assert.equal(obsTheme, 'audi-rs6-avant-2024', 'Theme attribute must be audi-rs6-avant-2024');
+    assert.equal(obsCardColor, 'obsidian-gold', 'Card color theme must be obsidian-gold');
+    assert.equal(obsWatermark, 'RS6 AVANT', 'Watermark text must update to RS6 AVANT');
+    assert.ok(obsName.includes('Audi RS6 Avant'), 'Dynamic Island name must update to Audi RS6 Avant');
+    assert.equal(obsHP, '621 HP', 'Dynamic Island HP must update to 621 HP');
+
+    // Test 1g: Click Next Vehicle Teaser Card to advance
     await cdp.evaluate(`document.getElementById('hero-next-vehicle-btn').click();`);
     await sleep(250);
-    const audiName = await cdp.evaluate(`document.getElementById('island-car-name')?.textContent.trim()`);
-    const audiHP = await cdp.evaluate(`document.getElementById('island-hp')?.textContent.trim()`);
-    const audiTheme = await cdp.evaluate(`document.getElementById('hero-stage-viewport')?.getAttribute('data-hero-theme')`);
-    const audiWatermark = await cdp.evaluate(`document.getElementById('hero-watermark')?.textContent.trim()`);
-    console.log(`[PASS] Next Vehicle teaser advance: theme="${audiTheme}", watermark="${audiWatermark}", hp="${audiHP}"`);
-    assert.equal(audiTheme, 'audi-rs6-avant-2024', 'Theme attribute must be audi-rs6-avant-2024');
-    assert.equal(audiWatermark, 'RS6 AVANT', 'Watermark text must update to RS6 AVANT');
-    assert.ok(audiName.includes('Audi RS6 Avant'), 'Dynamic Island name must update to Audi RS6 Avant');
-    assert.equal(audiHP, '621 HP', 'Dynamic Island HP must update to 621 HP');
+    const nextAdvName = await cdp.evaluate(`document.getElementById('island-car-name')?.textContent.trim()`);
+    const nextAdvWatermark = await cdp.evaluate(`document.getElementById('hero-watermark')?.textContent.trim()`);
+    console.log(`[PASS] Next Vehicle teaser advance: car="${nextAdvName}", watermark="${nextAdvWatermark}"`);
+    assert.ok(nextAdvName.includes('Porsche 911 GT3 RS'), 'Next Vehicle must advance to Porsche 911 GT3 RS');
+    assert.equal(nextAdvWatermark, '911 GT3 RS', 'Watermark text must update to 911 GT3 RS');
 
-    // Test 1g: Click Porsche Switcher (#switcher-porsche) to restore
-    await cdp.evaluate(`document.getElementById('switcher-porsche').click();`);
+    // Test 1h: Click Midnight & Coral Triad Pill (.triad-pill[data-triad="midnight-coral"]) to restore
+    await cdp.evaluate(`document.querySelector('.triad-pill[data-triad="midnight-coral"]').click();`);
     await sleep(250);
-    const porscheName = await cdp.evaluate(`document.getElementById('island-car-name')?.textContent.trim()`);
-    const porscheHP = await cdp.evaluate(`document.getElementById('island-hp')?.textContent.trim()`);
-    const porscheTheme = await cdp.evaluate(`document.getElementById('hero-stage-viewport')?.getAttribute('data-hero-theme')`);
-    const porscheWatermark = await cdp.evaluate(`document.getElementById('hero-watermark')?.textContent.trim()`);
-    console.log(`[PASS] Porsche Switcher restored: theme="${porscheTheme}", watermark="${porscheWatermark}", hp="${porscheHP}"`);
-    assert.equal(porscheTheme, 'porsche-gt3-rs-2024', 'Theme must restore to porsche-gt3-rs-2024');
-    assert.equal(porscheWatermark, '911 GT3 RS', 'Watermark must restore to 911 GT3 RS');
-    assert.ok(porscheName.includes('Porsche 911 GT3 RS'), 'Dynamic Island name must restore to Porsche 911 GT3 RS');
-    assert.equal(porscheHP, '518 HP', 'Dynamic Island HP must restore to 518 HP');
+    const coralName = await cdp.evaluate(`document.getElementById('island-car-name')?.textContent.trim()`);
+    const coralCardColor = await cdp.evaluate(`document.getElementById('hero-stage-card')?.getAttribute('data-color-theme')`);
+    const coralWatermark = await cdp.evaluate(`document.getElementById('hero-watermark')?.textContent.trim()`);
+    console.log(`[PASS] Restored Midnight & Coral: cardColor="${coralCardColor}", watermark="${coralWatermark}"`);
+    assert.equal(coralCardColor, 'midnight-coral', 'Card color theme must restore to midnight-coral');
+    assert.equal(coralWatermark, 'ROMA V8', 'Watermark must restore to ROMA V8');
+    assert.ok(coralName.includes('Ferrari Roma V8'), 'Dynamic Island name must restore to Ferrari Roma V8');
 
     // Test 1h: Multi-currency updates on #island-price
     // Test USD
