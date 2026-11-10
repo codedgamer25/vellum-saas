@@ -25,7 +25,10 @@
     },
     activeDetailVehicleId: null,
     editingVehicleId: null,
-    active3DCarId: 'porsche-gt3-rs-2024'
+    active3DCarId: 'porsche-gt3-rs-2024',
+    activeSpec: 'TRACK',
+    activeColorHex: '#6BA4D9',
+    heroViewer: null
   };
 
   // Toast Notification Helper (Sonner style)
@@ -183,208 +186,231 @@
     const makes = ['all', 'Porsche', 'Mercedes-Benz', 'BMW', 'Audi', 'Range Rover', 'Ferrari', 'Tesla', 'Aston Martin'];
 
     main.innerHTML = `
-      <!-- Full-Bleed 3D Hero Stage Viewport (Apple Keynote & Brune / WebLoved Aesthetic) -->
+      <!-- Hero Stage — Pinterest Inspired Luxury Rounded 3D Showroom Card -->
       <section class="hero-stage-viewport" id="hero-stage-viewport" data-hero-theme="${state.active3DCarId || 'porsche-gt3-rs-2024'}">
-        <!-- Colossal Typographic Background Watermark -->
-        <div class="hero-watermark-text" id="hero-watermark" aria-hidden="true">
-          911 GT3 RS
-        </div>
+        <div class="hero-stage-card" id="hero-stage-card" data-hero-theme="${state.active3DCarId || 'porsche-gt3-rs-2024'}" data-color-theme="glacier">
+          <!-- Colossal Typographic Background Watermark -->
+          <div class="hero-watermark-text" id="hero-watermark" aria-hidden="true">
+            911 GT3 RS
+          </div>
 
-        <!-- Full-Bleed 3D WebGL Canvas / Iframe with Studio Backdrop -->
-        <div class="hero-3d-fullbleed-wrapper">
-          <div class="hero-3d-poster-backdrop" id="hero-3d-poster" style="background-image: url('https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1600&q=80');"></div>
-          <iframe 
-            id="hero-3d-iframe" 
-            class="hero-3d-iframe"
-            title="3D Showroom Keynote Model"
-            src="https://sketchfab.com/models/456b3d9d60b646369d76667848d6d027/embed?autostart=1&camera=0&preload=1&ui_theme=dark&ui_infos=0&ui_controls=1&ui_stop=0"
-            frameborder="0"
-            allowfullscreen
-            mozallowfullscreen="true"
-            webkitallowfullscreen="true"
-            allow="autoplay; fullscreen; xr-spatial-tracking"
-            xr-spatial-tracking
-            execution-while-out-of-viewport
-            execution-while-not-rendered
-            web-share
-          ></iframe>
-        </div>
-
-        <!-- Seamless Vignette Edge Gradient Blend (no harsh iframe edges!) -->
-        <div class="hero-vignette-overlay" aria-hidden="true"></div>
-
-        <!-- Floating Apple Stage Overlay Container -->
-        <div class="hero-stage-overlay-container">
-          <!-- Top Bar: Live Status & Car Switcher & Immediate Delivery -->
-          <header class="hero-stage-top-bar">
-            <div class="hero-top-status-badge">
-              <span class="live-pulse-dot"></span>
-              <span>APEX PRIVATE SHOWROOM</span>
-              <span class="status-divider">•</span>
-              <span class="status-muted">2024 COLLECTION</span>
-            </div>
-
-            <!-- Apple Segmented Control Car Switcher -->
-            <div class="hero-car-switcher" id="hero-car-switcher" role="tablist" aria-label="3D Hero Car Switcher">
-              <button type="button" class="apple-switcher-btn active" id="switcher-porsche" data-car="porsche-gt3-rs-2024">
-                Porsche 911 GT3 RS
-              </button>
-              <button type="button" class="apple-switcher-btn" id="switcher-ferrari" data-car="ferrari-roma-2023">
-                Ferrari Roma V8
-              </button>
-              <button type="button" class="apple-switcher-btn" id="switcher-amg" data-car="mercedes-amg-g63-2024">
-                Mercedes-AMG G63
-              </button>
-              <button type="button" class="apple-switcher-btn" id="switcher-audi" data-car="audi-rs6-avant-2024">
-                Audi RS6 Avant
-              </button>
-            </div>
-
-            <div class="hero-top-delivery-badge">
-              <span>✦</span> AVAILABLE FOR IMMEDIATE DELIVERY
-            </div>
-          </header>
-
-          <!-- Mid Stage: Floating Editorial Info & Right Aura Selector / Teaser Card -->
-          <div class="hero-stage-content-row">
-            <div class="hero-stage-left-col">
-              <div class="hero-curated-pill">
-                <span>✦</span> CURATED HYPERCAR & LUXURY COLLECTION
-              </div>
-              <h1 class="hero-stage-title">
-                Acquire Automotive <span class="theme-accent-text" id="hero-accent-text">Excellence.</span>
-              </h1>
-              <p class="hero-stage-subtitle">
-                Direct access to authenticated, low-mileage exotic supercars and executive transport. Available for immediate private acquisition or worldwide white-glove transport.
-              </p>
-              <div class="hero-stage-actions">
-                <a 
-                  href="https://wa.me/15550192834?text=Hi%20Apex%20Auto%20Lounge%2C%20I%20am%20inquiring%20about%20the%202024%20Porsche%20911%20GT3%20RS%20featured%20on%20the%203D%20Showroom."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="hero-action-pill hero-action-whatsapp"
-                  id="hero-whatsapp-reserve"
-                >
-                  <span>💬</span> WhatsApp VIP Reservation
-                </a>
-                <button 
-                  type="button" 
-                  class="hero-action-pill hero-action-dossier" 
-                  id="hero-inspect-dossier"
-                  data-id="apex-car-01"
-                >
-                  <span>📄</span> Technical Dossier
-                </button>
-              </div>
-            </div>
-
-            <!-- Right Column: Interactive Aura Color Dots & Next Vehicle Teaser Card -->
-            <div class="hero-stage-right-col">
-              <!-- Select Aura Swatch Card -->
-              <div class="hero-aura-card">
-                <div class="aura-card-header">
-                  <span class="aura-label">SELECT AURA / MODEL</span>
-                  <span class="aura-car-name" id="aura-car-name">Arctic Gold</span>
-                </div>
-                <div class="aura-swatches-group" role="group" aria-label="Vehicle Aura Swatches">
-                  <button 
-                    type="button" 
-                    class="aura-swatch-dot active" 
-                    data-car="porsche-gt3-rs-2024" 
-                    data-aura="Arctic Gold"
-                    style="--swatch-color: #F59E0B;" 
-                    title="Porsche 911 GT3 RS (Arctic Gold)"
-                    aria-label="Porsche 911 GT3 RS"
-                  ></button>
-                  <button 
-                    type="button" 
-                    class="aura-swatch-dot" 
-                    data-car="ferrari-roma-2023" 
-                    data-aura="Rosso Corsa"
-                    style="--swatch-color: #EF4444;" 
-                    title="Ferrari Roma V8 (Rosso Corsa)"
-                    aria-label="Ferrari Roma V8"
-                  ></button>
-                  <button 
-                    type="button" 
-                    class="aura-swatch-dot" 
-                    data-car="mercedes-amg-g63-2024" 
-                    data-aura="Emerald Onyx"
-                    style="--swatch-color: #10B981;" 
-                    title="Mercedes-AMG G63 (Emerald Onyx)"
-                    aria-label="Mercedes-AMG G63"
-                  ></button>
-                  <button 
-                    type="button" 
-                    class="aura-swatch-dot" 
-                    data-car="audi-rs6-avant-2024" 
-                    data-aura="Nardo Cyan"
-                    style="--swatch-color: #06B6D4;" 
-                    title="Audi RS6 Avant (Nardo Cyan)"
-                    aria-label="Audi RS6 Avant"
-                  ></button>
-                </div>
-              </div>
-
-              <!-- Next Vehicle Teaser Card -->
-              <div class="hero-next-vehicle-card" id="hero-next-vehicle-btn" role="button" tabindex="0" title="Switch to Next Vehicle">
-                <div class="next-card-thumb-wrap">
-                  <img 
-                    id="next-vehicle-thumb"
-                    class="next-card-thumb" 
-                    src="https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=300&q=80" 
-                    alt="Next Vehicle" 
-                  />
-                </div>
-                <div class="next-card-meta">
-                  <span class="next-card-kicker">Next Vehicle →</span>
-                  <span class="next-card-name" id="next-vehicle-name">Ferrari Roma V8</span>
-                </div>
-              </div>
+          <!-- Local Three.js 3D Model Stage Canvas & Instant High-Res Visual Fallback -->
+          <div class="hero-3d-stage-viewport" id="hero-3d-stage-container">
+            <canvas id="hero-3d-canvas" class="hero-3d-canvas"></canvas>
+            <div class="hero-3d-instant-fallback" id="hero-3d-instant-fallback">
+              <img 
+                id="hero-3d-fallback-img" 
+                class="hero-3d-car-img" 
+                src="./models/ferrari_render.png" 
+                alt="Apex Auto Lounge Curated Hypercar" 
+                loading="eager"
+              />
             </div>
           </div>
 
-          <!-- Bottom Bar: Telemetry Dynamic Island, Gesture Prompt, Pagination, Scroll Cue -->
-          <footer class="hero-stage-bottom-bar">
-            <!-- Floating Apple Dynamic Island -->
-            <div class="hero-stage-bottom-island">
-              <div class="island-pill-left">
-                <span class="island-car-badge" id="island-car-name">2024 Porsche 911 GT3 RS</span>
-                <span class="island-divider"></span>
-                <div class="telemetry-metrics">
-                  <span class="metric-item"><strong id="island-hp">518 HP</strong></span>
-                  <span class="metric-item">0-60: <strong id="island-acceleration">3.0s</strong></span>
-                  <span class="metric-item">V-Max: <strong id="island-topspeed">184 MPH</strong></span>
+          <!-- Glassmorphic Card Foreground Overlay Content -->
+          <div class="hero-card-content">
+            <!-- Top Row: Badge & Segmented Car Switcher -->
+            <header class="hero-card-top-row">
+              <div class="hero-curated-badge">
+                <span>✦</span> 2024 CURATED HYPERCAR SERIES
+              </div>
+
+              <!-- Segmented Control Car Switcher -->
+              <div class="hero-car-switcher" id="hero-car-switcher" role="tablist" aria-label="3D Hero Car Switcher">
+                <button type="button" class="apple-switcher-btn active" id="switcher-porsche" data-car="porsche-gt3-rs-2024">
+                  Porsche 911 GT3 RS
+                </button>
+                <button type="button" class="apple-switcher-btn" id="switcher-ferrari" data-car="ferrari-roma-2023">
+                  Ferrari Roma V8
+                </button>
+                <button type="button" class="apple-switcher-btn" id="switcher-amg" data-car="mercedes-amg-g63-2024">
+                  Mercedes-AMG G63
+                </button>
+                <button type="button" class="apple-switcher-btn" id="switcher-audi" data-car="audi-rs6-avant-2024">
+                  Audi RS6 Avant
+                </button>
+              </div>
+
+              <div class="hero-top-delivery-badge" style="display: none;">
+                <span>✦</span> IMMEDIATE DELIVERY
+              </div>
+            </header>
+
+            <!-- Mid Row: Editorial Headline/CTA on Left, Spec/Color Selectors on Right -->
+            <div class="hero-card-middle">
+              <!-- Left Editorial Column -->
+              <div class="hero-left-editorial">
+                <h1 class="hero-headline">
+                  Designed for <br><span class="theme-accent-text" id="hero-accent-text">Velocity.</span>
+                </h1>
+                <p class="hero-editorial-desc">
+                  Direct access to authenticated, low-mileage exotic supercars and executive transport. Available for immediate private acquisition.
+                </p>
+                <div class="hero-cta-group">
+                  <a 
+                    href="https://wa.me/15550192834?text=Hi%20Apex%20Auto%20Lounge%2C%20I%20am%20inquiring%20about%20the%202024%20Porsche%20911%20GT3%20RS%20featured%20on%20the%203D%20Showroom."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn-hero-primary-pill hero-action-whatsapp"
+                    id="hero-whatsapp-reserve"
+                  >
+                    <span>💬</span> Reserve via WhatsApp
+                  </a>
+                  <button 
+                    type="button" 
+                    class="btn-hero-secondary-pill hero-action-dossier" 
+                    id="hero-inspect-dossier"
+                    data-id="apex-car-01"
+                  >
+                    <span>📄</span> Inspect Dossier
+                  </button>
+                </div>
+
+                <!-- Social Links at Bottom-Left (Instagram, TikTok, Facebook) -->
+                <div class="hero-social-links" aria-label="Social Channels">
+                  <a href="https://instagram.com/apexautolounge" target="_blank" rel="noopener noreferrer" class="hero-social-icon" title="Instagram @apexautolounge" aria-label="Instagram">
+                    <span>📷</span>
+                  </a>
+                  <a href="https://tiktok.com/@apexauto" target="_blank" rel="noopener noreferrer" class="hero-social-icon" title="TikTok @apexauto" aria-label="TikTok">
+                    <span>🎵</span>
+                  </a>
+                  <a href="https://facebook.com/apexautolounge" target="_blank" rel="noopener noreferrer" class="hero-social-icon" title="Facebook /apexautolounge" aria-label="Facebook">
+                    <span>🌐</span>
+                  </a>
                 </div>
               </div>
 
-              <!-- Model Pagination Dots -->
-              <div class="hero-model-pagination" role="group" aria-label="Model Pagination">
-                <button type="button" class="pagination-dot active" data-car="porsche-gt3-rs-2024" aria-label="Slide 1"></button>
-                <button type="button" class="pagination-dot" data-car="ferrari-roma-2023" aria-label="Slide 2"></button>
-                <button type="button" class="pagination-dot" data-car="mercedes-amg-g63-2024" aria-label="Slide 3"></button>
-                <button type="button" class="pagination-dot" data-car="audi-rs6-avant-2024" aria-label="Slide 4"></button>
-              </div>
+              <!-- Right Selectors Column (SELECT SPEC & SELECT COLOR & Next Vehicle) -->
+              <div class="hero-right-selectors">
+                <!-- Select Spec Block -->
+                <div class="selector-panel-block">
+                  <span class="selector-label">SELECT SPEC</span>
+                  <div class="spec-pills-row" role="radiogroup" aria-label="Select Specification">
+                    <button type="button" class="spec-pill-btn ${state.activeSpec === 'TRACK' ? 'active' : ''}" data-spec="TRACK">TRACK</button>
+                    <button type="button" class="spec-pill-btn ${state.activeSpec === 'SPORT' ? 'active' : ''}" data-spec="SPORT">SPORT</button>
+                    <button type="button" class="spec-pill-btn ${state.activeSpec === 'TOURING' ? 'active' : ''}" data-spec="TOURING">TOURING</button>
+                    <button type="button" class="spec-pill-btn ${state.activeSpec === 'BESPOKE' ? 'active' : ''}" data-spec="BESPOKE">BESPOKE</button>
+                  </div>
+                </div>
 
-              <div class="island-pill-right" id="island-price">
-                ${STORE.formatPrice(248000)}
+                <!-- Select Color Swatches Block -->
+                <div class="selector-panel-block">
+                  <div style="display: flex; justify-content: space-between; width: 100%; gap: 1rem;">
+                    <span class="selector-label">SELECT COLOR</span>
+                    <span class="aura-car-name" id="aura-car-name" style="font-family: var(--font-mono); font-size: 0.72rem; color: #FFFFFF; opacity: 0.85;">Glacier Cyan</span>
+                  </div>
+                  <div class="color-swatches-row" role="group" aria-label="Paint Color Swatches">
+                    <button 
+                      type="button" 
+                      class="color-swatch-circle aura-swatch-dot active" 
+                      data-car="porsche-gt3-rs-2024"
+                      data-theme="glacier" 
+                      data-color="#6BA4D9" 
+                      data-aura="Glacier Cyan"
+                      data-model="porsche"
+                      style="--swatch-color: #6BA4D9;" 
+                      title="Glacier Cyan"
+                      aria-label="Glacier Cyan"
+                    ></button>
+                    <button 
+                      type="button" 
+                      class="color-swatch-circle aura-swatch-dot" 
+                      data-car="ferrari-roma-2023"
+                      data-theme="rosso" 
+                      data-color="#E24738" 
+                      data-aura="Rosso Corsa"
+                      data-model="ferrari"
+                      style="--swatch-color: #E24738;" 
+                      title="Rosso Corsa Crimson"
+                      aria-label="Rosso Corsa Crimson"
+                    ></button>
+                    <button 
+                      type="button" 
+                      class="color-swatch-circle aura-swatch-dot" 
+                      data-car="mercedes-amg-g63-2024"
+                      data-theme="emerald" 
+                      data-color="#2A6844" 
+                      data-aura="Emerald Green"
+                      data-model="bmw"
+                      style="--swatch-color: #2A6844;" 
+                      title="Emerald Green"
+                      aria-label="Emerald Green"
+                    ></button>
+                    <button 
+                      type="button" 
+                      class="color-swatch-circle aura-swatch-dot" 
+                      data-car="audi-rs6-avant-2024"
+                      data-theme="amber" 
+                      data-color="#E67A2E" 
+                      data-aura="Sunset Amber"
+                      data-model="ferrari"
+                      style="--swatch-color: #E67A2E;" 
+                      title="Sunset Amber Gold"
+                      aria-label="Sunset Amber Gold"
+                    ></button>
+                  </div>
+                </div>
+
+                <!-- Next Vehicle Teaser Card -->
+                <div class="hero-next-vehicle-card" id="hero-next-vehicle-btn" role="button" tabindex="0" title="Switch to Next Vehicle">
+                  <div class="next-card-thumb-wrap">
+                    <img 
+                      id="next-vehicle-thumb"
+                      class="next-card-thumb" 
+                      src="https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=300&q=80" 
+                      alt="Next Vehicle" 
+                    />
+                  </div>
+                  <div class="next-card-meta">
+                    <span class="next-card-kicker">Next Vehicle →</span>
+                    <span class="next-card-name" id="next-vehicle-name">Ferrari Roma V8</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- Footer Meta Row: Gesture Prompt & Scroll Cue -->
-            <div class="hero-stage-footer-row">
-              <div class="hero-stage-prompt">
-                <span>🖱️ HOLD & DRAG TO ORBIT 360°</span>
-                <span class="prompt-sep">•</span>
-                <span>🔍 PINCH TO ZOOM</span>
+            <!-- Bottom Row: Dynamic Island Capsule, 4-Dot Pagination, Gesture Prompt -->
+            <footer class="hero-card-bottom-bar">
+              <div class="hero-stage-bottom-island">
+                <div class="island-pill-left">
+                  <span class="island-car-badge" id="island-car-name">2024 Porsche 911 GT3 RS</span>
+                  <span class="island-divider"></span>
+                  <div class="telemetry-metrics">
+                    <span class="metric-item"><strong id="island-hp">518 HP</strong></span>
+                    <span class="metric-item">0-60: <strong id="island-acceleration">3.0s</strong></span>
+                    <span class="metric-item">V-Max: <strong id="island-topspeed">184 MPH</strong></span>
+                  </div>
+                </div>
+
+                <!-- 4-Dot Pagination Indicator -->
+                <div class="hero-model-pagination" role="group" aria-label="Model Pagination">
+                  <button type="button" class="pagination-dot active" data-car="porsche-gt3-rs-2024" aria-label="Slide 1"></button>
+                  <button type="button" class="pagination-dot" data-car="ferrari-roma-2023" aria-label="Slide 2"></button>
+                  <button type="button" class="pagination-dot" data-car="mercedes-amg-g63-2024" aria-label="Slide 3"></button>
+                  <button type="button" class="pagination-dot" data-car="audi-rs6-avant-2024" aria-label="Slide 4"></button>
+                </div>
+
+                <div class="island-pill-right" id="island-price">
+                  ${STORE.formatPrice(248000)}
+                </div>
               </div>
 
-              <a href="#catalog" class="hero-stage-scroll-cue" id="hero-scroll-cue">
-                <span>EXPLORE SHOWROOM INVENTORY</span>
-                <span class="scroll-arrow">↓</span>
-              </a>
-            </div>
-          </footer>
+              <!-- Footer Prompt & Scroll Cue -->
+              <div class="hero-stage-footer-row">
+                <div class="hero-stage-prompt">
+                  <span>🖱️ HOLD & DRAG TO ORBIT 360°</span>
+                  <span class="prompt-sep">•</span>
+                  <span>🔍 PINCH TO ZOOM</span>
+                </div>
+
+                <a href="#catalog" class="hero-stage-scroll-cue" id="hero-scroll-cue">
+                  <span>EXPLORE SHOWROOM INVENTORY</span>
+                  <span class="scroll-arrow">↓</span>
+                </a>
+              </div>
+            </footer>
+          </div>
         </div>
       </section>
 
@@ -627,48 +653,70 @@
       });
     });
 
+    // Initialize Local Three.js 3D Viewer inside Hero Stage
+    function initHero3DViewer() {
+      const container = main.querySelector('#hero-3d-stage-container');
+      if (!container) return;
+
+      if (window.Apex3DViewer) {
+        if (state.heroViewer) {
+          try { state.heroViewer.destroy(); } catch (e) {}
+        }
+        state.heroViewer = new window.Apex3DViewer('hero-3d-stage-container', {
+          initialModel: 'ferrari',
+          initialColor: state.activeColorHex || '#6BA4D9',
+          autoRotate: true,
+          autoRotateSpeed: 0.8
+        });
+      }
+    }
+
     // Featured 3D Cars Metadata Mapping for Hero Stage Atmosphere
     const HERO_ATMOSPHERE_CONFIG = {
       'porsche-gt3-rs-2024': {
         watermark: '911 GT3 RS',
-        auraName: 'Arctic Gold',
-        accentColor: '#F59E0B',
+        auraName: 'Glacier Cyan',
+        accentColor: '#6BA4D9',
+        colorTheme: 'glacier',
+        modelKey: 'porsche',
         nextCarId: 'ferrari-roma-2023',
         nextCarName: 'Ferrari Roma V8',
-        nextCarThumb: 'https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=300&q=80',
-        posterImage: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1600&q=80'
+        nextCarThumb: 'https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=300&q=80'
       },
       'ferrari-roma-2023': {
         watermark: 'ROMA V8',
         auraName: 'Rosso Corsa',
-        accentColor: '#EF4444',
+        accentColor: '#E24738',
+        colorTheme: 'rosso',
+        modelKey: 'ferrari',
         nextCarId: 'mercedes-amg-g63-2024',
         nextCarName: 'Mercedes-AMG G63',
-        nextCarThumb: 'https://images.unsplash.com/photo-1520031441872-265e4ff70366?auto=format&fit=crop&w=300&q=80',
-        posterImage: 'https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&w=1600&q=80'
+        nextCarThumb: 'https://images.unsplash.com/photo-1520031441872-265e4ff70366?auto=format&fit=crop&w=300&q=80'
       },
       'mercedes-amg-g63-2024': {
         watermark: 'AMG G63',
-        auraName: 'Emerald Onyx',
-        accentColor: '#10B981',
+        auraName: 'Emerald Green',
+        accentColor: '#2A6844',
+        colorTheme: 'emerald',
+        modelKey: 'bmw',
         nextCarId: 'audi-rs6-avant-2024',
         nextCarName: 'Audi RS6 Avant',
-        nextCarThumb: 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=300&q=80',
-        posterImage: 'https://images.unsplash.com/photo-1520031441872-265e4ff70366?auto=format&fit=crop&w=1600&q=80'
+        nextCarThumb: 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=300&q=80'
       },
       'audi-rs6-avant-2024': {
         watermark: 'RS6 AVANT',
-        auraName: 'Nardo Cyan',
-        accentColor: '#06B6D4',
+        auraName: 'Sunset Amber',
+        accentColor: '#E67A2E',
+        colorTheme: 'amber',
+        modelKey: 'ferrari',
         nextCarId: 'porsche-gt3-rs-2024',
         nextCarName: 'Porsche 911 GT3 RS',
-        nextCarThumb: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=300&q=80',
-        posterImage: 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=1600&q=80'
+        nextCarThumb: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=300&q=80'
       }
     };
 
     // Wire Hero 3D Stage Keynote Controls
-    function updateHero3DStage(carId) {
+    function updateHero3DStage(carId, targetHex = null, targetTheme = null) {
       state.active3DCarId = carId;
       const car = STORE.getFeatured3DCar(carId);
       if (!car) return;
@@ -676,29 +724,33 @@
       const atmosphere = HERO_ATMOSPHERE_CONFIG[carId] || {
         watermark: car.model.toUpperCase(),
         auraName: 'Signature Aura',
-        accentColor: '#D4AF37',
+        accentColor: '#6BA4D9',
+        colorTheme: 'glacier',
+        modelKey: 'ferrari',
         nextCarId: 'porsche-gt3-rs-2024',
         nextCarName: 'Porsche 911 GT3 RS',
-        nextCarThumb: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=300&q=80',
-        posterImage: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1600&q=80'
+        nextCarThumb: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=300&q=80'
       };
 
-      // 1. Dynamic Atmosphere Theme Melt on Viewport Container
+      const appliedColor = targetHex || atmosphere.accentColor;
+      const appliedTheme = targetTheme || atmosphere.colorTheme;
+      state.activeColorHex = appliedColor;
+
+      // 1. Dynamic Atmosphere Theme & Background Gradient Melt on Card Container
       const heroViewport = main.querySelector('#hero-stage-viewport');
       if (heroViewport) {
         heroViewport.setAttribute('data-hero-theme', carId);
+      }
+      const heroCard = main.querySelector('#hero-stage-card');
+      if (heroCard) {
+        heroCard.setAttribute('data-hero-theme', carId);
+        heroCard.setAttribute('data-color-theme', appliedTheme);
       }
 
       // 2. Update Colossal Typographic Watermark
       const watermarkEl = main.querySelector('#hero-watermark');
       if (watermarkEl) {
         watermarkEl.textContent = atmosphere.watermark;
-      }
-
-      // 2b. Update Studio Poster Backdrop Image
-      const posterEl = main.querySelector('#hero-3d-poster');
-      if (posterEl && atmosphere.posterImage) {
-        posterEl.style.backgroundImage = `url('${atmosphere.posterImage}')`;
       }
 
       // 3. Update Apple Segmented Switcher Buttons
@@ -710,9 +762,9 @@
         }
       });
 
-      // 4. Update Aura Color Dots
-      main.querySelectorAll('.aura-swatch-dot').forEach((dot) => {
-        if (dot.getAttribute('data-car') === carId) {
+      // 4. Update Aura Color Dots / Swatches
+      main.querySelectorAll('.color-swatch-circle, .aura-swatch-dot').forEach((dot) => {
+        if (dot.getAttribute('data-car') === carId || dot.getAttribute('data-theme') === appliedTheme) {
           dot.classList.add('active');
         } else {
           dot.classList.remove('active');
@@ -748,16 +800,7 @@
         nextVehicleBtn.setAttribute('data-next-car', atmosphere.nextCarId);
       }
 
-      // 7. Update Iframe Embed URL
-      const iframe = main.querySelector('#hero-3d-iframe');
-      if (iframe) {
-        const targetSrc = `https://sketchfab.com/models/${car.sketchfabId}/embed?autostart=1&camera=0&preload=1&ui_theme=dark&ui_infos=0&ui_controls=1&ui_stop=0`;
-        if (iframe.getAttribute('src') !== targetSrc) {
-          iframe.setAttribute('src', targetSrc);
-        }
-      }
-
-      // 8. Update Dynamic Island Telemetry
+      // 7. Update Dynamic Island Telemetry
       const nameEl = main.querySelector('#island-car-name');
       if (nameEl) nameEl.textContent = `${car.year} ${car.make} ${car.model}`;
 
@@ -773,7 +816,7 @@
       const priceEl = main.querySelector('#island-price');
       if (priceEl) priceEl.textContent = STORE.formatPrice(car.priceUSD);
 
-      // 9. Update WhatsApp VIP Reservation Link
+      // 8. Update WhatsApp VIP Reservation Link
       const waBtn = main.querySelector('#hero-whatsapp-reserve');
       if (waBtn) {
         const encoded = encodeURIComponent(
@@ -782,7 +825,7 @@
         waBtn.setAttribute('href', `https://wa.me/15550192834?text=${encoded}`);
       }
 
-      // 10. Update Technical Dossier Button target vehicle ID
+      // 9. Update Technical Dossier Button target vehicle ID
       const dossierBtn = main.querySelector('#hero-inspect-dossier');
       if (dossierBtn) {
         const catalogVehicle = STORE.getVehicles().find(
@@ -790,6 +833,15 @@
         ) || STORE.getVehicles()[0];
         if (catalogVehicle) {
           dossierBtn.setAttribute('data-id', catalogVehicle.id);
+        }
+      }
+
+      // 10. Direct Local Three.js 3D Viewer Update (No iframe, No loading delay!)
+      if (state.heroViewer) {
+        if (state.heroViewer.currentModelKey !== atmosphere.modelKey) {
+          state.heroViewer.loadModel(atmosphere.modelKey, appliedColor);
+        } else {
+          state.heroViewer.changeCarColor(appliedColor);
         }
       }
     }
@@ -802,11 +854,23 @@
       });
     });
 
-    // Attach Aura Swatches Listeners
-    main.querySelectorAll('.aura-swatch-dot').forEach((dot) => {
+    // Attach Color Swatch Listeners (Instant Paint & Gradient Morph)
+    main.querySelectorAll('.color-swatch-circle, .aura-swatch-dot').forEach((dot) => {
       dot.addEventListener('click', (e) => {
-        const carId = e.currentTarget.getAttribute('data-car');
-        updateHero3DStage(carId);
+        const carId = e.currentTarget.getAttribute('data-car') || state.active3DCarId;
+        const color = e.currentTarget.getAttribute('data-color');
+        const theme = e.currentTarget.getAttribute('data-theme');
+        updateHero3DStage(carId, color, theme);
+      });
+    });
+
+    // Attach Spec Pill Buttons Listeners
+    main.querySelectorAll('.spec-pill-btn').forEach((pill) => {
+      pill.addEventListener('click', (e) => {
+        main.querySelectorAll('.spec-pill-btn').forEach((p) => p.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        state.activeSpec = e.currentTarget.getAttribute('data-spec');
+        showToast(`Spec switched to ${state.activeSpec}`, 'info');
       });
     });
 
@@ -843,7 +907,8 @@
       });
     }
 
-    // Sync active car state on render
+    // Initialize Local 3D Viewer & Synchronize Stage State
+    initHero3DViewer();
     if (state.active3DCarId) {
       updateHero3DStage(state.active3DCarId);
     }

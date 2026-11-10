@@ -15,7 +15,9 @@ const MIME_TYPES = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.png': 'image/png',
-  '.svg': 'image/svg+xml'
+  '.svg': 'image/svg+xml',
+  '.glb': 'model/gltf-binary',
+  '.wasm': 'application/wasm'
 };
 
 function startStaticServer() {
@@ -186,25 +188,32 @@ async function runDealershipTestSuite() {
     assert.ok(badge3DCount >= 4, 'Expected at least 4 cars with .badge-3d-showcase');
 
     // =========================================================================
-    // Stage 3 & 4: Full-Bleed 3D Hero Stage Viewport Tests
+    // Stage 3 & 4: Hero Stage Viewport & Local Three.js 3D Model Tests
     // =========================================================================
-    // Test 1c: Check #hero-stage-viewport is present, full-bleed and visible
+    // Test 1c: Check #hero-stage-viewport and #hero-3d-canvas are present and visible
     const heroStageInfo = await cdp.evaluate(`
       (() => {
         const stage = document.getElementById('hero-stage-viewport');
+        const card = document.getElementById('hero-stage-card');
+        const canvas = document.getElementById('hero-3d-canvas');
         if (!stage) return null;
         const rect = stage.getBoundingClientRect();
         return {
           width: rect.width,
           height: rect.height,
           theme: stage.getAttribute('data-hero-theme'),
-          watermark: document.getElementById('hero-watermark')?.textContent.trim()
+          cardTheme: card?.getAttribute('data-color-theme'),
+          watermark: document.getElementById('hero-watermark')?.textContent.trim(),
+          hasCanvas: !!canvas,
+          hasViewer: !!(window.Apex3DViewer)
         };
       })()
     `);
-    console.log(`[PASS] #hero-stage-viewport is present and visible:`, heroStageInfo);
+    console.log(`[PASS] #hero-stage-viewport & Three.js canvas present:`, heroStageInfo);
     assert.ok(heroStageInfo, '#hero-stage-viewport must be rendered');
-    assert.ok(heroStageInfo.height >= 500, '#hero-stage-viewport must have full-bleed height >= 500px');
+    assert.ok(heroStageInfo.height >= 500, '#hero-stage-viewport must have height >= 500px');
+    assert.ok(heroStageInfo.hasCanvas, '#hero-3d-canvas must be rendered');
+    assert.ok(heroStageInfo.hasViewer, 'window.Apex3DViewer must be exported');
     assert.equal(heroStageInfo.theme, 'porsche-gt3-rs-2024', 'Default theme must be porsche-gt3-rs-2024');
     assert.equal(heroStageInfo.watermark, '911 GT3 RS', 'Watermark text must match 911 GT3 RS');
 
@@ -214,18 +223,18 @@ async function runDealershipTestSuite() {
 
     const ferrariName = await cdp.evaluate(`document.getElementById('island-car-name')?.textContent.trim()`);
     const ferrariHP = await cdp.evaluate(`document.getElementById('island-hp')?.textContent.trim()`);
-    const ferrariIframeSrc = await cdp.evaluate(`document.getElementById('hero-3d-iframe')?.getAttribute('src') || ''`);
     const ferrariTheme = await cdp.evaluate(`document.getElementById('hero-stage-viewport')?.getAttribute('data-hero-theme')`);
+    const ferrariCardColor = await cdp.evaluate(`document.getElementById('hero-stage-card')?.getAttribute('data-color-theme')`);
     const ferrariWatermark = await cdp.evaluate(`document.getElementById('hero-watermark')?.textContent.trim()`);
     const ferrariAuraName = await cdp.evaluate(`document.getElementById('aura-car-name')?.textContent.trim()`);
 
-    console.log(`[PASS] Ferrari Switcher: theme="${ferrariTheme}", watermark="${ferrariWatermark}", aura="${ferrariAuraName}", hp="${ferrariHP}"`);
+    console.log(`[PASS] Ferrari Switcher: theme="${ferrariTheme}", cardColor="${ferrariCardColor}", watermark="${ferrariWatermark}", aura="${ferrariAuraName}", hp="${ferrariHP}"`);
     assert.equal(ferrariTheme, 'ferrari-roma-2023', 'Theme attribute must be ferrari-roma-2023');
+    assert.equal(ferrariCardColor, 'rosso', 'Card color theme must update to rosso');
     assert.equal(ferrariWatermark, 'ROMA V8', 'Watermark text must update to ROMA V8');
     assert.equal(ferrariAuraName, 'Rosso Corsa', 'Aura name must update to Rosso Corsa');
     assert.ok(ferrariName.includes('2023 Ferrari Roma V8'), 'Dynamic Island name must update to 2023 Ferrari Roma V8');
     assert.equal(ferrariHP, '612 HP', 'Dynamic Island HP must update to 612 HP');
-    assert.ok(ferrariIframeSrc.includes('fedadda2bb6c4bf481636121548c6a47'), 'Hero 3D iframe must contain Ferrari Sketchfab ID');
 
     // Capture proof: Hero 3D Stage with Ferrari Roma active & proof_hero_fullbleed_3d.png
     const hero3DProofPath = path.join(ARTIFACT_DIR, 'proof_dealership_hero_3d.png');
@@ -233,20 +242,20 @@ async function runDealershipTestSuite() {
     const fullbleedHeroProofPath = path.join(ARTIFACT_DIR, 'proof_hero_fullbleed_3d.png');
     await cdp.screenshot(fullbleedHeroProofPath);
 
-    // Test 1e: Click Mercedes-AMG Swatch Dot (.aura-swatch-dot[data-car="mercedes-amg-g63-2024"])
-    await cdp.evaluate(`document.querySelector('.aura-swatch-dot[data-car="mercedes-amg-g63-2024"]').click();`);
+    // Test 1e: Click Mercedes-AMG Swatch Dot (.color-swatch-circle[data-car="mercedes-amg-g63-2024"])
+    await cdp.evaluate(`document.querySelector('.color-swatch-circle[data-car="mercedes-amg-g63-2024"]').click();`);
     await sleep(250);
     const amgName = await cdp.evaluate(`document.getElementById('island-car-name')?.textContent.trim()`);
     const amgHP = await cdp.evaluate(`document.getElementById('island-hp')?.textContent.trim()`);
     const amgTheme = await cdp.evaluate(`document.getElementById('hero-stage-viewport')?.getAttribute('data-hero-theme')`);
+    const amgCardColor = await cdp.evaluate(`document.getElementById('hero-stage-card')?.getAttribute('data-color-theme')`);
     const amgWatermark = await cdp.evaluate(`document.getElementById('hero-watermark')?.textContent.trim()`);
-    const amgIframeSrc = await cdp.evaluate(`document.getElementById('hero-3d-iframe')?.getAttribute('src') || ''`);
-    console.log(`[PASS] AMG Switcher via Aura dot: theme="${amgTheme}", watermark="${amgWatermark}", hp="${amgHP}"`);
+    console.log(`[PASS] AMG Switcher via Swatch: theme="${amgTheme}", cardColor="${amgCardColor}", watermark="${amgWatermark}", hp="${amgHP}"`);
     assert.equal(amgTheme, 'mercedes-amg-g63-2024', 'Theme attribute must be mercedes-amg-g63-2024');
+    assert.equal(amgCardColor, 'emerald', 'Card color theme must be emerald');
     assert.equal(amgWatermark, 'AMG G63', 'Watermark text must update to AMG G63');
     assert.ok(amgName.includes('Mercedes-AMG G63'), 'Dynamic Island name must update to Mercedes-AMG G63');
     assert.equal(amgHP, '577 HP', 'Dynamic Island HP must update to 577 HP');
-    assert.ok(amgIframeSrc.includes('27ec2645ed95471395370a6650b38296'), 'Hero 3D iframe must contain AMG Sketchfab ID');
 
     // Test 1f: Click Next Vehicle Teaser Card to advance to Audi RS6
     await cdp.evaluate(`document.getElementById('hero-next-vehicle-btn').click();`);
@@ -255,13 +264,11 @@ async function runDealershipTestSuite() {
     const audiHP = await cdp.evaluate(`document.getElementById('island-hp')?.textContent.trim()`);
     const audiTheme = await cdp.evaluate(`document.getElementById('hero-stage-viewport')?.getAttribute('data-hero-theme')`);
     const audiWatermark = await cdp.evaluate(`document.getElementById('hero-watermark')?.textContent.trim()`);
-    const audiIframeSrc = await cdp.evaluate(`document.getElementById('hero-3d-iframe')?.getAttribute('src') || ''`);
     console.log(`[PASS] Next Vehicle teaser advance: theme="${audiTheme}", watermark="${audiWatermark}", hp="${audiHP}"`);
     assert.equal(audiTheme, 'audi-rs6-avant-2024', 'Theme attribute must be audi-rs6-avant-2024');
     assert.equal(audiWatermark, 'RS6 AVANT', 'Watermark text must update to RS6 AVANT');
     assert.ok(audiName.includes('Audi RS6 Avant'), 'Dynamic Island name must update to Audi RS6 Avant');
     assert.equal(audiHP, '621 HP', 'Dynamic Island HP must update to 621 HP');
-    assert.ok(audiIframeSrc.includes('b432bb3ad006442c88a915d6718dffef'), 'Hero 3D iframe must contain Audi Sketchfab ID');
 
     // Test 1g: Click Porsche Switcher (#switcher-porsche) to restore
     await cdp.evaluate(`document.getElementById('switcher-porsche').click();`);
@@ -481,7 +488,9 @@ async function runDealershipTestSuite() {
     await sleep(200);
 
     // Switch back to Public Catalog
+    console.log('About to click btn-admin-exit');
     await cdp.evaluate(`document.getElementById('btn-admin-exit').click();`);
+    console.log('Clicked btn-admin-exit');
     await sleep(250);
 
     // Test 10: Mobile Viewport 390x844 & Zero Horizontal Scroll
