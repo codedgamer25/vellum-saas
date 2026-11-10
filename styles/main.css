@@ -48,12 +48,19 @@
   --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
 
-  /* Motion & Easing Tokens */
+  /* Motion & Easing Tokens (Charles Liu 20-Rule Animation Constitution) */
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1); /* Rule 1: Ease-out for entrances */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-move: cubic-bezier(0.65, 0, 0.35, 1);    /* Rule 9: Ease-in-out for moves */
+  --ease-exit: cubic-bezier(0.25, 1, 0.5, 1);     /* Smooth deceleration on dismiss */
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  
+  --duration-dropdown: 200ms;  /* Rule 2: Dropdowns at 150-250ms */
+  --duration-entrance: 220ms;  /* Standard entrance */
+  --duration-exit: 176ms;      /* Rule 15: Make exits 20% shorter (220ms * 0.8) */
   --duration-fast: 160ms;
-  --duration-normal: 240ms;
-  --duration-slow: 420ms;
+  --duration-normal: 220ms;
+  --duration-slow: 400ms;
 
   /* Concentric Radii (Rule 14: Inner radius = outer - padding) */
   --radius-sm: 6px;
@@ -120,8 +127,36 @@ button {
   background: none;
 }
 
-button:active {
-  transform: scale(0.97);
+/* Rule 4: Scale to 0.97 on press & Rule 14: Don't tween while held */
+button:active,
+a:active,
+.btn-gold-primary:active,
+.btn-secondary:active,
+.btn-outline-pill:active,
+.currency-pill:active,
+.apple-switcher-btn:active,
+.triad-pill:active,
+.hero-arrow-btn:active,
+.btn-card-specs:active,
+.btn-card-whatsapp:active,
+.lifestyle-thumb-btn:active,
+.featured-arch-frame-btn:active,
+.car-card:active {
+  transform: scale(0.97) !important;
+  transition: transform 50ms linear !important;
+}
+
+/* Rule 13: No bounce on everyday UI - smooth architectural ease */
+button,
+a,
+.btn-gold-primary,
+.btn-secondary,
+.btn-outline-pill,
+.currency-pill,
+.car-card,
+.apple-switcher-btn,
+.triad-pill {
+  transition: transform 180ms var(--ease-entrance), background-color 160ms var(--ease-entrance), border-color 160ms var(--ease-entrance), color 160ms var(--ease-entrance);
 }
 
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
@@ -2189,21 +2224,33 @@ html.lenis body {
   color: #DC2626;
 }
 
-/* Modal Windows */
+/* Modal Windows (Rule 10: Start at 0.95, Rule 11/12: Trigger Anchoring, Rule 15: 20% Shorter Exits) */
 .modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(17, 17, 21, 0.55);
-  display: none;
+  background: rgba(17, 17, 21, 0.58);
+  display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
   overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--duration-entrance) var(--ease-entrance), visibility var(--duration-entrance);
 }
 
 .modal-overlay.is-active {
-  display: flex;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.modal-overlay.is-closing {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-exit) var(--ease-exit), visibility var(--duration-exit);
 }
 
 .modal-window {
@@ -2215,6 +2262,89 @@ html.lenis body {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-modal);
   padding: 2rem;
+  transform: scale(0.95) translate3d(0, 10px, 0); /* Rule 10: Start popovers at 0.95 */
+  opacity: 0;
+  transform-origin: center center;
+  transition: transform var(--duration-entrance) var(--ease-entrance), opacity var(--duration-entrance) var(--ease-entrance);
+}
+
+.modal-overlay.is-active .modal-window {
+  transform: scale(1) translate3d(0, 0, 0);
+  opacity: 1;
+}
+
+.modal-overlay.is-closing .modal-window {
+  transform: scale(0.95) translate3d(0, 6px, 0); /* Rule 12: Exit to the trigger */
+  opacity: 0;
+  transition: transform var(--duration-exit) var(--ease-exit), opacity var(--duration-exit) var(--ease-exit); /* Rule 15: 20% shorter */
+}
+
+/* Rule 5: Stretch moving knobs 12% */
+@keyframes knob-stretch-12 {
+  0% { transform: scale(0.97); }
+  45% { transform: scaleX(1.12) scaleY(0.94); }
+  100% { transform: scale(1); }
+}
+
+.currency-pill.active {
+  animation: knob-stretch-12 210ms var(--ease-entrance);
+}
+
+.triad-pill.active {
+  animation: knob-stretch-12 220ms var(--ease-entrance);
+}
+
+.gallery-nav-item.active {
+  animation: knob-stretch-12 220ms var(--ease-entrance);
+}
+
+/* Rule 8: Pulse to confirm success */
+@keyframes pulse-confirm {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.08); box-shadow: 0 0 0 5px rgba(17, 17, 21, 0.14); }
+  70% { transform: scale(0.98); }
+  100% { transform: scale(1); box-shadow: none; }
+}
+
+.pulse-confirmed {
+  animation: pulse-confirm 320ms var(--ease-entrance) !important;
+}
+
+.royal-toast .toast-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse-confirm 380ms var(--ease-entrance);
+}
+
+/* Rule 6: Stagger as details settle (Badge & Price trail by 50ms) */
+.car-card-badge {
+  animation: badge-trail-settle 240ms 45ms var(--ease-entrance) backwards;
+}
+
+.car-card-price-row {
+  animation: badge-trail-settle 260ms 65ms var(--ease-entrance) backwards;
+}
+
+@keyframes badge-trail-settle {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 7px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Rule 18: Crossfade icons + blur */
+@keyframes icon-crossfade-blur {
+  0% { opacity: 0; filter: blur(2px); transform: scale(0.96); }
+  100% { opacity: 1; filter: blur(0px); transform: scale(1); }
+}
+
+.icon-blur-crossfade {
+  animation: icon-crossfade-blur 160ms var(--ease-entrance);
 }
 
 .pin-modal-window {

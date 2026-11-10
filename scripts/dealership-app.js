@@ -229,7 +229,7 @@
           state.view = 'admin';
           renderApp();
         } else {
-          openPinModal();
+          openPinModal(modeBtn);
         }
       });
     }
@@ -403,12 +403,33 @@
     return filtered.map(buildCatalogCardHTML).join('');
   }
 
+  function triggerSuccessPulse(element) {
+    if (!element) return;
+    element.classList.remove('pulse-confirmed');
+    void element.offsetWidth;
+    element.classList.add('pulse-confirmed');
+    setTimeout(() => {
+      element.classList.remove('pulse-confirmed');
+    }, 340);
+  }
+
   function updateCatalogGridOnly() {
     const filtered = getFilteredVehicles();
     const grid = document.getElementById('car-catalog-grid');
     const countEl = document.getElementById('catalog-count');
     if (grid) {
       grid.innerHTML = buildCatalogCardsHTML(filtered);
+      // Rule 1: Ease-out for entrances & Rule 3: Stagger list rows by 30ms
+      if (window.gsap) {
+        const cards = grid.querySelectorAll('.car-card');
+        if (cards.length) {
+          window.gsap.fromTo(
+            cards,
+            { opacity: 0, y: 14, scale: 0.98 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.28, stagger: 0.030, ease: 'expo.out', clearProps: 'transform,opacity' }
+          );
+        }
+      }
     }
     if (countEl) {
       countEl.textContent = String(filtered.length);
@@ -421,6 +442,8 @@
       const isSelected = btn.getAttribute('data-currency') === newCurrency;
       btn.classList.toggle('active', isSelected);
       btn.setAttribute('aria-pressed', String(isSelected));
+      // Rule 8: Pulse to confirm success
+      if (isSelected) triggerSuccessPulse(btn);
     });
 
     // 2. Update catalog rate note
@@ -1019,7 +1042,7 @@
     });
 
     // Mode Toggle Button
-    main.querySelector('#btn-toggle-mode')?.addEventListener('click', () => {
+    main.querySelector('#btn-toggle-mode')?.addEventListener('click', (e) => {
       if (state.view === 'admin') {
         state.view = 'public';
         renderApp();
@@ -1027,7 +1050,7 @@
         state.view = 'admin';
         renderApp();
       } else {
-        openPinModal();
+        openPinModal(e.currentTarget);
       }
     });
 
@@ -1103,7 +1126,8 @@
 
     main.querySelector('#btn-lifestyle-acquire')?.addEventListener('click', (e) => {
       const id = e.currentTarget.getAttribute('data-id') || 'apex-car-06';
-      openVehicleModal(id, 'photo');
+      const cardOrBtn = main.querySelector('#lifestyle-arch-img') || e.currentTarget;
+      openVehicleModal(id, 'photo', cardOrBtn);
     });
 
     // Delegated Clicks on Main for Modal Openers and Empty Filter Reset
@@ -1111,14 +1135,15 @@
       const detailBtn = e.target.closest('.btn-open-detail');
       if (detailBtn) {
         const id = detailBtn.getAttribute('data-id');
-        if (id) openVehicleModal(id, 'photo');
+        const cardEl = detailBtn.closest('.car-card, .featured-arch-card') || detailBtn;
+        if (id) openVehicleModal(id, 'photo', cardEl);
         return;
       }
 
       const threeBtn = e.target.closest('.btn-open-3d');
       if (threeBtn) {
         const id = threeBtn.getAttribute('data-id');
-        if (id) openVehicleModal(id, '3d');
+        if (id) openVehicleModal(id, '3d', threeBtn);
         return;
       }
 
@@ -1129,7 +1154,7 @@
       }
     });
 
-    // Collapsible Bottom Dock Toggle
+    // Collapsible Bottom Dock Toggle (Rule 18: Crossfade icons + blur)
     main.querySelector('#btn-toggle-hero-dock')?.addEventListener('click', () => {
       state.isHudCollapsed = !state.isHudCollapsed;
       const dock = main.querySelector('#hero-bottom-dock');
@@ -1137,7 +1162,10 @@
       if (dock) dock.classList.toggle('is-collapsed', state.isHudCollapsed);
       if (btn) {
         btn.setAttribute('aria-expanded', String(!state.isHudCollapsed));
+        btn.classList.remove('icon-blur-crossfade');
+        void btn.offsetWidth;
         btn.textContent = state.isHudCollapsed ? '▴ Show 3D Controls & Finishes' : '▾ Hide Controls (Zen 3D View)';
+        btn.classList.add('icon-blur-crossfade');
       }
     });
 
@@ -1335,7 +1363,7 @@
       // Apply vehicle metadata & cached 3D model swap with turntable spin sweep
       applyHeroVehicleState(carId, targetHex, targetTheme, direction);
 
-      // Phase 2: At the fade-out trough (130ms), glide elements smoothly along the diagonal axis into target slots
+      // Phase 2: Overlap old & new states (Rule 16: crossfade overlap at 90ms)
       state.fadeOutTimerId = window.setTimeout(() => {
         state.fadeOutTimerId = null;
         main.classList.remove('is-vehicle-fade-out');
@@ -1351,51 +1379,66 @@
           const editorialNodes = main.querySelectorAll(
             '#hero-main-title, #hero-editorial-summary, .hero-carousel-arrows, .hero-explore-row'
           );
+          const bottomIsland = main.querySelector('#hero-stage-bottom-island');
 
           if (watermarkEl) {
             window.gsap.fromTo(
               watermarkEl,
-              { xPercent: -50 + dirSign * 7, opacity: 0.35, scale: 0.96 },
-              { xPercent: -50, opacity: 1, scale: 1, duration: 0.55, ease: 'expo.out', overwrite: 'auto' }
+              { xPercent: -50 + dirSign * 6, opacity: 0.35, scale: 0.96 },
+              { xPercent: -50, opacity: 1, scale: 1, duration: 0.52, ease: 'expo.out', overwrite: 'auto' }
             );
           }
+
+          // Rule 7: Arcs for object movement (Parabolic curved vehicular momentum with subtle upward arc apex)
           if (stageViewport) {
             window.gsap.fromTo(
               stageViewport,
-              { x: dirSign * 42, y: dirSign * 22, scale: 0.93 },
+              { x: dirSign * 46, y: -14, scale: 0.94 },
               { x: 0, y: 0, scale: 1, duration: 0.52, ease: 'expo.out', overwrite: 'auto', clearProps: 'transform' }
             );
           }
+
           if (flankPrev && flankNext) {
             window.gsap.fromTo(
               [flankPrev, flankNext],
-              { x: -dirSign * 34, y: -dirSign * 18, scale: 0.84, opacity: 0.38 },
+              { x: -dirSign * 38, y: 12, scale: 0.86, opacity: 0.45 },
               {
                 x: 0,
                 y: 0,
                 scale: 1,
                 opacity: 0.85,
-                duration: 0.56,
-                stagger: 0.05,
+                duration: 0.54,
+                stagger: 0.04,
                 ease: 'expo.out',
                 overwrite: 'auto',
                 clearProps: 'transform,opacity'
               }
             );
           }
+
+          // Rule 1: Ease-out for entrances & Rule 3: Stagger list rows/text by 35ms
           if (editorialNodes.length) {
             window.gsap.fromTo(
               editorialNodes,
-              { y: 18, opacity: 0.2 },
+              { y: 16, opacity: 0.2 },
               {
                 y: 0,
                 opacity: 1,
-                duration: 0.44,
-                stagger: 0.045,
+                duration: 0.42,
+                stagger: 0.035,
                 ease: 'power3.out',
                 overwrite: 'auto',
                 clearProps: 'transform,opacity'
               }
+            );
+          }
+
+          // Rule 6: Stagger as details settle (Telemetry bottom island trails by 50ms)
+          if (bottomIsland) {
+            window.gsap.fromTo(
+              bottomIsland,
+              { y: 12, opacity: 0.4 },
+              { y: 0, opacity: 1, duration: 0.44, delay: 0.05, ease: 'power3.out', overwrite: 'auto', clearProps: 'transform,opacity' }
             );
           }
         }
@@ -1405,8 +1448,8 @@
           state.fadeInCleanupTimerId = null;
           main.classList.remove('is-vehicle-cycling', 'is-vehicle-fade-in');
           main.setAttribute('data-transition-state', 'idle');
-        }, 280);
-      }, 130);
+        }, 260);
+      }, 95);
     }
 
     // Switcher & Triad Listeners
@@ -1475,12 +1518,16 @@
 
     // Circular Arrow Buttons & Flanking Blurred 3D Car Click Listeners
     main.querySelector('#hero-prev-vehicle-btn')?.addEventListener('click', (e) => {
-      const prevId = e.currentTarget.getAttribute('data-prev-car');
+      const btn = e.currentTarget;
+      rubberBandBounce(btn, -1); // Rule 19: Rubber band elastic feedback
+      const prevId = btn.getAttribute('data-prev-car');
       if (prevId) updateHero3DStage(prevId, null, null, { direction: 'prev' });
     });
 
     main.querySelector('#hero-next-vehicle-btn')?.addEventListener('click', (e) => {
-      const nextId = e.currentTarget.getAttribute('data-next-car');
+      const btn = e.currentTarget;
+      rubberBandBounce(btn, 1); // Rule 19: Rubber band elastic feedback
+      const nextId = btn.getAttribute('data-next-car');
       if (nextId) updateHero3DStage(nextId, null, null, { direction: 'next' });
     });
 
@@ -1496,7 +1543,7 @@
 
     main.querySelector('#hero-inspect-dossier')?.addEventListener('click', (e) => {
       const id = e.currentTarget.getAttribute('data-id') || 'apex-car-01';
-      openVehicleModal(id, '3d');
+      openVehicleModal(id, '3d', e.currentTarget);
     });
 
     // =========================================================================
@@ -1956,8 +2003,8 @@
       </section>
     `;
 
-    main.querySelector('#btn-admin-add-car')?.addEventListener('click', () => {
-      openAdminCarModal(null);
+    main.querySelector('#btn-admin-add-car')?.addEventListener('click', (e) => {
+      openAdminCarModal(null, e.currentTarget);
     });
 
     main.querySelector('#btn-admin-reset-demo')?.addEventListener('click', () => {
@@ -1987,7 +2034,7 @@
     main.querySelectorAll('.btn-admin-edit').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         const id = e.currentTarget.getAttribute('data-id');
-        openAdminCarModal(id);
+        openAdminCarModal(id, e.currentTarget);
       });
     });
 
@@ -2069,8 +2116,125 @@
     `;
   }
 
+  // =========================================================================
+  // Charles Liu 20-Rule Animation Engine: Modals, Stagger, Morph & Rubber-Band
+  // =========================================================================
+
+  // Rule 19: Rubber band bounce on limits / carousel buttons
+  function rubberBandBounce(element, direction = -1) {
+    if (!window.gsap || !element) return;
+    window.gsap.timeline()
+      .to(element, { x: direction * 10, scale: 0.95, duration: 0.08, ease: 'power2.out' })
+      .to(element, { x: 0, scale: 1, duration: 0.22, ease: 'elastic.out(1.2, 0.4)' });
+  }
+
+  // Rules 10, 11, 12, 15: Modal Entrance & Exit Choreography
+  function animateModalClose(overlay, onClosed) {
+    if (!overlay || !overlay.classList.contains('is-active')) return;
+    const modalWin = overlay.querySelector('.modal-window');
+    if (window.gsap && modalWin) {
+      window.gsap.to(modalWin, {
+        scale: 0.95, // Rule 10 & 12: Exit to trigger / scale down to 0.95
+        opacity: 0,
+        duration: 0.176, // Rule 15: Exits 20% shorter (220ms -> 176ms)
+        ease: 'power2.in',
+        onComplete: () => {
+          overlay.classList.remove('is-active');
+          window.gsap.set(modalWin, { clearProps: 'all' });
+          if (typeof onClosed === 'function') onClosed();
+        }
+      });
+      window.gsap.to(overlay, {
+        opacity: 0,
+        duration: 0.176,
+        ease: 'power2.in',
+        onComplete: () => {
+          window.gsap.set(overlay, { clearProps: 'opacity' });
+        }
+      });
+    } else {
+      overlay.classList.remove('is-active');
+      if (typeof onClosed === 'function') onClosed();
+    }
+  }
+
+  function setupModalAnchorAndEntrance(overlay, triggerEl) {
+    const modalWin = overlay.querySelector('.modal-window');
+    if (!modalWin) return;
+
+    if (triggerEl && typeof triggerEl.getBoundingClientRect === 'function') {
+      const rect = triggerEl.getBoundingClientRect();
+      const originX = `${Math.round(rect.left + rect.width / 2)}px`;
+      const originY = `${Math.round(rect.top + rect.height / 2)}px`;
+      modalWin.style.transformOrigin = `${originX} ${originY}`; // Rule 11 & 12
+    } else {
+      modalWin.style.transformOrigin = 'center center';
+    }
+
+    if (window.gsap) {
+      // Rule 1: Ease-out for entrances, Rule 10: Start popovers at 0.95
+      window.gsap.fromTo(
+        modalWin,
+        { scale: 0.95, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.22, ease: 'expo.out' }
+      );
+      window.gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.22, ease: 'expo.out' });
+    }
+  }
+
+  // Rule 20: Shared element morphing proxy (Reuse the same layoutId)
+  function runSharedElementMorph(triggerEl, targetImgEl) {
+    if (!window.gsap || !triggerEl || !targetImgEl) return;
+    const triggerImg = triggerEl.querySelector('img') || (triggerEl.tagName === 'IMG' ? triggerEl : null);
+    if (!triggerImg || typeof triggerImg.getBoundingClientRect !== 'function') return;
+
+    const startRect = triggerImg.getBoundingClientRect();
+    if (startRect.width <= 0 || startRect.height <= 0) return;
+
+    const imgSrc = triggerImg.getAttribute('src');
+    if (!imgSrc) return;
+
+    const proxy = document.createElement('div');
+    proxy.className = 'shared-element-proxy';
+    proxy.style.cssText = `
+      position: fixed;
+      top: ${startRect.top}px;
+      left: ${startRect.left}px;
+      width: ${startRect.width}px;
+      height: ${startRect.height}px;
+      background-image: url("${imgSrc}");
+      background-size: cover;
+      background-position: center;
+      border-radius: 1rem;
+      z-index: 10001;
+      pointer-events: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    `;
+    document.body.appendChild(proxy);
+
+    requestAnimationFrame(() => {
+      const destRect = targetImgEl.getBoundingClientRect();
+      if (destRect.width > 0 && destRect.height > 0) {
+        window.gsap.to(proxy, {
+          top: destRect.top,
+          left: destRect.left,
+          width: destRect.width,
+          height: destRect.height,
+          borderRadius: '1.25rem',
+          duration: 0.24,
+          ease: 'expo.out',
+          onComplete: () => {
+            if (proxy.parentNode) proxy.parentNode.removeChild(proxy);
+          }
+        });
+      } else {
+        if (proxy.parentNode) proxy.parentNode.removeChild(proxy);
+      }
+    });
+  }
+
   // Admin PIN Gate Modal
-  function openPinModal() {
+  function openPinModal(triggerEl = null) {
     let overlay = document.getElementById('pin-modal-overlay');
     if (!overlay) {
       overlay = document.createElement('div');
@@ -2100,7 +2264,11 @@
       document.body.appendChild(overlay);
 
       overlay.querySelector('#btn-close-pin-modal')?.addEventListener('click', () => {
-        overlay.classList.remove('is-active');
+        animateModalClose(overlay);
+      });
+
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) animateModalClose(overlay);
       });
 
       overlay.querySelector('#btn-submit-pin')?.addEventListener('click', verifyPin);
@@ -2112,6 +2280,7 @@
     const pinInput = overlay.querySelector('#admin-pin-input');
     if (pinInput) pinInput.value = '';
     overlay.classList.add('is-active');
+    setupModalAnchorAndEntrance(overlay, triggerEl);
     setTimeout(() => pinInput?.focus(), 120);
 
     function verifyPin() {
@@ -2119,9 +2288,10 @@
       if (pin === '2026') {
         state.isAdmin = true;
         state.view = 'admin';
-        overlay.classList.remove('is-active');
-        showToast('Showroom Owner Mode Authenticated', 'success');
-        renderApp();
+        animateModalClose(overlay, () => {
+          showToast('Showroom Owner Mode Authenticated', 'success');
+          renderApp();
+        });
       } else {
         showToast('Invalid passcode. Use demo PIN: 2026', 'error');
         if (pinInput) {
@@ -2133,7 +2303,7 @@
   }
 
   // Vehicle Detail Modal
-  function openVehicleModal(carId, defaultTab = 'photo') {
+  function openVehicleModal(carId, defaultTab = 'photo', triggerEl = null) {
     const car = STORE.getVehicle(carId);
     if (!car) return;
 
@@ -2314,12 +2484,44 @@
     `;
 
     overlay.classList.add('is-active');
+    setupModalAnchorAndEntrance(overlay, triggerEl);
 
-    overlay.querySelector('#btn-close-vehicle-modal')?.addEventListener('click', () => {
-      overlay.classList.remove('is-active');
-      const iframe = overlay.querySelector('.sketchfab-iframe');
-      if (iframe) iframe.src = 'about:blank';
-    });
+    // Rule 20: Shared element morph from trigger to modal main image
+    const mainImg = overlay.querySelector('#detail-main-display');
+    if (triggerEl && mainImg && !startWith3D) {
+      runSharedElementMorph(triggerEl, mainImg);
+    }
+
+    // Rule 3: Stagger spec cells by 30ms on modal reveal
+    if (window.gsap) {
+      window.gsap.fromTo(
+        overlay.querySelectorAll('.spec-cell'),
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.22, stagger: 0.03, ease: 'expo.out', delay: 0.08 }
+      );
+      // Rule 6: Detail settling - price trails by 50ms
+      const modalPrice = overlay.querySelector('.detail-car-price');
+      if (modalPrice) {
+        window.gsap.fromTo(
+          modalPrice,
+          { opacity: 0, x: 10 },
+          { opacity: 1, x: 0, duration: 0.22, ease: 'expo.out', delay: 0.05 }
+        );
+      }
+    }
+
+    // Dismissal handlers (Rule 15: 20% shorter exits)
+    function closeModal() {
+      animateModalClose(overlay, () => {
+        const iframe = overlay.querySelector('.sketchfab-iframe');
+        if (iframe) iframe.src = 'about:blank';
+      });
+    }
+
+    overlay.querySelector('#btn-close-vehicle-modal')?.addEventListener('click', closeModal);
+    overlay.onclick = (e) => {
+      if (e.target === overlay) closeModal();
+    };
 
     const tabPhoto = overlay.querySelector('#tab-media-photo');
     const tab3D = overlay.querySelector('#tab-media-3d');
@@ -2351,7 +2553,7 @@
   }
 
   // Admin Add / Edit Vehicle Modal
-  function openAdminCarModal(carId) {
+  function openAdminCarModal(carId, triggerEl = null) {
     const isEdit = Boolean(carId);
     const car = isEdit ? STORE.getVehicle(carId) : null;
 
@@ -2483,14 +2685,26 @@
     `;
 
     overlay.classList.add('is-active');
+    setupModalAnchorAndEntrance(overlay, triggerEl);
 
-    overlay.querySelector('#btn-close-admin-car-modal')?.addEventListener('click', () => {
-      overlay.classList.remove('is-active');
-    });
+    // Rule 3: Stagger form groups by 30ms on open
+    if (window.gsap) {
+      window.gsap.fromTo(
+        overlay.querySelectorAll('.form-group'),
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.22, stagger: 0.03, ease: 'expo.out', delay: 0.06 }
+      );
+    }
 
-    overlay.querySelector('#btn-cancel-admin-car')?.addEventListener('click', () => {
-      overlay.classList.remove('is-active');
-    });
+    function closeAdminModal() {
+      animateModalClose(overlay);
+    }
+
+    overlay.querySelector('#btn-close-admin-car-modal')?.addEventListener('click', closeAdminModal);
+    overlay.querySelector('#btn-cancel-admin-car')?.addEventListener('click', closeAdminModal);
+    overlay.onclick = (e) => {
+      if (e.target === overlay) closeAdminModal();
+    };
 
     const form = overlay.querySelector('#admin-car-form');
     form?.addEventListener('submit', (e) => {
@@ -2523,8 +2737,9 @@
         showToast(`Added ${payload.make} ${payload.model} to showroom`, 'success');
       }
 
-      overlay.classList.remove('is-active');
-      renderAdminView();
+      animateModalClose(overlay, () => {
+        renderAdminView();
+      });
     });
   }
 
