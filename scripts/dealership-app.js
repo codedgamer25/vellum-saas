@@ -245,11 +245,12 @@
       colorTheme: 'raven-poppy',
       triadId: 'raven-poppy',
       modelKey: 'porsche',
+      renderThumb: './models/render_porsche.png',
       prevCarId: 'audi-rs6-avant-2024',
       nextCarId: 'ferrari-roma-2023',
       nextCarName: 'Ferrari Roma V8',
-      nextCarThumb: STUDIO_IMAGES.ferrariRender,
-      flankHue: 'hue-rotate(210deg) saturate(1.3)'
+      nextCarThumb: './models/render_ferrari.png',
+      flankHue: 'saturate(1.08)'
     },
     'ferrari-roma-2023': {
       watermark: 'ROMA V8',
@@ -259,11 +260,12 @@
       colorTheme: 'midnight-coral',
       triadId: 'midnight-coral',
       modelKey: 'ferrari',
+      renderThumb: './models/render_ferrari.png',
       prevCarId: 'porsche-gt3-rs-2024',
       nextCarId: 'mercedes-amg-g63-2024',
       nextCarName: 'Mercedes-AMG G63',
-      nextCarThumb: STUDIO_IMAGES.ferrariRender,
-      flankHue: 'hue-rotate(0deg) saturate(1.1)'
+      nextCarThumb: './models/render_mercedes.png',
+      flankHue: 'saturate(1.08)'
     },
     'mercedes-amg-g63-2024': {
       watermark: 'AMG G63',
@@ -273,11 +275,12 @@
       colorTheme: 'pine-butter',
       triadId: 'pine-butter',
       modelKey: 'mercedes',
+      renderThumb: './models/render_mercedes.png',
       prevCarId: 'ferrari-roma-2023',
       nextCarId: 'audi-rs6-avant-2024',
       nextCarName: 'Audi RS6 Avant',
-      nextCarThumb: STUDIO_IMAGES.ferrariRender,
-      flankHue: 'hue-rotate(130deg) saturate(1.35)'
+      nextCarThumb: './models/render_audi.png',
+      flankHue: 'saturate(1.08)'
     },
     'audi-rs6-avant-2024': {
       watermark: 'RS6 AVANT',
@@ -287,11 +290,12 @@
       colorTheme: 'obsidian-gold',
       triadId: 'obsidian-gold',
       modelKey: 'audi',
+      renderThumb: './models/render_audi.png',
       prevCarId: 'mercedes-amg-g63-2024',
       nextCarId: 'porsche-gt3-rs-2024',
       nextCarName: 'Porsche 911 GT3 RS',
-      nextCarThumb: STUDIO_IMAGES.ferrariRender,
-      flankHue: 'hue-rotate(38deg) saturate(1.35)'
+      nextCarThumb: './models/render_porsche.png',
+      flankHue: 'saturate(1.08)'
     }
   };
 
@@ -316,12 +320,24 @@
     const activeLife = LIFESTYLE_GALLERY_ITEMS[state.activeLifestyleIdx] || LIFESTYLE_GALLERY_ITEMS[0];
     const lifestyleCar = STORE.getVehicle(activeLife.carId) || allVehicles[0];
 
-    // Curated 3 Flagships for the Arch-Framed "FEATURED COLLECTION" section
+    // Curated 3 Flagships for the Arch-Framed "FEATURED COLLECTION" section using high-resolution studio photographs
     const featuredArchCars = [
-      allVehicles.find((v) => v.id === 'apex-car-01') || allVehicles[0],
-      allVehicles.find((v) => v.id === 'apex-car-06') || allVehicles[1],
-      allVehicles.find((v) => v.id === 'apex-car-02') || allVehicles[2]
-    ].filter(Boolean);
+      {
+        car: allVehicles.find((v) => v.id === 'apex-car-01') || allVehicles[0],
+        archPhoto: STUDIO_IMAGES.porscheStudio,
+        displayTitle: 'PORSCHE 911 GT3 RS'
+      },
+      {
+        car: allVehicles.find((v) => v.id === 'apex-car-06') || allVehicles[1],
+        archPhoto: STUDIO_IMAGES.ferrariEditorial,
+        displayTitle: 'FERRARI ROMA V8'
+      },
+      {
+        car: allVehicles.find((v) => v.id === 'apex-car-02') || allVehicles[2],
+        archPhoto: STUDIO_IMAGES.mercedesStudio,
+        displayTitle: 'MERCEDES-AMG G63'
+      }
+    ].filter((item) => Boolean(item.car));
 
     main.innerHTML = `
       <!-- =====================================================================
@@ -347,10 +363,10 @@
             >
               <img
                 id="prev-vehicle-thumb"
-                src="./models/ferrari_render.png"
+                src="${prevAtm.renderThumb}"
                 alt="${prevCar.make} ${prevCar.model}"
                 class="hero-flank-car-img"
-                style="filter: blur(4.5px) ${prevAtm.flankHue};"
+                style="filter: blur(4px) ${prevAtm.flankHue};"
                 referrerPolicy="no-referrer"
               />
               <span class="hero-flank-shadow" aria-hidden="true"></span>
@@ -363,7 +379,7 @@
                 <img
                   id="hero-3d-fallback-img"
                   class="hero-3d-car-img"
-                  src="./models/ferrari_render.png"
+                  src="${currentAtmosphere.renderThumb}"
                   alt="${currentCar.make} ${currentCar.model} 3D Showcase"
                   loading="eager"
                   referrerPolicy="no-referrer"
@@ -382,10 +398,10 @@
             >
               <img
                 id="next-vehicle-thumb"
-                src="./models/ferrari_render.png"
+                src="${nextAtm.renderThumb}"
                 alt="${nextCar.make} ${nextCar.model}"
                 class="hero-flank-car-img"
-                style="filter: blur(4.5px) ${nextAtm.flankHue};"
+                style="filter: blur(4px) ${nextAtm.flankHue};"
                 referrerPolicy="no-referrer"
               />
               <span class="hero-flank-shadow" aria-hidden="true"></span>
@@ -395,29 +411,7 @@
 
           <!-- Foreground Editorial Overlay Content -->
           <div class="hero-card-content">
-            <!-- Top Row: Segmented Model Tabs -->
-            <div class="hero-card-top-row">
-              <div class="hero-edition-kicker" id="hero-edition-kicker">
-                01. ${currentCar.edition} · ${currentCar.engine}
-              </div>
-
-              <div class="hero-car-switcher" id="hero-car-switcher" role="tablist" aria-label="3D Hero Car Switcher">
-                <button type="button" class="apple-switcher-btn ${currentCar.id === 'porsche-gt3-rs-2024' ? 'active' : ''}" id="switcher-porsche" data-car="porsche-gt3-rs-2024">
-                  Porsche 911 GT3 RS
-                </button>
-                <button type="button" class="apple-switcher-btn ${currentCar.id === 'ferrari-roma-2023' ? 'active' : ''}" id="switcher-ferrari" data-car="ferrari-roma-2023">
-                  Ferrari Roma V8
-                </button>
-                <button type="button" class="apple-switcher-btn ${currentCar.id === 'mercedes-amg-g63-2024' ? 'active' : ''}" id="switcher-amg" data-car="mercedes-amg-g63-2024">
-                  Mercedes-AMG G63
-                </button>
-                <button type="button" class="apple-switcher-btn ${currentCar.id === 'audi-rs6-avant-2024' ? 'active' : ''}" id="switcher-audi" data-car="audi-rs6-avant-2024">
-                  Audi RS6 Avant
-                </button>
-              </div>
-            </div>
-
-            <!-- Middle Row: @uiuxzaid Left Bold Title, Copy, Circular Arrow Buttons & Explore Pill -->
+            <!-- Middle Row: Left Bold Title, Copy, Circular Arrow Buttons & Explore Pill -->
             <div class="hero-card-middle">
               <div class="hero-left-editorial">
                 <h1 class="hero-headline" id="hero-main-title">
@@ -603,17 +597,17 @@
            ===================================================================== -->
       <section class="featured-collection-section" id="featured-collection-section">
         <!-- Colossal Warm Peach/Sand Background Watermark -->
-        <div class="featured-collection-watermark" aria-hidden="true">FEATURE</div>
+        <div class="featured-collection-watermark" id="featured-watermark" aria-hidden="true">FEATURE</div>
 
         <div class="featured-collection-inner">
           <!-- Header Row: Left Thin Uppercase Title + Swirl, Right Description + Explore All Pill -->
           <div class="featured-collection-header">
             <div class="featured-header-left">
-              <h2 class="editorial-thin-heading">
+              <h2 class="editorial-thin-heading" id="featured-collection-heading">
                 FEATURED<br>COLLECTION
               </h2>
-              <svg class="editorial-swirl-svg" width="58" height="28" viewBox="0 0 58 28" fill="none" aria-hidden="true">
-                <path d="M2 22C14 6 28 26 36 14C42 5 30 2 27 11C24 20 42 22 55 8M55 8L47 7M55 8L53 16" stroke="#111115" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              <svg class="editorial-swirl-svg" width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+                <path d="M4 12C12 10 22 18 25 24C28 30 37 28 34 18C31 9 21 12 23 25C25 36 31 41 33 46M26 40L33 46L39 39" stroke="#111115" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
 
@@ -621,16 +615,16 @@
               <p class="editorial-body-copy">
                 Discover our curated range of exotic motorcars designed for ultimate aerodynamic poise, velocity, and bespoke grand touring elegance.
               </p>
-              <a href="#catalog" class="btn-outline-pill">Explore All</a>
+              <a href="#catalog" class="btn-outline-pill" id="btn-featured-explore-all">Explore All</a>
             </div>
           </div>
 
           <!-- 3-Column Stadium / Arch-Framed Collection Grid -->
-          <div class="featured-arch-grid">
+          <div class="featured-arch-grid" id="featured-arch-grid">
             ${featuredArchCars
               .map(
-                (car, idx) => `
-              <article class="featured-arch-card" data-id="${car.id}">
+                ({ car, archPhoto, displayTitle }, idx) => `
+              <article class="featured-arch-card ${idx === 1 ? 'is-center-arch' : ''}" data-id="${car.id}" data-arch-idx="${idx}">
                 <button
                   type="button"
                   class="featured-arch-frame-btn btn-open-detail"
@@ -639,16 +633,20 @@
                 >
                   <div class="featured-arch-capsule arch-tint-${idx + 1}">
                     <img
-                      src="${car.images && car.images[0] ? car.images[0] : STUDIO_IMAGES.porscheStudio}"
+                      src="${car.images && car.images[0] ? car.images[0] : archPhoto}"
                       alt="${car.year} ${car.make} ${car.model}"
                       class="featured-arch-img"
                       loading="lazy"
                       referrerPolicy="no-referrer"
                     />
+                    <span class="featured-arch-hover-pill" aria-hidden="true">Inspect Dossier ↗</span>
                   </div>
                 </button>
                 <div class="featured-arch-meta">
-                  <h3 class="featured-arch-title">${car.make} ${car.model}</h3>
+                  <div class="featured-arch-meta-top">
+                    <h3 class="featured-arch-title">${displayTitle}</h3>
+                    <span class="featured-arch-spec-tag">${car.horsepower} HP</span>
+                  </div>
                   <div class="featured-arch-price">Price : ${STORE.formatPrice(car.priceUSD)}</div>
                 </div>
               </article>
@@ -922,7 +920,7 @@
       }
     });
 
-    // Lifestyle Split Interactive Thumbnails & Acquire Button
+    // Lifestyle Split Interactive Thumbnails & Acquire Button (GSAP Crossfade + Scale Timeline)
     main.querySelectorAll('.lifestyle-thumb-btn').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         const idx = Number(e.currentTarget.getAttribute('data-lifestyle-idx') || 0);
@@ -935,38 +933,60 @@
 
         const mainCapsule = main.querySelector('.lifestyle-main-capsule');
         const circleInset = main.querySelector('.lifestyle-circle-inset');
+        const mainImg = main.querySelector('#lifestyle-main-img');
+        const insetImg = main.querySelector('#lifestyle-inset-img');
+        const capEl = main.querySelector('#lifestyle-caption-text');
         const priceEl = main.querySelector('#lifestyle-price');
+        const acqBtn = main.querySelector('#btn-lifestyle-acquire');
 
-        if (mainCapsule) mainCapsule.classList.add('is-swapping');
-        if (circleInset) circleInset.classList.add('is-swapping');
-        if (priceEl) priceEl.classList.add('is-swapping');
-
-        window.setTimeout(() => {
-          const mainImg = main.querySelector('#lifestyle-main-img');
+        const swapContent = () => {
           if (mainImg) {
             mainImg.src = item.main;
             mainImg.alt = item.caption;
           }
-          const insetImg = main.querySelector('#lifestyle-inset-img');
           if (insetImg) {
             insetImg.src = item.inset;
           }
-          const capEl = main.querySelector('#lifestyle-caption-text');
           if (capEl) {
             capEl.textContent = item.caption;
           }
           if (priceEl && car) {
             priceEl.textContent = STORE.formatPrice(car.priceUSD);
           }
-          const acqBtn = main.querySelector('#btn-lifestyle-acquire');
           if (acqBtn && car) {
             acqBtn.setAttribute('data-id', car.id);
           }
+        };
 
-          if (mainCapsule) mainCapsule.classList.remove('is-swapping');
-          if (circleInset) circleInset.classList.remove('is-swapping');
-          if (priceEl) priceEl.classList.remove('is-swapping');
-        }, 120);
+        if (window.gsap) {
+          const tl = window.gsap.timeline();
+          tl.to([mainCapsule, circleInset, priceEl].filter(Boolean), {
+            opacity: 0.25,
+            scale: 0.96,
+            y: 6,
+            duration: 0.14,
+            ease: 'power2.in',
+            onComplete: swapContent
+          }).to([mainCapsule, circleInset, priceEl].filter(Boolean), {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.38,
+            stagger: 0.04,
+            ease: 'expo.out',
+            clearProps: 'scale'
+          });
+        } else {
+          if (mainCapsule) mainCapsule.classList.add('is-swapping');
+          if (circleInset) circleInset.classList.add('is-swapping');
+          if (priceEl) priceEl.classList.add('is-swapping');
+          window.setTimeout(() => {
+            swapContent();
+            if (mainCapsule) mainCapsule.classList.remove('is-swapping');
+            if (circleInset) circleInset.classList.remove('is-swapping');
+            if (priceEl) priceEl.classList.remove('is-swapping');
+          }, 120);
+        }
       });
     });
 
@@ -1051,9 +1071,6 @@
       const accentTextEl = main.querySelector('#hero-accent-text');
       if (accentTextEl) accentTextEl.textContent = atmosphere.heroHeadline;
 
-      const kickerEl = main.querySelector('#hero-edition-kicker');
-      if (kickerEl) kickerEl.textContent = `01. ${car.edition} · ${car.engine}`;
-
       const summaryEl = main.querySelector('#hero-editorial-summary');
       if (summaryEl && car.summary) summaryEl.textContent = car.summary;
 
@@ -1092,7 +1109,9 @@
       }
       const prevThumb = main.querySelector('#prev-vehicle-thumb');
       if (prevThumb) {
-        prevThumb.style.filter = `blur(4.5px) ${prevAtmObj.flankHue}`;
+        prevThumb.setAttribute('src', prevAtmObj.renderThumb);
+        prevThumb.setAttribute('alt', `${prevCarObj.make} ${prevCarObj.model}`);
+        prevThumb.style.filter = `blur(4px) ${prevAtmObj.flankHue}`;
       }
 
       const flankNextBtn = main.querySelector('#hero-flank-next-btn');
@@ -1102,9 +1121,9 @@
       }
       const nextThumb = main.querySelector('#next-vehicle-thumb');
       if (nextThumb) {
-        nextThumb.setAttribute('src', atmosphere.nextCarThumb);
+        nextThumb.setAttribute('src', nextAtmObj.renderThumb);
         nextThumb.setAttribute('alt', atmosphere.nextCarName);
-        nextThumb.style.filter = `blur(4.5px) ${nextAtmObj.flankHue}`;
+        nextThumb.style.filter = `blur(4px) ${nextAtmObj.flankHue}`;
       }
       const nextCardName = main.querySelector('#next-vehicle-name');
       if (nextCardName) {
@@ -1204,6 +1223,64 @@
         main.classList.add('is-vehicle-fade-in');
         main.setAttribute('data-transition-state', 'fade-in');
 
+        if (window.gsap) {
+          const dirSign = direction === 'prev' ? -1 : 1;
+          const watermarkEl = main.querySelector('#hero-watermark');
+          const stageViewport = main.querySelector('#hero-3d-stage-container');
+          const flankPrev = main.querySelector('#hero-flank-prev-btn');
+          const flankNext = main.querySelector('#hero-flank-next-btn');
+          const editorialNodes = main.querySelectorAll(
+            '#hero-main-title, #hero-editorial-summary, .hero-carousel-arrows, .hero-explore-row'
+          );
+
+          if (watermarkEl) {
+            window.gsap.fromTo(
+              watermarkEl,
+              { xPercent: -50 + dirSign * 7, opacity: 0.35, scale: 0.96 },
+              { xPercent: -50, opacity: 1, scale: 1, duration: 0.55, ease: 'expo.out', overwrite: 'auto' }
+            );
+          }
+          if (stageViewport) {
+            window.gsap.fromTo(
+              stageViewport,
+              { x: dirSign * 42, y: dirSign * 22, scale: 0.93 },
+              { x: 0, y: 0, scale: 1, duration: 0.52, ease: 'expo.out', overwrite: 'auto', clearProps: 'transform' }
+            );
+          }
+          if (flankPrev && flankNext) {
+            window.gsap.fromTo(
+              [flankPrev, flankNext],
+              { x: -dirSign * 34, y: -dirSign * 18, scale: 0.84, opacity: 0.38 },
+              {
+                x: 0,
+                y: 0,
+                scale: 1,
+                opacity: 0.85,
+                duration: 0.56,
+                stagger: 0.05,
+                ease: 'expo.out',
+                overwrite: 'auto',
+                clearProps: 'transform,opacity'
+              }
+            );
+          }
+          if (editorialNodes.length) {
+            window.gsap.fromTo(
+              editorialNodes,
+              { y: 18, opacity: 0.2 },
+              {
+                y: 0,
+                opacity: 1,
+                duration: 0.44,
+                stagger: 0.045,
+                ease: 'power3.out',
+                overwrite: 'auto',
+                clearProps: 'transform,opacity'
+              }
+            );
+          }
+        }
+
         // Phase 3: Release temporary GPU layer promotion once fade-in settles
         state.fadeInCleanupTimerId = window.setTimeout(() => {
           state.fadeInCleanupTimerId = null;
@@ -1242,6 +1319,14 @@
         const heroCard = main.querySelector('#hero-stage-card');
         if (heroCard && triadId) {
           heroCard.setAttribute('data-color-theme', triadId);
+        }
+
+        if (window.gsap) {
+          window.gsap.fromTo(
+            e.currentTarget,
+            { scale: 0.86 },
+            { scale: 1.12, duration: 0.32, ease: 'back.out(2)', overwrite: 'auto' }
+          );
         }
 
         // Repaint the currently active 3D vehicle in-place without switching vehicles
@@ -1284,8 +1369,10 @@
       openVehicleModal(id, '3d');
     });
 
-    // Scroll-Triggered Editorial Reveal Choreography (@uiuxzaid Video Sections 2, 3, 4 & Footer)
-    function initEditorialScrollAnimations() {
+    // =========================================================================
+    // GSAP + ScrollTrigger + Lenis Inertial Smooth Scroll & @uiuxzaid Video Choreography
+    // =========================================================================
+    function initLenisAndGsapChoreography() {
       const revealTargets = [
         ...main.querySelectorAll(
           '.editorial-lifestyle-section, .featured-collection-section, .catalog-filter-wrapper, .car-card'
@@ -1297,56 +1384,379 @@
         typeof window.matchMedia === 'function' &&
         window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      if (prefersReducedMotion || typeof IntersectionObserver === 'undefined') {
+      if (prefersReducedMotion) {
         revealTargets.forEach((el) => el.classList.add('is-in-view'));
         return;
       }
 
+      const gsap = window.gsap;
+      const ScrollTrigger = window.ScrollTrigger;
+
+      if (gsap && ScrollTrigger && !state.hasRegisteredScrollTrigger) {
+        gsap.registerPlugin(ScrollTrigger);
+        state.hasRegisteredScrollTrigger = true;
+      }
+
+      // Initialize Lenis Smooth Inertial Scroll Singleton synced with GSAP Ticker & ScrollTrigger
+      if (typeof window.Lenis === 'function' && !state.lenis) {
+        try {
+          state.lenis = new window.Lenis({
+            lerp: 0.09,
+            smoothWheel: true,
+            wheelMultiplier: 0.95,
+            touchMultiplier: 1.0
+          });
+
+          if (ScrollTrigger) {
+            state.lenis.on('scroll', ScrollTrigger.update);
+          }
+
+          if (gsap && gsap.ticker) {
+            gsap.ticker.add((time) => {
+              state.lenis.raf(time * 1000);
+            });
+            gsap.ticker.lagSmoothing(0);
+          } else {
+            const rafLoop = (time) => {
+              state.lenis.raf(time);
+              requestAnimationFrame(rafLoop);
+            };
+            requestAnimationFrame(rafLoop);
+          }
+        } catch (err) {
+          console.warn('Lenis initialization fallback:', err);
+        }
+      }
+
+      window.ApexMotion = {
+        lenis: state.lenis || null,
+        gsap: gsap || null,
+        ScrollTrigger: ScrollTrigger || null
+      };
+
+      // Smooth Anchor Navigation via Lenis
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        if (anchor.dataset.lenisBound === 'true') return;
+        anchor.dataset.lenisBound = 'true';
+        anchor.addEventListener('click', (ev) => {
+          const href = anchor.getAttribute('href');
+          if (!href || href === '#') return;
+          const targetEl = document.querySelector(href);
+          if (targetEl && state.lenis) {
+            ev.preventDefault();
+            state.lenis.scrollTo(targetEl, { offset: -24, duration: 1.15 });
+          }
+        });
+      });
+
+      // Fallback IntersectionObserver so .is-in-view class is always kept in sync
       if (state.editorialScrollObserver) {
         state.editorialScrollObserver.disconnect();
       }
+      if (typeof IntersectionObserver !== 'undefined') {
+        state.editorialScrollObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-in-view');
+              }
+            });
+          },
+          { threshold: 0.1, rootMargin: '0px 0px -30px 0px' }
+        );
+        revealTargets.forEach((el) => {
+          const rect = el.getBoundingClientRect();
+          if (rect.top < window.innerHeight * 0.94) {
+            el.classList.add('is-in-view');
+          }
+          state.editorialScrollObserver.observe(el);
+        });
+      } else {
+        revealTargets.forEach((el) => el.classList.add('is-in-view'));
+      }
 
-      state.editorialScrollObserver = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('is-in-view');
+      if (!gsap || !ScrollTrigger) return;
+
+      // Clean up any previous ScrollTriggers created on earlier public view re-renders
+      if (Array.isArray(state.gsapTriggers)) {
+        state.gsapTriggers.forEach((st) => {
+          try {
+            st.kill();
+          } catch (e) {}
+        });
+      }
+      state.gsapTriggers = [];
+
+      // 1. Hero Watermark Horizontal Scroll Parallax Scrub
+      const heroWatermark = main.querySelector('#hero-watermark');
+      const heroSection = main.querySelector('#hero-stage-viewport');
+      if (heroWatermark && heroSection) {
+        const stHero = ScrollTrigger.create({
+          trigger: heroSection,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 0.6,
+          onUpdate: (self) => {
+            heroWatermark.style.setProperty('--watermark-scroll-x', `${(self.progress * -95).toFixed(1)}px`);
+          }
+        });
+        state.gsapTriggers.push(stHero);
+      }
+
+      // 2. Section 2 ("MORE THAN ENGINEERING, IT'S A LIFESTYLE") GSAP ScrollTrigger Choreography
+      const lifestyleSec = main.querySelector('#lifestyle-section');
+      if (lifestyleSec) {
+        const lifeLeftItems = lifestyleSec.querySelectorAll(
+          '.editorial-thin-heading, .editorial-body-copy, .lifestyle-price-cta-row, .lifestyle-thumbs-row'
+        );
+        const lifeCapsule = lifestyleSec.querySelector('.lifestyle-main-capsule');
+        const lifeCapsuleImg = lifestyleSec.querySelector('.lifestyle-main-photo');
+        const lifeCircle = lifestyleSec.querySelector('.lifestyle-circle-inset');
+
+        const lifeTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: lifestyleSec,
+            start: 'top 82%',
+            toggleActions: 'play none none none',
+            onEnter: () => lifestyleSec.classList.add('is-in-view')
+          }
+        });
+
+        lifeTl
+          .fromTo(
+            lifeLeftItems,
+            { y: 36, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.78, stagger: 0.09, ease: 'power3.out', clearProps: 'transform,opacity' },
+            0
+          )
+          .fromTo(
+            lifeCapsule,
+            {
+              y: 52,
+              opacity: 0,
+              scale: 0.93,
+              clipPath: 'inset(32% 0% 0% 0% round 999px)'
+            },
+            {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              clipPath: 'inset(0% 0% 0% 0% round 999px)',
+              duration: 1.0,
+              ease: 'expo.out',
+              clearProps: 'clipPath,transform,opacity'
+            },
+            0.08
+          )
+          .fromTo(
+            lifeCapsuleImg,
+            { scale: 1.22, yPercent: 8 },
+            { scale: 1, yPercent: 0, duration: 1.15, ease: 'expo.out', clearProps: 'transform' },
+            0.08
+          )
+          .fromTo(
+            lifeCircle,
+            { x: -34, scale: 0.68, rotation: -10, opacity: 0 },
+            {
+              x: 0,
+              scale: 1,
+              rotation: 0,
+              opacity: 1,
+              duration: 0.85,
+              ease: 'back.out(1.7)',
+              clearProps: 'x,scale,rotation,opacity'
+            },
+            0.24
+          );
+
+        if (lifeTl.scrollTrigger) state.gsapTriggers.push(lifeTl.scrollTrigger);
+      }
+
+      // 3. Section 3 ("FEATURED COLLECTION") — Exact @uiuxzaid Video Reveal & Arch Unmask Wave
+      const featuredSec = main.querySelector('#featured-collection-section');
+      if (featuredSec) {
+        const featWatermark = featuredSec.querySelector('#featured-watermark');
+        const featHeading = featuredSec.querySelector('.featured-header-left');
+        const featSwirlPath = featuredSec.querySelector('.editorial-swirl-svg path');
+        const featRight = featuredSec.querySelector('.featured-header-right');
+        const archCards = Array.from(featuredSec.querySelectorAll('.featured-arch-card'));
+        const archCapsules = archCards.map((c) => c.querySelector('.featured-arch-capsule')).filter(Boolean);
+        const archImgs = archCards.map((c) => c.querySelector('.featured-arch-img')).filter(Boolean);
+        const archMetas = archCards.map((c) => c.querySelector('.featured-arch-meta')).filter(Boolean);
+
+        // Colossal Warm "FEATURE" Watermark Horizontal Scrub + Differential Arch Scroll Parallax
+        const stFeatureScrub = ScrollTrigger.create({
+          trigger: featuredSec,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 0.65,
+          onUpdate: (self) => {
+            if (featWatermark) {
+              const shift = (0.5 - self.progress) * 145;
+              featWatermark.style.setProperty('--feature-scroll-x', `${shift.toFixed(1)}px`);
+            }
+            // Subtle differential vertical parallax on the center vs outer arches during Lenis scroll
+            const centerLift = (0.5 - self.progress) * 22;
+            archCards.forEach((card, i) => {
+              const offset = i === 1 ? -centerLift : centerLift * 0.45;
+              card.style.setProperty('--arch-scroll-y', `${offset.toFixed(1)}px`);
+            });
+          }
+        });
+        state.gsapTriggers.push(stFeatureScrub);
+
+        // Main Featured Collection Entrance Timeline (Header + Swirl Draw + 3 Stadium Arch Unmask Wave)
+        const featTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: featuredSec,
+            start: 'top 80%',
+            toggleActions: 'play none none none',
+            onEnter: () => featuredSec.classList.add('is-in-view')
+          }
+        });
+
+        featTl
+          .fromTo(
+            featHeading,
+            { y: 40, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.78, ease: 'power3.out', clearProps: 'transform,opacity' },
+            0
+          )
+          .fromTo(
+            featSwirlPath,
+            { strokeDashoffset: 180 },
+            { strokeDashoffset: 0, duration: 0.95, ease: 'power2.inOut' },
+            0.16
+          )
+          .fromTo(
+            featRight,
+            { y: 32, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.78, ease: 'power3.out', clearProps: 'transform,opacity' },
+            0.12
+          )
+          .fromTo(
+            archCards,
+            { y: 68, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.95,
+              stagger: 0.14,
+              ease: 'expo.out',
+              clearProps: 'transform,opacity'
+            },
+            0.18
+          )
+          .fromTo(
+            archCapsules,
+            {
+              clipPath: 'inset(42% 0% 0% 0% round 999px)',
+              scale: 0.92
+            },
+            {
+              clipPath: 'inset(0% 0% 0% 0% round 999px)',
+              scale: 1,
+              duration: 1.05,
+              stagger: 0.14,
+              ease: 'expo.out',
+              clearProps: 'clipPath,scale'
+            },
+            0.18
+          )
+          .fromTo(
+            archImgs,
+            { scale: 1.24, yPercent: 10 },
+            {
+              scale: 1,
+              yPercent: 0,
+              duration: 1.18,
+              stagger: 0.14,
+              ease: 'expo.out',
+              clearProps: 'transform'
+            },
+            0.18
+          )
+          .fromTo(
+            archMetas,
+            { y: 20, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.65,
+              stagger: 0.14,
+              ease: 'power3.out',
+              clearProps: 'transform,opacity'
+            },
+            0.42
+          );
+
+        if (featTl.scrollTrigger) state.gsapTriggers.push(featTl.scrollTrigger);
+
+        // Interactive GSAP Magnetic Arch Hover + Dynamic "FEATURE" Watermark Tinting
+        const watermarkTints = [
+          'rgba(186, 170, 220, 0.30)', // Arch 1 Lavender
+          'rgba(235, 178, 152, 0.30)', // Arch 2 Warm Peach
+          'rgba(162, 200, 230, 0.30)'  // Arch 3 Sky Glacier
+        ];
+
+        archCards.forEach((card, idx) => {
+          const capsule = card.querySelector('.featured-arch-capsule');
+          const img = card.querySelector('.featured-arch-img');
+          const hoverPill = card.querySelector('.featured-arch-hover-pill');
+
+          card.addEventListener('mouseenter', () => {
+            if (capsule) {
+              gsap.to(capsule, { y: -10, scale: 1.018, duration: 0.42, ease: 'power3.out', overwrite: 'auto' });
+            }
+            if (img) {
+              gsap.to(img, { scale: 1.08, duration: 0.48, ease: 'power3.out', overwrite: 'auto' });
+            }
+            if (hoverPill) {
+              gsap.to(hoverPill, { y: 0, opacity: 1, duration: 0.32, ease: 'power3.out', overwrite: 'auto' });
+            }
+            if (featWatermark) {
+              featWatermark.style.color = watermarkTints[idx] || watermarkTints[1];
             }
           });
-        },
-        { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
-      );
 
-      revealTargets.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight * 0.92) {
-          el.classList.add('is-in-view');
-        }
-        state.editorialScrollObserver.observe(el);
-      });
+          card.addEventListener(
+            'mousemove',
+            (ev) => {
+              if (!capsule || !img) return;
+              const rect = capsule.getBoundingClientRect();
+              const rx = (ev.clientX - rect.left) / Math.max(1, rect.width) - 0.5;
+              const ry = (ev.clientY - rect.top) / Math.max(1, rect.height) - 0.5;
+              gsap.to(img, {
+                x: rx * 14,
+                y: ry * 10,
+                scale: 1.08,
+                duration: 0.35,
+                ease: 'power2.out',
+                overwrite: 'auto'
+              });
+            },
+            { passive: true }
+          );
 
-      if (!state.hasBoundWatermarkParallax) {
-        state.hasBoundWatermarkParallax = true;
-        window.addEventListener(
-          'scroll',
-          () => {
-            const scrollY = window.scrollY || 0;
-            const heroWatermark = document.getElementById('hero-watermark');
-            if (heroWatermark && scrollY < 900) {
-              heroWatermark.style.setProperty('--watermark-scroll-x', `${(scrollY * -0.06).toFixed(1)}px`);
+          card.addEventListener('mouseleave', () => {
+            if (capsule) {
+              gsap.to(capsule, { y: 0, scale: 1, duration: 0.45, ease: 'power3.out', overwrite: 'auto' });
             }
-            const featWatermark = document.querySelector('.featured-collection-watermark');
+            if (img) {
+              gsap.to(img, { x: 0, y: 0, scale: 1, duration: 0.5, ease: 'power3.out', overwrite: 'auto' });
+            }
+            if (hoverPill) {
+              gsap.to(hoverPill, { y: 10, opacity: 0, duration: 0.26, ease: 'power2.in', overwrite: 'auto' });
+            }
             if (featWatermark) {
-              const section = featWatermark.closest('.featured-collection-section');
-              if (section) {
-                const rect = section.getBoundingClientRect();
-                const offset = (window.innerHeight * 0.5 - rect.top) * 0.045;
-                featWatermark.style.setProperty('--feature-scroll-x', `${Math.max(-42, Math.min(42, offset)).toFixed(1)}px`);
-              }
+              featWatermark.style.color = 'rgba(235, 178, 152, 0.22)';
             }
-          },
-          { passive: true }
-        );
+          });
+        });
+      }
+
+      if (ScrollTrigger && typeof ScrollTrigger.refresh === 'function') {
+        ScrollTrigger.refresh();
       }
     }
 
@@ -1354,7 +1764,7 @@
     if (state.active3DCarId) {
       updateHero3DStage(state.active3DCarId, state.activeColorHex, state.activeTriadId, { skipTransition: true });
     }
-    initEditorialScrollAnimations();
+    initLenisAndGsapChoreography();
   }
 
   // Render Admin Owner Panel
