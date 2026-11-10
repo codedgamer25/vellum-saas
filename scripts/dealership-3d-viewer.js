@@ -8,54 +8,63 @@
 (function (window, document) {
   'use strict';
 
-  // All 4 hero vehicle slots map directly to existing local .glb models in /models/
+  // Dedicated 3D GLB models for all 4 hero vehicles, normalized to the lit front-left 3/4 studio angle
   const MODEL_CONFIG = {
     ferrari: {
       path: './models/ferrari.glb',
       scale: 0.82,
       targetSpan: 3.45,
+      rotationY: 0,
       positionY: 0,
-      paintMaterialNames: ['Body_Color', 'Ferrari_Yellow', '_0098_DodgerBlue', 'body', 'paint'],
-      defaultColor: '#FD6E6E', // Coral / Rosso
+      paintMaterialNames: ['Body_Color', 'Ferrari_Yellow', '_0098_DodgerBlue'],
+      windowMaterialNames: ['Glass_Gray'],
+      defaultColor: '#E11D48', // Rosso Corsa Crimson
       cameraPos: [-4.65, 1.75, -5.85],
       targetPos: [0, 0.34, 0]
     },
     porsche: {
-      path: './models/bmw_m4.glb',
+      path: './models/porsche_911.glb',
       scale: 0.82,
       targetSpan: 3.45,
+      rotationY: Math.PI,
       positionY: 0,
-      paintMaterialNames: ['mMAT_Carpaint_Blue1', 'paint', 'coat', 'body'],
-      defaultColor: '#FF3B30', // Poppy Red
-      cameraPos: [5.15, 1.98, 5.85],
+      paintMaterialNames: ['paint', 'coat'],
+      windowMaterialNames: ['window'],
+      defaultColor: '#2563EB', // Gentian Sapphire Blue
+      cameraPos: [-4.65, 1.75, -5.85],
       targetPos: [0, 0.34, 0]
     },
-    bmw: {
-      path: './models/bmw_m4.glb',
+    mercedes: {
+      path: './models/mercedes_g63.glb',
       scale: 0.82,
-      targetSpan: 3.45,
+      targetSpan: 3.32,
+      rotationY: Math.PI,
       positionY: 0,
-      paintMaterialNames: ['mMAT_Carpaint_Blue1', 'paint', 'body'],
-      defaultColor: '#2563EB', // Cobalt / Pine Butter Accent
-      cameraPos: [-5.15, 1.98, 5.85],
-      targetPos: [0, 0.34, 0]
+      paintMaterialNames: ['MMAT_CarPaint_010'],
+      windowMaterialNames: ['MMAT_Glass1'],
+      defaultColor: '#059669', // AMG Emerald Green
+      cameraPos: [-4.65, 1.82, -5.85],
+      targetPos: [0, 0.38, 0]
     },
     audi: {
-      path: './models/ferrari.glb',
+      path: './models/audi_rs6.glb',
       scale: 0.82,
       targetSpan: 3.45,
+      rotationY: Math.PI,
       positionY: 0,
-      paintMaterialNames: ['Body_Color', 'Ferrari_Yellow', '_0098_DodgerBlue', 'body', 'paint'],
-      defaultColor: '#D4AF37', // Champagne Gold
-      cameraPos: [4.65, 1.75, -5.85],
+      paintMaterialNames: ['CARI_PAINT'],
+      windowMaterialNames: ['Glass'],
+      defaultColor: '#D97706', // Solarbeam Amber Gold
+      cameraPos: [-4.65, 1.75, -5.85],
       targetPos: [0, 0.34, 0]
     }
   };
 
-  // Direct carId aliases
+  // Legacy & direct carId aliases
+  MODEL_CONFIG.bmw = MODEL_CONFIG.mercedes;
   MODEL_CONFIG['porsche-gt3-rs-2024'] = MODEL_CONFIG.porsche;
   MODEL_CONFIG['ferrari-roma-2023'] = MODEL_CONFIG.ferrari;
-  MODEL_CONFIG['mercedes-amg-g63-2024'] = MODEL_CONFIG.bmw;
+  MODEL_CONFIG['mercedes-amg-g63-2024'] = MODEL_CONFIG.mercedes;
   MODEL_CONFIG['audi-rs6-avant-2024'] = MODEL_CONFIG.audi;
 
   // Detect software WebGL (SwiftShader / llvmpipe) per threejs skill
@@ -366,10 +375,11 @@
     prepareModelEntry(gltf, config, initialColor) {
       const model = gltf.scene;
       model.position.set(0, 0, 0);
+      model.rotation.set(0, config.rotationY || 0, 0);
       model.scale.set(1, 1, 1);
       model.updateMatrixWorld(true);
 
-      // Measure unscaled world bounds and auto-normalize so 0.01x FBX exports (bmw_m4.glb) match ferrari.glb
+      // Measure unscaled world bounds and auto-normalize so all 4 GLB models share consistent studio framing
       const rawBox = new THREE.Box3().setFromObject(model);
       const rawSize = rawBox.getSize(new THREE.Vector3());
       const maxDim = Math.max(rawSize.x, rawSize.y, rawSize.z);
@@ -387,31 +397,48 @@
       model.position.z -= center.z;
       model.position.y = (config.positionY || 0) - box.min.y;
 
-      const paintMaterials = [];
+      const sharedPaintMat = new THREE.MeshPhysicalMaterial({
+        name: 'ApexCarPaint',
+        color: new THREE.Color(initialColor),
+        metalness: 0.34,
+        roughness: 0.21,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.05,
+        side: THREE.DoubleSide
+      });
+
+      const sharedWindowMat = new THREE.MeshPhysicalMaterial({
+        name: 'ApexTintedGlass',
+        color: new THREE.Color(0x12161f),
+        metalness: 0.85,
+        roughness: 0.08,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.04,
+        transparent: true,
+        opacity: 0.86
+      });
+
+      const paintMaterials = [sharedPaintMat];
       model.traverse((child) => {
         if (child.isMesh && child.material) {
           const mat = child.material;
-          const matName = (mat.name || '').toLowerCase();
-          const meshName = (child.name || '').toLowerCase();
+          const matName = mat.name || '';
           const isPaint =
-            (mat.name && config.paintMaterialNames.some((pName) => mat.name.includes(pName))) ||
-            matName.includes('carpaint') ||
-            matName.includes('body') ||
-            matName.includes('paint') ||
-            meshName.includes('body') ||
-            meshName.includes('paint');
+            Array.isArray(config.paintMaterialNames) &&
+            config.paintMaterialNames.some(
+              (pName) => matName === pName || matName.toLowerCase() === pName.toLowerCase() || matName.includes(pName)
+            );
+          const isWindow =
+            !isPaint &&
+            Array.isArray(config.windowMaterialNames) &&
+            config.windowMaterialNames.some(
+              (wName) => matName === wName || matName.toLowerCase() === wName.toLowerCase() || matName.includes(wName)
+            );
 
           if (isPaint) {
-            if (!child.material.isMeshPhysicalMaterial) {
-              child.material = new THREE.MeshPhysicalMaterial({
-                color: new THREE.Color(initialColor),
-                metalness: 0.32,
-                roughness: 0.24,
-                clearcoat: 1.0,
-                clearcoatRoughness: 0.05
-              });
-            }
-            paintMaterials.push(child.material);
+            child.material = sharedPaintMat;
+          } else if (isWindow) {
+            child.material = sharedWindowMat;
           }
         }
       });
@@ -459,7 +486,7 @@
     scheduleIdlePreload() {
       if (this.idlePreloadId) return;
       const runPreload = () => {
-        const secondaryKeys = ['porsche', 'ferrari'];
+        const secondaryKeys = ['porsche', 'mercedes', 'audi', 'ferrari'];
         secondaryKeys.forEach((key) => {
           const cfg = MODEL_CONFIG[key];
           if (cfg && !this.modelCache.has(cfg.path) && !this.loadingPromises.has(cfg.path)) {
@@ -489,20 +516,15 @@
 
       this.changeCarColor(targetColor);
 
-      if (config.cameraPos) {
-        const aspect = this.camera && this.camera.aspect ? this.camera.aspect : 1.5;
+      if (config.cameraPos && this.camera) {
+        const aspect = this.camera.aspect ? this.camera.aspect : 1.5;
         const distScale = aspect < 1.4 ? Math.min(1.42, 1.4 / Math.max(aspect, 0.72)) : 1.0;
         const cx = config.cameraPos[0] * distScale;
         const cy = config.cameraPos[1] * distScale;
         const cz = config.cameraPos[2] * distScale;
 
-        if (!isSoftwareGl && this.camera) {
-          this.targetCameraPos = new THREE.Vector3(cx, cy, cz);
-          this.camera.position.lerp(this.targetCameraPos, 0.72);
-        } else if (this.camera) {
-          this.camera.position.set(cx, cy, cz);
-          this.targetCameraPos = null;
-        }
+        this.camera.position.set(cx, cy, cz);
+        this.targetCameraPos = null;
       }
 
       if (this.controls) {
@@ -555,36 +577,33 @@
       this.currentColor = hexColor;
       if (typeof THREE === 'undefined') return;
       const threeColor = new THREE.Color(hexColor);
-      // Deepen bright pastel hexes slightly for rich automotive clearcoat saturation
+      // Deepen lightness slightly before converting sRGB -> Linear so studio lights don't wash out the paint
       const hsl = {};
       threeColor.getHSL(hsl);
-      if (hsl.l > 0.56) {
-        threeColor.setHSL(hsl.h, Math.min(1, hsl.s * 1.15), 0.44);
+      if (hsl.l > 0.45) {
+        threeColor.setHSL(hsl.h, Math.min(1, Math.max(hsl.s, 0.88)), 0.42);
+      }
+      if (typeof threeColor.convertSRGBToLinear === 'function') {
+        threeColor.convertSRGBToLinear();
       }
 
       if (this.paintMaterials && this.paintMaterials.length > 0) {
         this.paintMaterials.forEach((mat) => {
           mat.color.copy(threeColor);
           if (mat.clearcoat !== undefined) mat.clearcoat = 1.0;
-          if (mat.metalness !== undefined) mat.metalness = 0.32;
-          if (mat.roughness !== undefined) mat.roughness = 0.24;
+          if (mat.metalness !== undefined) mat.metalness = 0.34;
+          if (mat.roughness !== undefined) mat.roughness = 0.21;
           mat.needsUpdate = true;
-        });
-      } else if (this.currentModel) {
-        this.currentModel.traverse((child) => {
-          if (child.isMesh && child.material && child.material.color) {
-            const cName = (child.name || '').toLowerCase();
-            const mName = (child.material.name || '').toLowerCase();
-            if (cName.includes('body') || mName.includes('body') || mName.includes('paint')) {
-              child.material.color.copy(threeColor);
-              child.material.needsUpdate = true;
-            }
-          }
         });
       }
 
       if (this.carImageFallback) {
         this.carImageFallback.style.setProperty('--car-color-accent', hexColor);
+      }
+
+      // Immediately render a frame so color changes appear instantaneously even when autoRotate is paused
+      if (this.renderer && this.scene && this.camera) {
+        this.renderer.render(this.scene, this.camera);
       }
     }
 

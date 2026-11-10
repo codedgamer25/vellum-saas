@@ -25,15 +25,15 @@
     audiStudio: './src/assets/images/audi_rs6_studio_1794305860108.jpg'
   };
 
-  // Marco Perez 2-Base + 1-Pop Color Triads
+  // Studio Paint Finish Swatches (Repaints the active 3D vehicle in-place without switching cars)
   const MARCO_PEREZ_TRIADS = {
     'midnight-coral': {
       id: 'midnight-coral',
-      name: 'Midnight & Coral',
-      fullName: 'Midnight Navy & Coral Orange',
+      name: 'Rosso Corsa Crimson',
+      fullName: 'Rosso Corsa Crimson',
       carId: 'ferrari-roma-2023',
       watermark: 'ROMA V8',
-      popColor: '#FD6E6E',
+      popColor: '#D41118',
       baseDark: '#00243A',
       baseSoft: '#B6DFED',
       hueFilter: 'hue-rotate(0deg) saturate(1.05)',
@@ -41,38 +41,38 @@
     },
     'raven-poppy': {
       id: 'raven-poppy',
-      name: 'Raven & Poppy',
-      fullName: 'Raven Black & Poppy Red',
+      name: 'Gentian Sapphire Blue',
+      fullName: 'Gentian Sapphire Blue',
       carId: 'porsche-gt3-rs-2024',
       watermark: '911 GT3 RS',
-      popColor: '#FF3B30',
+      popColor: '#2563EB',
       baseDark: '#0B0D12',
       baseSoft: '#8BB4D0',
       hueFilter: 'hue-rotate(215deg) saturate(1.35) brightness(0.95)',
-      tagline: 'Raven black & powder blue. Add Poppy red, now it is impossible to ignore.'
+      tagline: 'Raven black & powder blue. Add Sapphire blue, now it is impossible to ignore.'
     },
     'pine-butter': {
       id: 'pine-butter',
-      name: 'Pine & Butter',
-      fullName: 'Pale Pine & Butter Yellow',
+      name: 'Verde Emerald Metallic',
+      fullName: 'Verde Emerald Metallic',
       carId: 'mercedes-amg-g63-2024',
       watermark: 'AMG G63',
-      popColor: '#FCE788',
+      popColor: '#059669',
       baseDark: '#1A3528',
       baseSoft: '#4A121A',
-      hueFilter: 'hue-rotate(42deg) saturate(1.4) brightness(1.05)',
-      tagline: 'Pale pine & deep burgundy. Add butter yellow, now look at the packaging.'
+      hueFilter: 'hue-rotate(130deg) saturate(1.35) brightness(0.95)',
+      tagline: 'Pale pine & racing emerald. Crafted for unmistakable gallery presence.'
     },
     'obsidian-gold': {
       id: 'obsidian-gold',
-      name: 'Obsidian & Gold',
-      fullName: 'Obsidian Black & Champagne Gold',
+      name: 'Solarbeam Amber Gold',
+      fullName: 'Solarbeam Amber Gold',
       carId: 'audi-rs6-avant-2024',
       watermark: 'RS6 AVANT',
-      popColor: '#D4AF37',
+      popColor: '#D97706',
       baseDark: '#0A0A0C',
       baseSoft: '#1A1A24',
-      hueFilter: 'hue-rotate(270deg) saturate(1.25) brightness(0.92)',
+      hueFilter: 'hue-rotate(38deg) saturate(1.4) brightness(0.98)',
       tagline: 'The smallest color can make the biggest difference.'
     }
   };
@@ -127,7 +127,7 @@
     active3DCarId: 'ferrari-roma-2023',
     activeTriadId: 'midnight-coral',
     activeSpec: 'TRACK',
-    activeColorHex: '#FD6E6E',
+    activeColorHex: '#D41118',
     activeLifestyleIdx: 0,
     isHudCollapsed: false,
     heroViewer: null,
@@ -240,8 +240,8 @@
     'porsche-gt3-rs-2024': {
       watermark: '911 GT3 RS',
       heroHeadline: 'PORSCHE 911 GT3 RS',
-      auraName: 'Raven & Poppy',
-      accentColor: '#FF3B30',
+      auraName: 'Gentian Sapphire Blue',
+      accentColor: '#2563EB',
       colorTheme: 'raven-poppy',
       triadId: 'raven-poppy',
       modelKey: 'porsche',
@@ -254,12 +254,12 @@
     'ferrari-roma-2023': {
       watermark: 'ROMA V8',
       heroHeadline: 'FERRARI ROMA V8',
-      auraName: 'Midnight & Coral',
-      accentColor: '#FD6E6E',
+      auraName: 'Rosso Corsa Crimson',
+      accentColor: '#D41118',
       colorTheme: 'midnight-coral',
       triadId: 'midnight-coral',
       modelKey: 'ferrari',
-      prevCarId: 'audi-rs6-avant-2024',
+      prevCarId: 'porsche-gt3-rs-2024',
       nextCarId: 'mercedes-amg-g63-2024',
       nextCarName: 'Mercedes-AMG G63',
       nextCarThumb: STUDIO_IMAGES.ferrariRender,
@@ -268,22 +268,22 @@
     'mercedes-amg-g63-2024': {
       watermark: 'AMG G63',
       heroHeadline: 'AMG G63 EDITION',
-      auraName: 'Pine & Butter',
-      accentColor: '#FCE788',
+      auraName: 'Verde Emerald Metallic',
+      accentColor: '#059669',
       colorTheme: 'pine-butter',
       triadId: 'pine-butter',
-      modelKey: 'bmw',
+      modelKey: 'mercedes',
       prevCarId: 'ferrari-roma-2023',
       nextCarId: 'audi-rs6-avant-2024',
       nextCarName: 'Audi RS6 Avant',
       nextCarThumb: STUDIO_IMAGES.ferrariRender,
-      flankHue: 'hue-rotate(48deg) saturate(1.4)'
+      flankHue: 'hue-rotate(130deg) saturate(1.35)'
     },
     'audi-rs6-avant-2024': {
       watermark: 'RS6 AVANT',
       heroHeadline: 'AUDI RS6 AVANT',
-      auraName: 'Obsidian & Gold',
-      accentColor: '#D4AF37',
+      auraName: 'Solarbeam Amber Gold',
+      accentColor: '#D97706',
       colorTheme: 'obsidian-gold',
       triadId: 'obsidian-gold',
       modelKey: 'audi',
@@ -291,7 +291,7 @@
       nextCarId: 'porsche-gt3-rs-2024',
       nextCarName: 'Porsche 911 GT3 RS',
       nextCarThumb: STUDIO_IMAGES.ferrariRender,
-      flankHue: 'hue-rotate(265deg) saturate(1.25)'
+      flankHue: 'hue-rotate(38deg) saturate(1.35)'
     }
   };
 
@@ -1049,11 +1049,10 @@
         btn.classList.toggle('active', btn.getAttribute('data-car') === carId);
       });
 
-      // Update Marco Perez Triad Pills
+      // Update Active Paint Swatch Pill (only highlight the active color swatch)
       main.querySelectorAll('.triad-pill').forEach((pill) => {
         const triadId = pill.getAttribute('data-triad');
-        const pillCar = pill.getAttribute('data-car');
-        pill.classList.toggle('active', triadId === state.activeTriadId || pillCar === carId || triadId === appliedTheme);
+        pill.classList.toggle('active', triadId === state.activeTriadId);
       });
 
       // Update Pagination Dots
@@ -1205,9 +1204,28 @@
     main.querySelectorAll('.triad-pill').forEach((pill) => {
       pill.addEventListener('click', (e) => {
         const triadId = e.currentTarget.getAttribute('data-triad');
+        const colorHex = e.currentTarget.getAttribute('data-color');
         const triad = MARCO_PEREZ_TRIADS[triadId];
-        if (!triad) return;
-        updateHero3DStage(triad.carId, triad.popColor, triad.id);
+        if (!triad && !colorHex) return;
+
+        const appliedColor = colorHex || triad.popColor;
+        state.activeColorHex = appliedColor;
+        if (triadId) state.activeTriadId = triadId;
+
+        // Highlight only the clicked color swatch without changing the active car
+        main.querySelectorAll('.triad-pill').forEach((p) => {
+          p.classList.toggle('active', p === e.currentTarget);
+        });
+
+        const heroCard = main.querySelector('#hero-stage-card');
+        if (heroCard && triadId) {
+          heroCard.setAttribute('data-color-theme', triadId);
+        }
+
+        // Repaint the currently active 3D vehicle in-place without switching vehicles
+        if (window.Apex3DViewer && typeof window.Apex3DViewer.changeCarColor === 'function') {
+          window.Apex3DViewer.changeCarColor(appliedColor);
+        }
       });
     });
 

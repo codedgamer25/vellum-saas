@@ -41,12 +41,19 @@ test('filterAndSortVehicles filters by keyword, make, status, and sorts by price
   assert.ok(sortedAsc[0].priceUSD <= sortedAsc[1].priceUSD);
 });
 
-test('all FEATURED_3D_CARS map to existing local .glb models and INITIAL_VEHICLES use local studio images', () => {
+test('all FEATURED_3D_CARS map to dedicated local .glb models and INITIAL_VEHICLES use local studio images', () => {
   assert.equal(FEATURED_3D_CARS.length, 4);
+  const expectedGlbByCarId: Record<string, string> = {
+    'porsche-gt3-rs-2024': './models/porsche_911.glb',
+    'ferrari-roma-2023': './models/ferrari.glb',
+    'mercedes-amg-g63-2024': './models/mercedes_g63.glb',
+    'audi-rs6-avant-2024': './models/audi_rs6.glb'
+  };
   for (const car of FEATURED_3D_CARS) {
-    assert.ok(
-      car.glbPath === './models/ferrari.glb' || car.glbPath === './models/bmw_m4.glb',
-      `Expected local .glb path for ${car.id}, got ${car.glbPath}`
+    assert.equal(
+      car.glbPath,
+      expectedGlbByCarId[car.id],
+      `Expected dedicated local .glb path for ${car.id}, got ${car.glbPath}`
     );
   }
 
