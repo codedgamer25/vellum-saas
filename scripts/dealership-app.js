@@ -299,6 +299,196 @@
     }
   };
 
+  function buildCatalogCardHTML(car) {
+    const statusClass =
+      car.status === 'available'
+        ? 'badge-available'
+        : car.status === 'reserved'
+        ? 'badge-reserved'
+        : 'badge-sold';
+    const statusLabel =
+      car.status === 'available'
+        ? 'Available'
+        : car.status === 'reserved'
+        ? 'Reserved'
+        : 'Sold';
+
+    const primaryImage =
+      car.images && car.images[0]
+        ? car.images[0]
+        : STUDIO_IMAGES.porscheStudio;
+
+    const formattedPrice = STORE.formatPrice(car.priceUSD);
+    const whatsappMsg = encodeURIComponent(
+      `Hi Apex Auto Lounge, I am inquiring about the ${car.year} ${car.make} ${car.model} (${formattedPrice}, VIN: ${car.vin}). Is it available for private inspection?`
+    );
+
+    const hasSpecialStatus = car.status !== 'available';
+
+    return `
+      <article class="car-card" data-id="${car.id}">
+        <div class="car-card-media">
+          ${hasSpecialStatus ? `<span class="car-card-badge ${statusClass}">${statusLabel}</span>` : ''}
+          <img
+            src="${primaryImage}"
+            alt="${car.year} ${car.make} ${car.model}"
+            class="car-card-img"
+            loading="lazy"
+            decoding="async"
+            referrerPolicy="no-referrer"
+          />
+        </div>
+        <div class="car-card-body">
+          <div class="car-card-header">
+            <div class="car-card-year">${car.year} · ${car.bodyType || 'Coupe'} · ${car.exteriorColor}</div>
+            <h3 class="car-card-title">${car.make} ${car.model}</h3>
+          </div>
+
+          <div class="car-card-specs">
+            <span>${new Intl.NumberFormat().format(car.mileage)} mi</span>
+            <span aria-hidden="true">·</span>
+            <span>${car.transmission}</span>
+            <span aria-hidden="true">·</span>
+            <span>${car.horsepower} HP</span>
+          </div>
+
+          <!-- Clean price row without redundant labels -->
+          <div class="car-card-price-row">
+            <div class="price-value">${formattedPrice}</div>
+            <div class="car-vin-short">
+              VIN ${car.vin.slice(-6)}
+            </div>
+          </div>
+
+          <div class="car-card-actions">
+            <button type="button" class="btn-card-specs btn-open-detail" data-id="${car.id}">
+              Specs & Gallery
+            </button>
+            ${
+              car.sketchfabId
+                ? `<button type="button" class="btn-card-specs btn-open-3d" data-id="${car.id}" title="Launch Interactive 3D Model">
+                    3D Model
+                  </button>`
+                : ''
+            }
+            <a
+              href="https://wa.me/15550192834?text=${whatsappMsg}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-card-whatsapp"
+              aria-label="Inquire about ${car.year} ${car.make} ${car.model} via WhatsApp"
+            >
+              Inquire ↗
+            </a>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function buildCatalogCardsHTML(filtered) {
+    if (!filtered || filtered.length === 0) {
+      return `
+        <div class="catalog-empty-state">
+          <h3>No Matching Exotic Vehicles Found</h3>
+          <p>
+            Try adjusting your search criteria or resetting filters to view our full collection.
+          </p>
+          <button type="button" class="btn-outline-pill" id="btn-clear-empty-filter">
+            Reset All Filters
+          </button>
+        </div>
+      `;
+    }
+    return filtered.map(buildCatalogCardHTML).join('');
+  }
+
+  function updateCatalogGridOnly() {
+    const filtered = getFilteredVehicles();
+    const grid = document.getElementById('car-catalog-grid');
+    const countEl = document.getElementById('catalog-count');
+    if (grid) {
+      grid.innerHTML = buildCatalogCardsHTML(filtered);
+    }
+    if (countEl) {
+      countEl.textContent = String(filtered.length);
+    }
+  }
+
+  function updateCurrencyInPlace(newCurrency) {
+    // 1. Update currency pill toggles in header and catalog
+    document.querySelectorAll('.currency-pill').forEach((btn) => {
+      const isSelected = btn.getAttribute('data-currency') === newCurrency;
+      btn.classList.toggle('active', isSelected);
+      btn.setAttribute('aria-pressed', String(isSelected));
+    });
+
+    // 2. Update catalog rate note
+    const rateNoteCurr = document.querySelector('.catalog-rate-note strong');
+    if (rateNoteCurr) {
+      rateNoteCurr.textContent = newCurrency;
+    }
+
+    // 3. Update all catalog card prices and WhatsApp links
+    document.querySelectorAll('#car-catalog-grid .car-card').forEach((card) => {
+      const carId = card.getAttribute('data-id');
+      const car = STORE.getVehicle(carId);
+      if (car) {
+        const priceEl = card.querySelector('.price-value');
+        if (priceEl) priceEl.textContent = STORE.formatPrice(car.priceUSD);
+        const waLink = card.querySelector('.btn-card-whatsapp');
+        if (waLink) {
+          const formatted = STORE.formatPrice(car.priceUSD);
+          const msg = encodeURIComponent(
+            `Hi Apex Auto Lounge, I am inquiring about the ${car.year} ${car.make} ${car.model} (${formatted}, VIN: ${car.vin}). Is it available for private inspection?`
+          );
+          waLink.setAttribute('href', `https://wa.me/15550192834?text=${msg}`);
+        }
+      }
+    });
+
+    // 4. Update featured collection arch prices
+    document.querySelectorAll('.featured-arch-card').forEach((card) => {
+      const carId = card.getAttribute('data-id');
+      const car = STORE.getVehicle(carId);
+      if (car) {
+        const priceEl = card.querySelector('.featured-arch-price');
+        if (priceEl) priceEl.textContent = STORE.formatPrice(car.priceUSD);
+      }
+    });
+
+    // 5. Update hero island price & WhatsApp link
+    const heroCar = STORE.getFeatured3DCar(state.active3DCarId);
+    if (heroCar) {
+      const heroPrice = document.getElementById('island-price');
+      if (heroPrice) heroPrice.textContent = STORE.formatPrice(heroCar.priceUSD);
+      const waBtn = document.getElementById('hero-whatsapp-reserve');
+      if (waBtn) {
+        const encoded = encodeURIComponent(
+          `Hi Apex Auto Lounge, I am inquiring about the ${heroCar.year} ${heroCar.make} ${heroCar.model} featured on the 3D Showroom (${STORE.formatPrice(heroCar.priceUSD)}). Is it available for private acquisition?`
+        );
+        waBtn.setAttribute('href', `https://wa.me/15550192834?text=${encoded}`);
+      }
+    }
+
+    // 6. Update lifestyle section price
+    const lifestyleItem = LIFESTYLE_GALLERY_ITEMS[state.activeLifestyleIdx] || LIFESTYLE_GALLERY_ITEMS[0];
+    const lifestyleCar = STORE.getVehicle(lifestyleItem.carId);
+    if (lifestyleCar) {
+      const lifestylePrice = document.getElementById('lifestyle-price');
+      if (lifestylePrice) lifestylePrice.textContent = STORE.formatPrice(lifestyleCar.priceUSD);
+    }
+
+    // 7. Update active modal price if open
+    const modal = document.getElementById('modal-vehicle-detail');
+    if (modal && modal.classList.contains('is-active')) {
+      const modalPrice = modal.querySelector('.detail-car-price');
+      if (modalPrice && modalPrice.dataset.rawPrice) {
+        modalPrice.textContent = STORE.formatPrice(Number(modalPrice.dataset.rawPrice));
+      }
+    }
+  }
+
   function renderPublicView() {
     const main = document.getElementById('main-content');
     if (!main) return;
@@ -560,6 +750,7 @@
                     alt="${item.caption}"
                     class="lifestyle-thumb-img"
                     loading="lazy"
+                    decoding="async"
                     referrerPolicy="no-referrer"
                   />
                 </button>
@@ -578,6 +769,7 @@
                   alt="${activeLife.caption}"
                   class="lifestyle-main-photo"
                   loading="lazy"
+                  decoding="async"
                   referrerPolicy="no-referrer"
                 />
               </div>
@@ -590,6 +782,7 @@
                   alt="Atelier Craftsmanship Detail"
                   class="lifestyle-inset-photo"
                   loading="lazy"
+                  decoding="async"
                   referrerPolicy="no-referrer"
                 />
               </div>
@@ -645,6 +838,7 @@
                       alt="${car.year} ${car.make} ${car.model}"
                       class="featured-arch-img"
                       loading="lazy"
+                      decoding="async"
                       referrerPolicy="no-referrer"
                     />
                     <span class="featured-arch-hover-pill" aria-hidden="true">Inspect Dossier ↗</span>
@@ -767,151 +961,54 @@
       <!-- Vehicle Card Grid -->
       <section class="catalog-section" id="catalog">
         <div class="car-grid" id="car-catalog-grid">
-          ${
-            filtered.length > 0
-              ? filtered
-                  .map((car) => {
-                    const statusClass =
-                      car.status === 'available'
-                        ? 'badge-available'
-                        : car.status === 'reserved'
-                        ? 'badge-reserved'
-                        : 'badge-sold';
-                    const statusLabel =
-                      car.status === 'available'
-                        ? 'Available'
-                        : car.status === 'reserved'
-                        ? 'Reserved'
-                        : 'Sold';
-
-                    const primaryImage =
-                      car.images && car.images[0]
-                        ? car.images[0]
-                        : STUDIO_IMAGES.porscheStudio;
-
-                    const formattedPrice = STORE.formatPrice(car.priceUSD);
-                    const whatsappMsg = encodeURIComponent(
-                      `Hi Apex Auto Lounge, I am inquiring about the ${car.year} ${car.make} ${car.model} (${formattedPrice}, VIN: ${car.vin}). Is it available for private inspection?`
-                    );
-
-                    const hasSpecialStatus = car.status !== 'available';
-
-                    return `
-              <article class="car-card" data-id="${car.id}">
-                <div class="car-card-media">
-                  ${hasSpecialStatus ? `<span class="car-card-badge ${statusClass}">${statusLabel}</span>` : ''}
-                  <img
-                    src="${primaryImage}"
-                    alt="${car.year} ${car.make} ${car.model}"
-                    class="car-card-img"
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                <div class="car-card-body">
-                  <div class="car-card-header">
-                    <div class="car-card-year">${car.year} · ${car.bodyType || 'Coupe'} · ${car.exteriorColor}</div>
-                    <h3 class="car-card-title">${car.make} ${car.model}</h3>
-                  </div>
-
-                  <div class="car-card-specs">
-                    <span>${new Intl.NumberFormat().format(car.mileage)} mi</span>
-                    <span aria-hidden="true">·</span>
-                    <span>${car.transmission}</span>
-                    <span aria-hidden="true">·</span>
-                    <span>${car.horsepower} HP</span>
-                  </div>
-
-                  <!-- Rule 2 & 8: Clean price row without redundant 'Price' label or divider line -->
-                  <div class="car-card-price-row">
-                    <div class="price-value">${formattedPrice}</div>
-                    <div class="car-vin-short">
-                      VIN ${car.vin.slice(-6)}
-                    </div>
-                  </div>
-
-                  <!-- Rule 10: Emphasize the CTA -->
-                  <div class="car-card-actions">
-                    <button type="button" class="btn-card-specs btn-open-detail" data-id="${car.id}">
-                      Specs & Gallery
-                    </button>
-                    ${
-                      car.sketchfabId
-                        ? `<button type="button" class="btn-card-specs btn-open-3d" data-id="${car.id}" title="Launch Interactive 3D Model">
-                            3D Model
-                          </button>`
-                        : ''
-                    }
-                    <a
-                      href="https://wa.me/15550192834?text=${whatsappMsg}"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="btn-card-whatsapp"
-                      aria-label="Inquire about ${car.year} ${car.make} ${car.model} via WhatsApp"
-                    >
-                      Inquire ↗
-                    </a>
-                  </div>
-                </div>
-              </article>
-            `;
-                  })
-                  .join('')
-              : `
-            <div class="catalog-empty-state">
-              <h3>No Matching Exotic Vehicles Found</h3>
-              <p>
-                Try adjusting your search criteria or resetting filters to view our full collection.
-              </p>
-              <button type="button" class="btn-outline-pill" id="btn-clear-empty-filter">
-                Reset All Filters
-              </button>
-            </div>
-          `
-          }
+          ${buildCatalogCardsHTML(filtered)}
         </div>
       </section>
     `;
 
-    // Wire Filter Event Listeners
+    // Wire Filter Event Listeners with Debouncing & In-Place DOM Updates (No Full-Page Rerenders)
+    let searchDebounceTimer = null;
     const kwInput = main.querySelector('#filter-keyword');
     if (kwInput) {
       kwInput.addEventListener('input', (e) => {
         state.filters.keyword = e.target.value;
-        renderPublicView();
-        const reFocused = document.getElementById('filter-keyword');
-        if (reFocused) {
-          reFocused.focus();
-          reFocused.setSelectionRange(reFocused.value.length, reFocused.value.length);
-        }
+        if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => {
+          updateCatalogGridOnly();
+        }, 80);
       });
     }
 
     main.querySelector('#filter-make')?.addEventListener('change', (e) => {
       state.filters.make = e.target.value;
-      renderPublicView();
+      updateCatalogGridOnly();
     });
 
     main.querySelector('#filter-status')?.addEventListener('change', (e) => {
       state.filters.status = e.target.value;
-      renderPublicView();
+      updateCatalogGridOnly();
     });
 
     main.querySelector('#filter-sort')?.addEventListener('change', (e) => {
       state.filters.sortBy = e.target.value;
-      renderPublicView();
+      updateCatalogGridOnly();
     });
 
-    main.querySelector('#btn-reset-filters')?.addEventListener('click', () => {
+    const resetFiltersHandler = () => {
       state.filters = { keyword: '', make: 'all', status: 'all', priceMax: 300000, sortBy: 'featured' };
-      renderPublicView();
+      const kw = main.querySelector('#filter-keyword');
+      if (kw) kw.value = '';
+      const mk = main.querySelector('#filter-make');
+      if (mk) mk.value = 'all';
+      const st = main.querySelector('#filter-status');
+      if (st) st.value = 'all';
+      const srt = main.querySelector('#filter-sort');
+      if (srt) srt.value = 'featured';
+      updateCatalogGridOnly();
       showToast('Filters reset to show all inventory');
-    });
+    };
 
-    main.querySelector('#btn-clear-empty-filter')?.addEventListener('click', () => {
-      state.filters = { keyword: '', make: 'all', status: 'all', priceMax: 300000, sortBy: 'featured' };
-      renderPublicView();
-    });
+    main.querySelector('#btn-reset-filters')?.addEventListener('click', resetFiltersHandler);
 
     // Currency Switchers
     main.querySelectorAll('.currency-pill').forEach((btn) => {
@@ -1009,19 +1106,27 @@
       openVehicleModal(id, 'photo');
     });
 
-    // Modal Open Buttons (Catalog + Featured Collection Arches)
-    main.querySelectorAll('.btn-open-detail').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        const id = e.currentTarget.getAttribute('data-id');
-        openVehicleModal(id, 'photo');
-      });
-    });
+    // Delegated Clicks on Main for Modal Openers and Empty Filter Reset
+    main.addEventListener('click', (e) => {
+      const detailBtn = e.target.closest('.btn-open-detail');
+      if (detailBtn) {
+        const id = detailBtn.getAttribute('data-id');
+        if (id) openVehicleModal(id, 'photo');
+        return;
+      }
 
-    main.querySelectorAll('.btn-open-3d').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        const id = e.currentTarget.getAttribute('data-id');
-        openVehicleModal(id, '3d');
-      });
+      const threeBtn = e.target.closest('.btn-open-3d');
+      if (threeBtn) {
+        const id = threeBtn.getAttribute('data-id');
+        if (id) openVehicleModal(id, '3d');
+        return;
+      }
+
+      const clearBtn = e.target.closest('#btn-clear-empty-filter');
+      if (clearBtn) {
+        resetFiltersHandler();
+        return;
+      }
     });
 
     // Collapsible Bottom Dock Toggle
@@ -1036,7 +1141,7 @@
       }
     });
 
-    // Initialize Local Three.js 3D Viewer inside Hero Stage
+    // Initialize Local Three.js 3D Viewer inside Hero Stage (on-demand rendering, 0% idle GPU)
     function initHero3DViewer() {
       const container = main.querySelector('#hero-3d-stage-container');
       if (!container) return;
@@ -1051,7 +1156,7 @@
         state.heroViewer = new window.Apex3DViewer('hero-3d-stage-container', {
           initialModel: initialAtm.modelKey,
           initialColor: state.activeColorHex || initialAtm.accentColor,
-          autoRotate: true,
+          autoRotate: false,
           autoRotateSpeed: 0.75
         });
       }
@@ -2077,7 +2182,7 @@
           </div>
 
           <div class="detail-modal-gallery" id="media-viewer-photo" style="${startWith3D ? 'display: none;' : ''}">
-            <img src="${activeImg}" alt="${car.make} ${car.model}" class="detail-main-img" id="detail-main-display" referrerPolicy="no-referrer" />
+            <img src="${activeImg}" alt="${car.make} ${car.model}" class="detail-main-img" id="detail-main-display" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
             ${
               images.length > 1
                 ? `
@@ -2085,7 +2190,7 @@
                 ${images
                   .map(
                     (img, idx) => `
-                  <img src="${img}" alt="Thumbnail ${idx + 1}" class="detail-thumb-item ${idx === 0 ? 'active' : ''}" data-src="${img}" referrerPolicy="no-referrer" />
+                  <img src="${img}" alt="Thumbnail ${idx + 1}" class="detail-thumb-item ${idx === 0 ? 'active' : ''}" data-src="${img}" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
                 `
                   )
                   .join('')}
@@ -2135,7 +2240,7 @@
               </div>
 
               <div>
-                <div class="detail-car-price">${formattedPrice}</div>
+                <div class="detail-car-price" data-raw-price="${car.priceUSD}">${formattedPrice}</div>
               </div>
             </div>
 
@@ -2434,8 +2539,24 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    STORE.subscribe(() => {
-      renderApp();
+    let prevCurrency = STORE.getCurrency();
+    let prevVehiclesCount = STORE.getVehicles().length;
+
+    STORE.subscribe((data) => {
+      const isPublicView = state.view === 'public';
+      const currentCurrency = (data && data.currency) || STORE.getCurrency();
+      const currentVehicles = (data && data.vehicles) || STORE.getVehicles();
+      const currencyChanged = currentCurrency !== prevCurrency;
+      const vehiclesChanged = currentVehicles.length !== prevVehiclesCount;
+
+      prevCurrency = currentCurrency;
+      prevVehiclesCount = currentVehicles.length;
+
+      if (isPublicView && currencyChanged && !vehiclesChanged && document.getElementById('hero-stage-viewport')) {
+        updateCurrencyInPlace(currentCurrency);
+      } else {
+        renderApp();
+      }
     });
     renderApp();
   });
