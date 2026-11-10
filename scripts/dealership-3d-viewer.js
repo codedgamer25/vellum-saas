@@ -10,30 +10,30 @@
   const MODEL_CONFIG = {
     ferrari: {
       path: './models/ferrari.glb',
-      scale: 1.0,
+      scale: 0.84,
       positionY: 0,
       paintMaterialNames: ['Body_Color', 'Ferrari_Yellow', '_0098_DodgerBlue'],
       defaultColor: '#FD6E6E', // Marco Perez Coral Orange
-      cameraPos: [-3.2, 1.4, -4.2],
-      targetPos: [0, 0.4, 0]
+      cameraPos: [-4.2, 1.75, -5.5],
+      targetPos: [0, 0.36, 0]
     },
     porsche: {
       path: './models/porsche_911.glb',
-      scale: 1.0,
+      scale: 0.84,
       positionY: 0,
       paintMaterialNames: ['paint', 'coat'],
       defaultColor: '#FF3B30', // Marco Perez Poppy Red
-      cameraPos: [4.2, 1.8, 4.6],
-      targetPos: [0, 0.4, 0]
+      cameraPos: [5.4, 2.25, 5.9],
+      targetPos: [0, 0.36, 0]
     },
     bmw: {
       path: './models/bmw_m4.glb',
-      scale: 1.0,
+      scale: 0.84,
       positionY: 0,
       paintMaterialNames: ['mMAT_Carpaint_Blue1'],
       defaultColor: '#FCE788', // Marco Perez Butter Yellow
-      cameraPos: [4.0, 1.7, 4.5],
-      targetPos: [0, 0.4, 0]
+      cameraPos: [5.2, 2.2, 5.8],
+      targetPos: [0, 0.36, 0]
     }
   };
 
@@ -163,9 +163,9 @@
       // Scene
       this.scene = new THREE.Scene();
 
-      // Camera (Perspective, wide luxury studio focal length)
+      // Camera (Perspective, wide luxury studio focal length at normal smallest zoom)
       this.camera = new THREE.PerspectiveCamera(34, width / height, 0.1, 100);
-      this.camera.position.set(-3.2, 1.4, -4.2);
+      this.camera.position.set(-4.2, 1.75, -5.5);
 
       // WebGLRenderer
       this.renderer = new THREE.WebGLRenderer({
@@ -231,7 +231,7 @@
       ctx.fillRect(0, 0, 512, 512);
 
       const shadowTexture = new THREE.CanvasTexture(shadowCanvas);
-      const planeGeometry = new THREE.PlaneGeometry(6.2, 4.2);
+      const planeGeometry = new THREE.PlaneGeometry(5.4, 3.6);
       const planeMaterial = new THREE.MeshBasicMaterial({
         map: shadowTexture,
         transparent: true,
@@ -250,13 +250,15 @@
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
+        this.controls.enableZoom = false; // Strictly remove zoom on 3D model - locked at normal smallest zoom
         this.controls.maxPolarAngle = Math.PI / 2 - 0.05; // Prevent camera dipping below floor
         this.controls.minPolarAngle = Math.PI / 8;
-        this.controls.minDistance = 3.0;
-        this.controls.maxDistance = 10.0;
         this.controls.enablePan = false;
         this.controls.autoRotate = this.options.autoRotate;
         this.controls.autoRotateSpeed = this.options.autoRotateSpeed;
+        if (THREE.TOUCH) {
+          this.controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DO_NOTHING };
+        }
       }
     }
 
@@ -337,9 +339,12 @@
           // Apply target color
           this.changeCarColor(targetColor);
 
-          // Adjust camera to fit vehicle
+          // Adjust camera to fit vehicle at normal smallest zoom
+          if (config.cameraPos) {
+            this.camera.position.set(config.cameraPos[0], config.cameraPos[1], config.cameraPos[2]);
+          }
           if (this.controls) {
-            this.controls.target.set(0, size.y * 0.4, 0);
+            this.controls.target.set(0, size.y * 0.36, 0);
             this.controls.update();
           }
 

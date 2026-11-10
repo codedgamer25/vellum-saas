@@ -233,6 +233,8 @@
 
     const filtered = getFilteredVehicles();
     const makes = ['all', 'Porsche', 'Mercedes-Benz', 'BMW', 'Audi', 'Range Rover', 'Ferrari', 'Tesla', 'Aston Martin'];
+    const currencies = ['USD', 'NGN', 'GBP', 'EUR'];
+    const currentCurrency = STORE.getCurrency();
 
     const currentTriad = MARCO_PEREZ_TRIADS[state.activeTriadId] || MARCO_PEREZ_TRIADS['midnight-coral'];
     const currentCar = STORE.getFeatured3DCar(state.active3DCarId) || STORE.getFeatured3DCar(currentTriad.carId);
@@ -264,8 +266,13 @@
           <div class="hero-card-content">
             <!-- Top Row: Badge & Segmented Car Switcher -->
             <header class="hero-card-top-row">
-              <div class="hero-curated-badge">
-                <span>✦</span> 2024 CURATED HYPERCAR SERIES
+              <div class="hero-brand-top-group">
+                <a href="#" class="hero-stage-brand" id="hero-brand-link">
+                  <span class="brand-icon">✦</span> APEX AUTO LOUNGE
+                </a>
+                <div class="hero-curated-badge">
+                  2024 CURATED HYPERCAR SERIES
+                </div>
               </div>
 
               <!-- Segmented Control Car Switcher -->
@@ -470,8 +477,6 @@
               <div class="hero-stage-footer-row">
                 <div class="hero-stage-prompt">
                   <span>🖱️ HOLD & DRAG TO ORBIT 360°</span>
-                  <span class="prompt-sep">•</span>
-                  <span>🔍 PINCH TO ZOOM</span>
                 </div>
 
                 <a href="#catalog" class="hero-stage-scroll-cue" id="hero-scroll-cue">
@@ -486,6 +491,34 @@
 
       <!-- Multi-Criteria Filter Bar (Positioned gracefully below hero) -->
       <section class="catalog-filter-wrapper" style="max-width: 1440px; margin: 2rem auto 0 auto; padding: 0 1.5rem;">
+        <!-- Catalog Utility Bar: Heading, Currency Selector & Owner Admin -->
+        <div class="catalog-utility-bar">
+          <div class="catalog-heading-wrap">
+            <h2 class="catalog-section-title">Showroom Inventory</h2>
+            <span class="catalog-vehicle-count">${filtered.length} Motorcars Available</span>
+          </div>
+
+          <div class="catalog-utility-actions">
+            <!-- Currency Switcher -->
+            <div class="currency-selector-group" id="currency-switcher" role="group" aria-label="Currency Selector">
+              ${currencies
+                .map(
+                  (c) => `
+                <button type="button" class="currency-pill ${c === currentCurrency ? 'active' : ''}" data-currency="${c}">
+                  ${c === 'USD' ? '$ USD' : c === 'NGN' ? '₦ NGN' : c === 'GBP' ? '£ GBP' : '€ EUR'}
+                </button>
+              `
+                )
+                .join('')}
+            </div>
+
+            <!-- Mode Switcher -->
+            <button type="button" class="btn-mode-toggle ${state.view === 'admin' ? 'is-admin-active' : ''}" id="btn-toggle-mode">
+              ${state.view === 'admin' ? '✕ Exit Admin View' : '🔒 Owner Admin'}
+            </button>
+          </div>
+        </div>
+
         <div class="filter-bar-container" id="filter-bar">
           <div class="filter-input-wrapper">
             <span class="filter-icon">🔍</span>
@@ -705,6 +738,40 @@
       clearEmpty.addEventListener('click', () => {
         state.filters = { keyword: '', make: 'all', status: 'all', priceMax: 300000, sortBy: 'featured' };
         renderPublicView();
+      });
+    }
+
+    // Currency Switcher in Catalog Utility Bar
+    main.querySelectorAll('.currency-pill').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const curr = e.currentTarget.getAttribute('data-currency');
+        STORE.setCurrency(curr);
+      });
+    });
+
+    // Mode Toggle Button (Admin PIN Gate)
+    const modeBtn = main.querySelector('#btn-toggle-mode');
+    if (modeBtn) {
+      modeBtn.addEventListener('click', () => {
+        if (state.view === 'admin') {
+          state.view = 'public';
+          renderApp();
+        } else {
+          if (state.isAdmin) {
+            state.view = 'admin';
+            renderApp();
+          } else {
+            openPinModal();
+          }
+        }
+      });
+    }
+
+    const brandLink = main.querySelector('#hero-brand-link');
+    if (brandLink) {
+      brandLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     }
 
