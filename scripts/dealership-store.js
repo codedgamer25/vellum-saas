@@ -4,7 +4,7 @@
  * Multi-Currency: USD, NGN, GBP, EUR
  */
 
-(function (window) {
+(function (root) {
   'use strict';
 
   const STORAGE_KEY = 'apex_dealership_inventory_v1';
@@ -15,6 +15,14 @@
     NGN: { symbol: '₦', rate: 1600, label: 'NGN (₦)', decimals: 0 },
     GBP: { symbol: '£', rate: 0.79, label: 'GBP (£)', decimals: 0 },
     EUR: { symbol: '€', rate: 0.92, label: 'EUR (€)', decimals: 0 }
+  };
+
+  const LOCAL_STUDIO_IMAGES = {
+    ferrariEditorial: './src/assets/images/lifestyle_supercar_editorial_1794305857459.jpg',
+    ferrariRender: './models/ferrari_render.png',
+    porscheStudio: './src/assets/images/porsche_gt3rs_studio_1794305858079.jpg',
+    mercedesStudio: './src/assets/images/mercedes_g63_studio_1794305857861.jpg',
+    audiStudio: './src/assets/images/audi_rs6_studio_1794305860108.jpg'
   };
 
   /**
@@ -30,66 +38,148 @@
     return match ? match[1].toLowerCase() : trimmed;
   }
 
+  /**
+   * Pure helper: formatPriceWithRates(usdAmount, curr)
+   */
+  function formatPriceWithRates(usdAmount, curr = 'USD') {
+    const config = CURRENCY_RATES[curr] || CURRENCY_RATES.USD;
+    const converted = Math.round(Number(usdAmount || 0) * config.rate);
+    const formattedNumber = new Intl.NumberFormat('en-US').format(converted);
+    return `${config.symbol}${formattedNumber}`;
+  }
+
+  /**
+   * Pure helper: filterAndSortVehicles(vehicles, filters)
+   */
+  function filterAndSortVehicles(vehicles, filters = {}) {
+    const keyword = (filters.keyword || '').trim().toLowerCase();
+    const make = (filters.make || 'all').toLowerCase();
+    const status = filters.status || 'all';
+    const priceMax = filters.priceMax !== undefined ? Number(filters.priceMax) : Infinity;
+    const sortBy = filters.sortBy || 'featured';
+
+    return (vehicles || [])
+      .filter((car) => {
+        if (keyword) {
+          const matches =
+            car.make.toLowerCase().includes(keyword) ||
+            car.model.toLowerCase().includes(keyword) ||
+            String(car.year).includes(keyword) ||
+            (car.vin && car.vin.toLowerCase().includes(keyword));
+          if (!matches) return false;
+        }
+        if (make !== 'all' && car.make.toLowerCase() !== make) {
+          return false;
+        }
+        if (status !== 'all' && car.status !== status) {
+          return false;
+        }
+        if (car.priceUSD > priceMax) {
+          return false;
+        }
+        return true;
+      })
+      .sort((a, b) => {
+        switch (sortBy) {
+          case 'price-asc':
+            return a.priceUSD - b.priceUSD;
+          case 'price-desc':
+            return b.priceUSD - a.priceUSD;
+          case 'year-desc':
+            return b.year - a.year;
+          case 'mileage-asc':
+            return a.mileage - b.mileage;
+          case 'featured':
+          default:
+            return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+        }
+      });
+  }
+
   const FEATURED_3D_CARS = [
     {
       id: 'porsche-gt3-rs-2024',
       make: 'Porsche',
       model: '911 GT3 RS',
+      heroTitle: '911 GT3 RS',
       year: 2024,
       edition: 'Weissach Package',
       priceUSD: 248000,
       sketchfabId: '456b3d9d60b646369d76667848d6d027',
+      localModelKey: 'porsche',
+      glbPath: './models/bmw_m4.glb',
+      previewImg: LOCAL_STUDIO_IMAGES.porscheStudio,
+      cutoutImg: LOCAL_STUDIO_IMAGES.ferrariRender,
       hp: 518,
       zeroToSixty: '3.0s',
       topSpeed: '184 MPH',
       engine: '4.0L Naturally Aspirated Boxer-6',
       color: 'Arctic Grey / Pyro Red',
-      transmission: '7-Speed PDK'
+      transmission: '7-Speed PDK',
+      summary: 'Motorsport-bred active aerodynamics and lightweight carbon weave engineered for uncompromising track precision and street presence.'
     },
     {
       id: 'ferrari-roma-2023',
       make: 'Ferrari',
       model: 'Roma V8',
+      heroTitle: 'FERRARI ROMA V8',
       year: 2023,
       edition: 'Atelier Tailor Made',
       priceUSD: 238000,
       sketchfabId: 'fedadda2bb6c4bf481636121548c6a47',
+      localModelKey: 'ferrari',
+      glbPath: './models/ferrari.glb',
+      previewImg: LOCAL_STUDIO_IMAGES.ferrariEditorial,
+      cutoutImg: LOCAL_STUDIO_IMAGES.ferrariRender,
       hp: 612,
       zeroToSixty: '3.2s',
       topSpeed: '199 MPH',
       engine: '3.9L Twin-Turbo V8',
       color: 'Rosso Corsa',
-      transmission: '8-Speed F1 Dual-Clutch'
+      transmission: '8-Speed F1 Dual-Clutch',
+      summary: 'Brand-new Atelier grand touring architecture pairs 612 horsepower twin-turbocharged response with timeless Maranello sculpture.'
     },
     {
       id: 'mercedes-amg-g63-2024',
       make: 'Mercedes-Benz',
       model: 'Mercedes-AMG G63',
+      heroTitle: 'AMG G63 EDITION',
       year: 2024,
       edition: 'Edition 55 Magno',
       priceUSD: 195000,
       sketchfabId: '27ec2645ed95471395370a6650b38296',
+      localModelKey: 'bmw',
+      glbPath: './models/bmw_m4.glb',
+      previewImg: LOCAL_STUDIO_IMAGES.mercedesStudio,
+      cutoutImg: LOCAL_STUDIO_IMAGES.ferrariRender,
       hp: 577,
       zeroToSixty: '4.5s',
       topSpeed: '149 MPH',
       engine: 'Handcrafted AMG 4.0L V8 Biturbo',
       color: 'Obsidian Black Metallic',
-      transmission: 'AMG SPEEDSHIFT 9G'
+      transmission: 'AMG SPEEDSHIFT 9G',
+      summary: 'Hand-assembled V8 biturbo authority wrapped in architectural satin black bodywork with bespoke Nappa leather cabin appointments.'
     },
     {
       id: 'audi-rs6-avant-2024',
       make: 'Audi',
       model: 'RS6 Avant Performance',
+      heroTitle: 'RS6 AVANT GT',
       year: 2024,
       edition: 'Carbon Dynamic Package',
       priceUSD: 142000,
       sketchfabId: 'b432bb3ad006442c88a915d6718dffef',
+      localModelKey: 'audi',
+      glbPath: './models/ferrari.glb',
+      previewImg: LOCAL_STUDIO_IMAGES.audiStudio,
+      cutoutImg: LOCAL_STUDIO_IMAGES.ferrariRender,
       hp: 621,
       zeroToSixty: '3.3s',
       topSpeed: '190 MPH',
       engine: '4.0L Twin-Turbo V8 MHEV',
       color: 'Nardo Grey',
-      transmission: '8-Speed Tiptronic Quattro'
+      transmission: '8-Speed Tiptronic Quattro',
+      summary: 'Widebody super-touring silhouette delivering 621 horsepower quattro composure, ceramic braking, and effortless transcontinental pace.'
     }
   ];
 
@@ -113,9 +203,9 @@
       horsepower: 518,
       vin: 'WP0AB2A97RS202401',
       images: [
-        'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1200&q=80'
+        LOCAL_STUDIO_IMAGES.porscheStudio,
+        LOCAL_STUDIO_IMAGES.ferrariEditorial,
+        LOCAL_STUDIO_IMAGES.audiStudio
       ],
       description: 'The pinnacle of motorsport engineering for the road. Features DRS active aero, Weissach package carbon weave, magnesium lightweight wheels, and titanium roll cage.',
       features: [
@@ -147,15 +237,15 @@
       horsepower: 577,
       vin: 'W1NYX7FJ8RX202402',
       images: [
-        'https://images.unsplash.com/photo-1520031441872-265e4ff70366?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=80'
+        LOCAL_STUDIO_IMAGES.mercedesStudio,
+        LOCAL_STUDIO_IMAGES.porscheStudio
       ],
       description: 'Iconic luxury off-road capability combined with hand-built AMG biturbo brutality. Equipped with AMG Night Package II and 22-inch forged cross-spoke wheels.',
       features: [
         'AMG Performance Dual Side-Exit Exhaust',
         'AMG Night Package II Obsidian Trim',
         'Burmester 3D Surround Sound',
-        'Triple Differential Differential Locks',
+        'Triple Differential Locks',
         '22-inch Forged Cross-Spoke Matte Black Wheels'
       ],
       createdAt: '2024-03-05T12:00:00Z'
@@ -178,8 +268,8 @@
       horsepower: 503,
       vin: 'WBS43AY02PF202303',
       images: [
-        'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1200&q=80'
+        LOCAL_STUDIO_IMAGES.audiStudio,
+        LOCAL_STUDIO_IMAGES.porscheStudio
       ],
       description: 'Precision German track weapon finished in rare Isle of Man Green metallic with high-contrast Kyalami Orange carbon bucket seating.',
       features: [
@@ -210,8 +300,8 @@
       horsepower: 621,
       vin: 'WAUZZZF28RN202404',
       images: [
-        'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=1200&q=80'
+        LOCAL_STUDIO_IMAGES.audiStudio,
+        LOCAL_STUDIO_IMAGES.mercedesStudio
       ],
       description: 'The super-wagon benchmark. Blistering 621 hp bi-turbo V8 paired with quattro all-wheel drive, dynamic rear-wheel steering, and widebody stance.',
       features: [
@@ -241,8 +331,8 @@
       horsepower: 606,
       vin: 'SALWR2V44RA202405',
       images: [
-        'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80'
+        LOCAL_STUDIO_IMAGES.mercedesStudio,
+        LOCAL_STUDIO_IMAGES.ferrariEditorial
       ],
       description: 'First-class luxury travel redefined by Special Vehicle Operations. Includes rear executive seating with deployable ceramic tables and refrigerated console.',
       features: [
@@ -273,8 +363,8 @@
       horsepower: 612,
       vin: 'ZFF89VHA4P0202306',
       images: [
-        'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1200&q=80'
+        LOCAL_STUDIO_IMAGES.ferrariEditorial,
+        LOCAL_STUDIO_IMAGES.porscheStudio
       ],
       description: 'La Nuova Dolce Vita. Timeless Maranello grand touring silhouette housing an award-winning twin-turbo V8 and dual-cockpit digital interior.',
       features: [
@@ -304,8 +394,8 @@
       horsepower: 1020,
       vin: '5YJSA1E67RF202407',
       images: [
-        'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=1200&q=80'
+        LOCAL_STUDIO_IMAGES.audiStudio,
+        LOCAL_STUDIO_IMAGES.porscheStudio
       ],
       description: '0 to 60 mph in 1.99 seconds. The world’s quickest production acceleration with carbon-sleeved rotors and torque vectoring.',
       features: [
@@ -335,8 +425,8 @@
       horsepower: 697,
       vin: 'SCFRMAAW0PG202308',
       images: [
-        'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=80'
+        LOCAL_STUDIO_IMAGES.ferrariEditorial,
+        LOCAL_STUDIO_IMAGES.mercedesStudio
       ],
       description: 'The pinnacle of performance SUVs. 697 hp of British muscularity paired with race-derived wet-clutch transmission and carbon ceramic anchors.',
       features: [
@@ -350,6 +440,17 @@
     }
   ];
 
+  function sanitizeVehicleImages(vehicles) {
+    return vehicles.map((v, idx) => {
+      const seedMatch = INITIAL_VEHICLES.find((s) => s.id === v.id) || INITIAL_VEHICLES[idx % INITIAL_VEHICLES.length];
+      const hasExternalUrl = Array.isArray(v.images) && v.images.some((u) => typeof u === 'string' && u.includes('unsplash.com'));
+      if (!Array.isArray(v.images) || v.images.length === 0 || hasExternalUrl) {
+        return Object.assign({}, v, { images: [...seedMatch.images] });
+      }
+      return v;
+    });
+  }
+
   class Store {
     constructor() {
       this.listeners = new Set();
@@ -359,8 +460,10 @@
 
     _loadCurrency() {
       try {
-        const stored = localStorage.getItem(CURRENCY_KEY);
-        if (stored && CURRENCY_RATES[stored]) return stored;
+        if (typeof localStorage !== 'undefined') {
+          const stored = localStorage.getItem(CURRENCY_KEY);
+          if (stored && CURRENCY_RATES[stored]) return stored;
+        }
       } catch (e) {
         console.warn('Unable to access localStorage for currency:', e);
       }
@@ -369,11 +472,13 @@
 
     _loadVehicles() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed;
+        if (typeof localStorage !== 'undefined') {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              return sanitizeVehicleImages(parsed);
+            }
           }
         }
       } catch (e) {
@@ -384,7 +489,9 @@
 
     _saveSeed(seedList) {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(seedList));
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(seedList));
+        }
       } catch (e) {
         console.warn('Failed saving seed inventory to localStorage:', e);
       }
@@ -393,7 +500,9 @@
 
     _persist() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.vehicles));
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(this.vehicles));
+        }
       } catch (e) {
         console.error('Failed to persist inventory to localStorage:', e);
       }
@@ -418,7 +527,6 @@
       return () => this.listeners.delete(fn);
     }
 
-    // Currency methods
     getCurrency() {
       return this.currency;
     }
@@ -427,7 +535,9 @@
       if (CURRENCY_RATES[curr]) {
         this.currency = curr;
         try {
-          localStorage.setItem(CURRENCY_KEY, curr);
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(CURRENCY_KEY, curr);
+          }
         } catch (e) {
           console.warn('Failed to store currency in localStorage:', e);
         }
@@ -441,20 +551,17 @@
 
     formatPrice(usdAmount, currencyOverride) {
       const curr = currencyOverride || this.currency;
-      const config = CURRENCY_RATES[curr] || CURRENCY_RATES.USD;
-      const converted = Math.round(Number(usdAmount || 0) * config.rate);
-
-      // Use Intl.NumberFormat for clean punctuation
-      const formattedNumber = new Intl.NumberFormat('en-US').format(converted);
-      return `${config.symbol}${formattedNumber}`;
+      return formatPriceWithRates(usdAmount, curr);
     }
 
-    // Helper export
     extractSketchfabId(input) {
       return extractSketchfabId(input);
     }
 
-    // Inventory CRUD
+    filterAndSortVehicles(filters) {
+      return filterAndSortVehicles(this.vehicles, filters);
+    }
+
     getVehicles() {
       return [...this.vehicles];
     }
@@ -466,6 +573,10 @@
     addVehicle(vehicleData) {
       const rawSketchfab = vehicleData.sketchfabId !== undefined ? vehicleData.sketchfabId : vehicleData.sketchfab;
       const parsedSketchfabId = extractSketchfabId(rawSketchfab);
+
+      const rawImg = vehicleData.image && !String(vehicleData.image).includes('unsplash.com')
+        ? vehicleData.image
+        : LOCAL_STUDIO_IMAGES.porscheStudio;
 
       const newVehicle = {
         id: `apex-car-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
@@ -487,7 +598,7 @@
         vin: String(vehicleData.vin || `VIN${Date.now()}`).trim().toUpperCase(),
         images: Array.isArray(vehicleData.images) && vehicleData.images.length > 0
           ? vehicleData.images
-          : [vehicleData.image || 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1200&q=80'],
+          : [rawImg],
         description: String(vehicleData.description || 'Pristine showroom condition with complete documentation.').trim(),
         features: Array.isArray(vehicleData.features) && vehicleData.features.length > 0
           ? vehicleData.features
@@ -515,7 +626,7 @@
       const updated = {
         ...current,
         ...patchData,
-        id: current.id, // Immutable ID
+        id: current.id,
         sketchfabId: updatedSketchfabId,
         priceUSD: patchData.priceUSD !== undefined ? Number(patchData.priceUSD) : current.priceUSD,
         mileage: patchData.mileage !== undefined ? Number(patchData.mileage) : current.mileage,
@@ -573,7 +684,6 @@
       };
     }
 
-    // Featured 3D Showcase Models (Apple Keynote Stage)
     getFeatured3DCars() {
       return [...FEATURED_3D_CARS];
     }
@@ -581,8 +691,25 @@
     getFeatured3DCar(id) {
       return FEATURED_3D_CARS.find((c) => c.id === id) || FEATURED_3D_CARS[0];
     }
+
+    getStudioImages() {
+      return Object.assign({}, LOCAL_STUDIO_IMAGES);
+    }
   }
 
-  // Export globally
-  window.ApexStore = new Store();
-})(window);
+  const storeInstance = new Store();
+  if (root) {
+    root.ApexStore = storeInstance;
+  }
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+      ApexStore: storeInstance,
+      Store,
+      extractSketchfabId,
+      formatPriceWithRates,
+      filterAndSortVehicles,
+      FEATURED_3D_CARS,
+      INITIAL_VEHICLES
+    };
+  }
+})(typeof window !== 'undefined' ? window : globalThis);

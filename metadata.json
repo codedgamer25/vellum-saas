@@ -1,0 +1,8 @@
+{
+  "name": "Apex Auto Lounge",
+  "description": "Beverly Hills premier exotic motorcar gallery and interactive 3D showroom featuring editorial typography, depth-of-field 3D carousel, multi-currency pricing, and owner inventory console.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

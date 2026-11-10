@@ -2,8 +2,11 @@
   "name": "royal-headmistress-luxury-hair",
   "version": "2.0.0",
   "private": true,
-  "description": "Royal Headmistress — Premium Wigs & Luxury Hair Couture Website",
+  "description": "Apex Auto Lounge — Editorial Luxury & 3D Exotic Dealership Gallery",
   "scripts": {
-    "start": "npx serve ."
+    "dev": "npx serve . -l 3000",
+    "start": "npx serve . -l 3000",
+    "build": "node --check scripts/dealership-store.js && node --check scripts/dealership-3d-viewer.js && node --check scripts/dealership-app.js",
+    "lint": "node --check scripts/dealership-store.js && node --check scripts/dealership-3d-viewer.js && node --check scripts/dealership-app.js"
   }
 }
