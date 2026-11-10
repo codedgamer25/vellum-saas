@@ -90,8 +90,8 @@
         {
           initialModel: 'ferrari',
           initialColor: '#FD6E6E',
-          autoRotate: !isSoftwareGl,
-          autoRotateSpeed: 0.75
+          autoRotate: false,
+          autoRotateSpeed: 0.65
         },
         options
       );
@@ -114,6 +114,8 @@
       this.intersectionObserver = null;
       this.isVisibleInViewport = true;
       this.isLoopRunning = false;
+      this.isInteracting = false;
+      this.dampingFramesRemaining = 0;
       this.isInitialized = false;
       this.dracoLoader = null;
       this.gltfLoader = null;
@@ -147,7 +149,6 @@
         document.addEventListener('visibilitychange', this.onVisibilityChange);
         this.setupViewportObserver();
 
-        this.startRenderLoop();
         this.loadModel(this.currentModelKey, this.currentColor);
 
         this.isInitialized = true;
@@ -166,10 +167,10 @@
           const entry = entries[0];
           if (!entry) return;
           this.isVisibleInViewport = entry.isIntersecting;
-          if (this.isVisibleInViewport && !document.hidden) {
-            this.startRenderLoop();
-          } else {
+          if (!this.isVisibleInViewport || document.hidden) {
             this.stopRenderLoop();
+          } else if (this.needsContinuousRender()) {
+            this.startRenderLoop();
           }
         },
         { threshold: 0.05 }
@@ -180,7 +181,23 @@
     onVisibilityChange() {
       if (document.hidden) {
         this.stopRenderLoop();
-      } else if (this.isVisibleInViewport) {
+      } else if (this.isVisibleInViewport && this.needsContinuousRender()) {
+        this.startRenderLoop();
+      }
+    }
+
+    needsContinuousRender() {
+      return (
+        this.isInteracting ||
+        this.dampingFramesRemaining > 0 ||
+        Math.abs(this.spinOffset) > 0.001 ||
+        Boolean(this.targetCameraPos)
+      );
+    }
+
+    wakeRenderLoop(frames = 28) {
+      this.dampingFramesRemaining = Math.max(this.dampingFramesRemaining, frames);
+      if (this.isVisibleInViewport && !document.hidden) {
         this.startRenderLoop();
       }
     }
@@ -260,29 +277,30 @@
         preserveDrawingBuffer: false
       });
       this.renderer.setSize(width, height);
-      this.renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, 2));
+      // Cap DPR at 1.25 to cut GPU fragment shader load by ~60% on Retina displays while maintaining crisp edges
+      this.renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, 1.25));
       if (this.renderer.outputEncoding !== undefined) {
         this.renderer.outputEncoding = THREE.sRGBEncoding;
       }
       if (this.renderer.toneMapping !== undefined) {
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        this.renderer.toneMappingExposure = 0.92;
+        this.renderer.toneMappingExposure = 0.95;
       }
 
-      // Generate procedural studio softbox environment reflection so metallic paint & glass have rich contrast
+      // Lightweight 256x128 studio softbox reflection texture
       try {
         const envCanvas = document.createElement('canvas');
-        envCanvas.width = 512;
-        envCanvas.height = 256;
+        envCanvas.width = 256;
+        envCanvas.height = 128;
         const ectx = envCanvas.getContext('2d');
-        const grad = ectx.createLinearGradient(0, 0, 0, 256);
+        const grad = ectx.createLinearGradient(0, 0, 0, 128);
         grad.addColorStop(0, '#1e2430');
         grad.addColorStop(0.25, '#ffffff');
         grad.addColorStop(0.48, '#2d3340');
         grad.addColorStop(0.55, '#12151c');
         grad.addColorStop(1, '#090b10');
         ectx.fillStyle = grad;
-        ectx.fillRect(0, 0, 512, 256);
+        ectx.fillRect(0, 0, 256, 128);
         const envTex = new THREE.CanvasTexture(envCanvas);
         if (THREE.EquirectangularReflectionMapping) {
           envTex.mapping = THREE.EquirectangularReflectionMapping;
@@ -292,44 +310,34 @@
     }
 
     setupLighting() {
-      // Balanced High-Contrast Studio Rig for Deep Saturated Car Paint on White Backdrop
-      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x1e293b, 0.72);
+      // Streamlined 3-Light Studio Rig (eliminates per-pixel SpotLight overhead)
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x1e293b, 0.95);
       hemiLight.position.set(0, 10, 0);
       this.scene.add(hemiLight);
 
-      const keyLight = new THREE.DirectionalLight(0xfffdf8, 1.35);
-      keyLight.position.set(-6, 9, -6);
+      const keyLight = new THREE.DirectionalLight(0xfffdf8, 1.65);
+      keyLight.position.set(-5, 9, -6);
       this.scene.add(keyLight);
 
-      const fillLight = new THREE.DirectionalLight(0xcbd5e1, 0.78);
-      fillLight.position.set(6, 5, 5);
+      const fillLight = new THREE.DirectionalLight(0xe2e8f0, 0.95);
+      fillLight.position.set(6, 6, 4);
       this.scene.add(fillLight);
-
-      const rimLight = new THREE.DirectionalLight(0xffffff, 0.75);
-      rimLight.position.set(0, 6, -8);
-      this.scene.add(rimLight);
-
-      const topSpot = new THREE.SpotLight(0xffffff, 1.15);
-      topSpot.position.set(0, 9, 0);
-      topSpot.angle = Math.PI / 3;
-      topSpot.penumbra = 0.85;
-      this.scene.add(topSpot);
     }
 
     setupContactShadow() {
       const shadowCanvas = document.createElement('canvas');
-      shadowCanvas.width = 512;
-      shadowCanvas.height = 512;
+      shadowCanvas.width = 256;
+      shadowCanvas.height = 256;
       const ctx = shadowCanvas.getContext('2d');
 
-      const gradient = ctx.createRadialGradient(256, 256, 18, 256, 256, 235);
+      const gradient = ctx.createRadialGradient(128, 128, 10, 128, 128, 118);
       gradient.addColorStop(0, 'rgba(15, 18, 26, 0.55)');
       gradient.addColorStop(0.38, 'rgba(15, 18, 26, 0.30)');
       gradient.addColorStop(0.7, 'rgba(15, 18, 26, 0.08)');
       gradient.addColorStop(1, 'rgba(15, 18, 26, 0)');
 
       ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 512, 512);
+      ctx.fillRect(0, 0, 256, 256);
 
       const shadowTexture = new THREE.CanvasTexture(shadowCanvas);
       const planeGeometry = new THREE.PlaneGeometry(5.6, 3.7);
@@ -342,6 +350,8 @@
       const shadowPlane = new THREE.Mesh(planeGeometry, planeMaterial);
       shadowPlane.rotation.x = -Math.PI / 2;
       shadowPlane.position.y = 0.01;
+      shadowPlane.matrixAutoUpdate = false;
+      shadowPlane.updateMatrix();
       shadowPlane.name = 'groundContactShadow';
       this.scene.add(shadowPlane);
     }
@@ -350,16 +360,29 @@
       if (typeof THREE.OrbitControls === 'function') {
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = !isSoftwareGl;
-        this.controls.dampingFactor = 0.06;
+        this.controls.dampingFactor = 0.08;
         this.controls.enableZoom = false;
         this.controls.maxPolarAngle = Math.PI / 2 - 0.06;
         this.controls.minPolarAngle = Math.PI / 7;
         this.controls.enablePan = false;
-        this.controls.autoRotate = !isSoftwareGl && this.options.autoRotate;
-        this.controls.autoRotateSpeed = this.options.autoRotateSpeed;
+        this.controls.autoRotate = false;
         if (THREE.TOUCH) {
           this.controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DO_NOTHING };
         }
+
+        this.controls.addEventListener('start', () => {
+          this.isInteracting = true;
+          this.wakeRenderLoop(40);
+        });
+        this.controls.addEventListener('change', () => {
+          if (!this.isLoopRunning && this.renderer && this.scene && this.camera) {
+            this.renderer.render(this.scene, this.camera);
+          }
+        });
+        this.controls.addEventListener('end', () => {
+          this.isInteracting = false;
+          this.wakeRenderLoop(32);
+        });
       }
     }
 
@@ -380,66 +403,65 @@
       model.scale.set(1, 1, 1);
       model.updateMatrixWorld(true);
 
-      // Measure unscaled world bounds and auto-normalize so all 4 GLB models share consistent studio framing
+      // Single-pass bounding box calculation (avoids traversing all vertices twice)
       const rawBox = new THREE.Box3().setFromObject(model);
       const rawSize = rawBox.getSize(new THREE.Vector3());
+      const rawCenter = rawBox.getCenter(new THREE.Vector3());
       const maxDim = Math.max(rawSize.x, rawSize.y, rawSize.z);
       const targetSpan = config.targetSpan || 3.45;
       const normalizedScale = maxDim > 0.0001 ? targetSpan / maxDim : config.scale;
 
       model.scale.setScalar(normalizedScale);
+      model.position.x = -rawCenter.x * normalizedScale;
+      model.position.z = -rawCenter.z * normalizedScale;
+      model.position.y = (config.positionY || 0) - rawBox.min.y * normalizedScale;
       model.updateMatrixWorld(true);
 
-      const box = new THREE.Box3().setFromObject(model);
-      const center = box.getCenter(new THREE.Vector3());
-      const size = box.getSize(new THREE.Vector3());
+      const scaledHeight = rawSize.y * normalizedScale;
 
-      model.position.x -= center.x;
-      model.position.z -= center.z;
-      model.position.y = (config.positionY || 0) - box.min.y;
-
-      const sharedPaintMat = new THREE.MeshPhysicalMaterial({
+      const sharedPaintMat = new THREE.MeshStandardMaterial({
         name: 'ApexCarPaint',
         color: new THREE.Color(initialColor),
-        metalness: 0.34,
-        roughness: 0.21,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.05,
-        side: THREE.DoubleSide
+        metalness: 0.38,
+        roughness: 0.18,
+        envMapIntensity: 1.25,
+        side: THREE.FrontSide
       });
 
-      const sharedWindowMat = new THREE.MeshPhysicalMaterial({
+      const sharedWindowMat = new THREE.MeshStandardMaterial({
         name: 'ApexTintedGlass',
         color: new THREE.Color(0x12161f),
         metalness: 0.85,
         roughness: 0.08,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.04,
         transparent: true,
         opacity: 0.86
       });
 
       const paintMaterials = [sharedPaintMat];
       model.traverse((child) => {
-        if (child.isMesh && child.material) {
-          const mat = child.material;
-          const matName = mat.name || '';
-          const isPaint =
-            Array.isArray(config.paintMaterialNames) &&
-            config.paintMaterialNames.some(
-              (pName) => matName === pName || matName.toLowerCase() === pName.toLowerCase() || matName.includes(pName)
-            );
-          const isWindow =
-            !isPaint &&
-            Array.isArray(config.windowMaterialNames) &&
-            config.windowMaterialNames.some(
-              (wName) => matName === wName || matName.toLowerCase() === wName.toLowerCase() || matName.includes(wName)
-            );
+        if (child.isMesh) {
+          child.matrixAutoUpdate = false;
+          child.updateMatrix();
+          if (child.material) {
+            const mat = child.material;
+            const matName = mat.name || '';
+            const isPaint =
+              Array.isArray(config.paintMaterialNames) &&
+              config.paintMaterialNames.some(
+                (pName) => matName === pName || matName.toLowerCase() === pName.toLowerCase() || matName.includes(pName)
+              );
+            const isWindow =
+              !isPaint &&
+              Array.isArray(config.windowMaterialNames) &&
+              config.windowMaterialNames.some(
+                (wName) => matName === wName || matName.toLowerCase() === wName.toLowerCase() || matName.includes(wName)
+              );
 
-          if (isPaint) {
-            child.material = sharedPaintMat;
-          } else if (isWindow) {
-            child.material = sharedWindowMat;
+            if (isPaint) {
+              child.material = sharedPaintMat;
+            } else if (isWindow) {
+              child.material = sharedWindowMat;
+            }
           }
         }
       });
@@ -448,7 +470,7 @@
         model,
         paintMaterials,
         baseRotationY: config.rotationY || 0,
-        targetY: size.y * 0.35
+        targetY: scaledHeight * 0.35
       };
     }
 
@@ -485,25 +507,6 @@
       return promise;
     }
 
-    scheduleIdlePreload() {
-      if (this.idlePreloadId) return;
-      const runPreload = () => {
-        const secondaryKeys = ['porsche', 'mercedes', 'audi', 'ferrari'];
-        secondaryKeys.forEach((key) => {
-          const cfg = MODEL_CONFIG[key];
-          if (cfg && !this.modelCache.has(cfg.path) && !this.loadingPromises.has(cfg.path)) {
-            this.fetchAndCacheModel(cfg, cfg.defaultColor).catch(() => {});
-          }
-        });
-      };
-
-      if (typeof window.requestIdleCallback === 'function') {
-        this.idlePreloadId = window.requestIdleCallback(runPreload, { timeout: 1500 });
-      } else {
-        this.idlePreloadId = window.setTimeout(runPreload, 500);
-      }
-    }
-
     activateCachedModel(entry, config, targetColor, direction = null) {
       if (this.currentModel && this.currentModel !== entry.model) {
         this.scene.remove(this.currentModel);
@@ -522,7 +525,7 @@
         window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       if (!prefersReducedMotion && direction) {
-        this.spinOffset = direction === 'prev' ? -0.32 : 0.32;
+        this.spinOffset = direction === 'prev' ? -0.28 : 0.28;
       } else {
         this.spinOffset = 0;
       }
@@ -538,7 +541,7 @@
         const cz = config.cameraPos[2] * distScale;
 
         if (!prefersReducedMotion && direction && typeof THREE !== 'undefined') {
-          this.camera.position.set(cx * 1.06, cy * 1.04, cz * 1.06);
+          this.camera.position.set(cx * 1.05, cy * 1.03, cz * 1.05);
           this.targetCameraPos = new THREE.Vector3(cx, cy, cz);
         } else {
           this.camera.position.set(cx, cy, cz);
@@ -557,9 +560,12 @@
         this.carImageFallback.classList.add('has-3d-loaded');
       }
 
-      // Render an immediate frame so WebGL canvas matches the swapped vehicle before fade-in
       if (this.renderer && this.scene && this.camera) {
         this.renderer.render(this.scene, this.camera);
+      }
+
+      if (this.needsContinuousRender()) {
+        this.wakeRenderLoop(36);
       }
     }
 
@@ -575,18 +581,23 @@
 
       // Fast Path: Instantaneous <0.2ms swap if GLB is already in memory cache
       if (this.modelCache.has(config.path)) {
+        if (this.container) this.container.classList.remove('is-loading');
         const cachedEntry = this.modelCache.get(config.path);
         this.activateCachedModel(cachedEntry, config, targetColor, direction);
         return;
       }
 
+      // Rule 19: Add loading states (Show minimal atelier loader during fetch)
+      if (this.container) this.container.classList.add('is-loading');
+
       this.fetchAndCacheModel(config, targetColor)
         .then((entry) => {
           if (currentToken !== this.loadToken) return;
+          if (this.container) this.container.classList.remove('is-loading');
           this.activateCachedModel(entry, config, targetColor, direction);
-          this.scheduleIdlePreload();
         })
         .catch((err) => {
+          if (this.container) this.container.classList.remove('is-loading');
           console.warn('Apex3DViewer: Fallback kept for ' + modelKey, err);
           this.enableInteractiveTilt();
         });
@@ -596,7 +607,6 @@
       this.currentColor = hexColor;
       if (typeof THREE === 'undefined') return;
       const threeColor = new THREE.Color(hexColor);
-      // Deepen lightness slightly before converting sRGB -> Linear so studio lights don't wash out the paint
       const hsl = {};
       threeColor.getHSL(hsl);
       if (hsl.l > 0.45) {
@@ -609,9 +619,8 @@
       if (this.paintMaterials && this.paintMaterials.length > 0) {
         this.paintMaterials.forEach((mat) => {
           mat.color.copy(threeColor);
-          if (mat.clearcoat !== undefined) mat.clearcoat = 1.0;
-          if (mat.metalness !== undefined) mat.metalness = 0.34;
-          if (mat.roughness !== undefined) mat.roughness = 0.21;
+          if (mat.metalness !== undefined) mat.metalness = 0.38;
+          if (mat.roughness !== undefined) mat.roughness = 0.18;
           mat.needsUpdate = true;
         });
       }
@@ -620,7 +629,6 @@
         this.carImageFallback.style.setProperty('--car-color-accent', hexColor);
       }
 
-      // Immediately render a frame so color changes appear instantaneously even when autoRotate is paused
       if (this.renderer && this.scene && this.camera) {
         this.renderer.render(this.scene, this.camera);
       }
@@ -658,40 +666,27 @@
       this.camera.aspect = width / height;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(width, height);
+      if (this.scene) {
+        this.renderer.render(this.scene, this.camera);
+      }
     }
 
     afterDraw(cb) {
       if (!this.renderer || !this.isLoopRunning) return;
-      const gl = this.renderer.getContext();
-      if (gl && typeof gl.fenceSync === 'function') {
-        const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
-        gl.flush();
-        const poll = () => {
-          if (!this.isLoopRunning) {
-            if (sync) gl.deleteSync(sync);
-            return;
-          }
-          const state = sync && gl.getSyncParameter(sync, gl.SYNC_STATUS);
-          if (state === gl.UNSIGNALED) {
-            this.timeoutId = window.setTimeout(poll, 8);
-          } else {
-            if (sync) gl.deleteSync(sync);
-            this.timeoutId = window.setTimeout(cb, 85);
-          }
-        };
-        this.timeoutId = window.setTimeout(poll, 8);
-      } else {
-        this.timeoutId = window.setTimeout(cb, 85);
-      }
+      this.timeoutId = window.setTimeout(cb, 48);
     }
 
     animate() {
       if (!this.isLoopRunning) return;
 
+      let activeTransition = false;
+
       if (this.currentModel && Math.abs(this.spinOffset) > 0.001) {
         this.spinOffset *= 0.8;
         if (Math.abs(this.spinOffset) <= 0.002) {
           this.spinOffset = 0;
+        } else {
+          activeTransition = true;
         }
         this.currentModel.rotation.y = (this.currentBaseRotationY || 0) + this.spinOffset;
       }
@@ -701,6 +696,8 @@
         if (this.camera.position.distanceToSquared(this.targetCameraPos) < 0.0015) {
           this.camera.position.copy(this.targetCameraPos);
           this.targetCameraPos = null;
+        } else {
+          activeTransition = true;
         }
       }
 
@@ -710,6 +707,16 @@
 
       if (this.renderer && this.scene && this.camera) {
         this.renderer.render(this.scene, this.camera);
+      }
+
+      if (this.dampingFramesRemaining > 0 && !this.isInteracting) {
+        this.dampingFramesRemaining--;
+      }
+
+      // Pause loop automatically once transitions and orbit damping settle (0% idle GPU usage)
+      if (!this.isInteracting && !activeTransition && this.dampingFramesRemaining <= 0) {
+        this.stopRenderLoop();
+        return;
       }
 
       if (isSoftwareGl) {

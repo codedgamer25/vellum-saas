@@ -20,12 +20,14 @@
   --color-border-strong: #111115;
   --color-border-focus: #111115;
 
-  /* Brand & Marco Perez Pop Accents */
+  /* Brand & Atelier Accents (Rule 11: Deliberate Accent Color) */
   --color-gold: #111115;
   --color-gold-accent: #B8860B;
   --color-gold-hover: #272730;
   --color-gold-glow: rgba(17, 17, 21, 0.12);
   --color-gold-tint: rgba(17, 17, 21, 0.06);
+  --color-accent: #E11D48;
+  --color-accent-subtle: rgba(225, 29, 72, 0.08);
 
   /* Status Colors (Paired with explicit text labels) */
   --color-status-avail: #0D9488;
@@ -35,10 +37,10 @@
   --color-status-sold: #64748B;
   --color-status-sold-bg: rgba(100, 116, 139, 0.12);
 
-  /* High-Contrast Ink Hierarchy */
+  /* High-Contrast Ink Hierarchy (Rule 15: Improve text contrast) */
   --color-text-high: #111115;
-  --color-text-mid: #5A5E68;
-  --color-text-low: #858994;
+  --color-text-mid: #334155;
+  --color-text-low: #64748B;
 
   /* 2+1 Font Families (Outfit + Plus Jakarta Sans + JetBrains Mono) */
   --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -53,10 +55,11 @@
   --duration-normal: 240ms;
   --duration-slow: 420ms;
 
-  /* Radii & Elevations */
+  /* Concentric Radii (Rule 14: Inner radius = outer - padding) */
   --radius-sm: 6px;
-  --radius-md: 12px;
+  --radius-md: 10px;
   --radius-lg: 20px;
+  --radius-modal: 24px;
   --radius-pill: 9999px;
 
   --shadow-card: 0 12px 32px -12px rgba(17, 17, 21, 0.07);
@@ -143,8 +146,10 @@ img {
   position: sticky;
   top: 0;
   z-index: 60;
-  background: rgba(255, 255, 255, 0.92);
-  border-bottom: 1px solid var(--color-border-subtle);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: none;
 }
 
 .header-container {
@@ -426,7 +431,7 @@ img {
 .hero-stage-viewport {
   position: relative;
   width: 100%;
-  max-width: 1440px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%);
   margin: 0 auto;
   padding: 0;
 }
@@ -434,9 +439,11 @@ img {
 .hero-stage-card {
   position: relative;
   width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
   min-height: 760px;
-  background: linear-gradient(180deg, #FFFFFF 0%, #F7F8FA 100%);
-  border-bottom: 1px solid var(--color-border-subtle);
+  background: transparent;
+  border-bottom: none;
   overflow: hidden;
   contain: layout style;
   display: flex;
@@ -544,10 +551,10 @@ img {
   height: auto;
   object-fit: contain;
   transform: scale3d(1.22, 1.22, 1);
+  will-change: transform;
   transition:
     transform 340ms var(--ease-out),
-    opacity 280ms var(--ease-out),
-    filter 340ms var(--ease-out);
+    opacity 280ms var(--ease-out);
 }
 
 .hero-flank-prev .hero-flank-car-img {
@@ -563,8 +570,7 @@ img {
   height: 16px;
   margin-top: -10px;
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(17, 17, 21, 0.26) 0%, rgba(17, 17, 21, 0) 72%);
-  filter: blur(4px);
+  background: radial-gradient(ellipse at center, rgba(17, 17, 21, 0.22) 0%, rgba(17, 17, 21, 0) 72%);
   transition: transform 340ms var(--ease-out), opacity 280ms var(--ease-out);
 }
 
@@ -746,6 +752,7 @@ img {
   background: #FFFFFF;
   color: var(--color-text-high);
   font-size: 1.05rem;
+  line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -754,6 +761,15 @@ img {
     border-color 200ms var(--ease-out),
     background-color 200ms var(--ease-out),
     color 200ms var(--ease-out);
+}
+
+/* Rule 17: Align by eye, not pixels (Optical centering for directional glyphs) */
+#hero-prev-vehicle-btn {
+  padding-right: 2px;
+}
+
+#hero-next-vehicle-btn {
+  padding-left: 2px;
 }
 
 #hero-prev-vehicle-btn:hover {
@@ -920,6 +936,93 @@ img {
   border-radius: 50%;
   flex-shrink: 0;
   box-shadow: inset 0 0 0 1px rgba(17, 17, 21, 0.12);
+}
+
+/* Rule 20: Animate useful feedback (Interactive Paint Lacquer Toast) */
+.hero-stage-bottom-island {
+  position: relative;
+}
+
+.swatch-feedback-toast {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translate3d(-50%, 8px, 0);
+  background: rgba(17, 17, 21, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #FFFFFF;
+  padding: 0.38rem 0.85rem;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
+  z-index: 25;
+  box-shadow: 0 10px 28px -6px rgba(0, 0, 0, 0.32);
+}
+
+.swatch-feedback-toast.is-visible {
+  opacity: 1;
+  transform: translate3d(-50%, 0, 0);
+}
+
+.toast-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.5);
+  display: inline-block;
+}
+
+/* Rule 19: Add loading states (Minimal Atelier 3D Loader) */
+.hero-3d-loading-chip {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  transform: translate3d(-50%, 0, 0);
+  z-index: 15;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 0.38rem 0.9rem;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--color-text-mid);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 240ms var(--ease-out);
+  box-shadow: 0 4px 14px -3px rgba(17, 17, 21, 0.08);
+}
+
+.hero-3d-stage-container.is-loading .hero-3d-loading-chip {
+  opacity: 1;
+}
+
+.hero-3d-spinner {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--color-border);
+  border-top-color: var(--color-text-high);
+  border-radius: 50%;
+  animation: heroSpinnerSpin 750ms linear infinite;
+}
+
+@keyframes heroSpinnerSpin {
+  to { transform: rotate(360deg); }
 }
 
 /* ==========================================================================
@@ -1200,8 +1303,8 @@ img {
   padding: 5.5rem 2.5rem;
   overflow: hidden;
   background: linear-gradient(180deg, #F8F9FA 0%, #FFFFFF 100%);
-  border-top: 1px solid var(--color-border-subtle);
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-top: none;
+  border-bottom: none;
 }
 
 .featured-collection-watermark {
@@ -1510,14 +1613,15 @@ html.lenis body {
   flex-wrap: wrap;
 }
 
+/* Rule 14: Inner radius = outer - padding (20px outer - 12px padding = 8px inner radius) */
 .filter-bar-container {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr auto;
   gap: 0.85rem;
   background: #FFFFFF;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 1rem;
+  border-radius: 20px;
+  padding: 12px;
   box-shadow: var(--shadow-card);
 }
 
@@ -1525,15 +1629,28 @@ html.lenis body {
   position: relative;
 }
 
+.filter-search-icon {
+  position: absolute;
+  left: 0.95rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-low);
+  pointer-events: none;
+}
+
 .filter-input,
 .filter-select {
   width: 100%;
   padding: 0.65rem 0.95rem;
-  border-radius: var(--radius-md);
+  border-radius: 8px; /* Concentric: 20px - 12px = 8px */
   border: 1px solid var(--color-border);
   background: var(--color-canvas);
   color: var(--color-text-high);
   font-size: 0.86rem;
+}
+
+.filter-input.with-icon {
+  padding-left: 2.35rem;
 }
 
 .filter-input:focus,
@@ -1632,36 +1749,27 @@ html.lenis body {
   }
 }
 
+/* Rule 1: Delete filler badges (Only render non-standard status with clean typography) */
 .car-card-badge {
   position: absolute;
   top: 0.85rem;
   left: 0.85rem;
-  padding: 0.25rem 0.65rem;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  background: rgba(255, 255, 255, 0.92);
+  letter-spacing: 0.05em;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .badge-available { color: var(--color-status-avail); }
 .badge-reserved { color: var(--color-status-res); }
 .badge-sold { color: var(--color-status-sold); }
-
-.badge-3d-showcase {
-  position: absolute;
-  top: 0.85rem;
-  right: 0.85rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  font-weight: 600;
-  background: rgba(17, 17, 21, 0.82);
-  color: #FFFFFF;
-}
 
 .car-card-body {
   padding: 1.35rem;
@@ -1671,12 +1779,13 @@ html.lenis body {
   flex: 1;
 }
 
+/* Rule 4: Mono only where needed (Clean body font for vehicle meta, mono for VIN) */
 .car-card-year {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--color-text-low);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-text-mid);
+  letter-spacing: 0.02em;
 }
 
 .car-card-title {
@@ -1685,46 +1794,48 @@ html.lenis body {
   font-weight: 700;
   color: var(--color-text-high);
   margin-top: 0.2rem;
+  text-wrap: balance;
 }
 
 .car-card-specs {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
   color: var(--color-text-mid);
   font-variant-numeric: tabular-nums;
 }
 
+/* Rule 8: Group with spacing (No arbitrary hairline border slices) */
 .car-card-price-row {
   display: flex;
-  align-items: flex-end;
+  align-items: baseline;
   justify-content: space-between;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--color-border-subtle);
+  padding-top: 0.4rem;
   margin-top: auto;
 }
 
-.price-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-text-low);
-}
-
+/* Rule 18: Tabular nums on prices & specs */
 .price-value {
   font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--color-text-high);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
 .car-vin-short {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.74rem;
+  font-weight: 500;
   color: var(--color-text-low);
+  font-variant-numeric: tabular-nums;
+  background: var(--color-canvas);
+  padding: 0.2rem 0.45rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
 }
 
 .car-card-actions {
@@ -2123,7 +2234,23 @@ html.lenis body {
   border-radius: 50%;
   border: 1px solid var(--color-border);
   background: #FFFFFF;
-  font-size: 0.9rem;
+  color: var(--color-text-high);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
+}
+
+.modal-close-btn:hover {
+  background: var(--color-canvas);
+  border-color: var(--color-text-high);
+  transform: scale(1.05);
+}
+
+.modal-close-btn:active {
+  transform: scale(0.95);
 }
 
 .pin-input {
@@ -2236,6 +2363,7 @@ html.lenis body {
 .spec-cell-value {
   font-weight: 600;
   font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .features-list {

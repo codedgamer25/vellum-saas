@@ -366,7 +366,7 @@
                 src="${prevAtm.renderThumb}"
                 alt="${prevCar.make} ${prevCar.model}"
                 class="hero-flank-car-img"
-                style="filter: blur(4px) ${prevAtm.flankHue};"
+                style="filter: ${prevAtm.flankHue};"
                 referrerPolicy="no-referrer"
               />
               <span class="hero-flank-shadow" aria-hidden="true"></span>
@@ -374,6 +374,11 @@
 
             <!-- Center Interactive Local Three.js 3D Model Stage Canvas -->
             <div class="hero-3d-stage-viewport" id="hero-3d-stage-container" data-testid="hero-3d-stage">
+              <!-- Rule 19: Add loading states -->
+              <div class="hero-3d-loading-chip" id="hero-3d-loading-chip" aria-hidden="true">
+                <span class="hero-3d-spinner"></span>
+                <span class="hero-3d-loading-text">Calibrating Atelier 3D Model...</span>
+              </div>
               <canvas id="hero-3d-canvas" class="hero-3d-canvas"></canvas>
               <div class="hero-3d-instant-fallback" id="hero-3d-instant-fallback">
                 <img
@@ -401,7 +406,7 @@
                 src="${nextAtm.renderThumb}"
                 alt="${nextCar.make} ${nextCar.model}"
                 class="hero-flank-car-img"
-                style="filter: blur(4px) ${nextAtm.flankHue};"
+                style="filter: ${nextAtm.flankHue};"
                 referrerPolicy="no-referrer"
               />
               <span class="hero-flank-shadow" aria-hidden="true"></span>
@@ -484,6 +489,9 @@
                   <strong id="island-topspeed">${currentCar.topSpeed}</strong>
                   <span id="island-price">${STORE.formatPrice(currentCar.priceUSD)}</span>
                 </div>
+
+                <!-- Rule 20: Animate useful feedback (Live Lacquer Applied Toast) -->
+                <div class="swatch-feedback-toast" id="swatch-feedback-toast" aria-live="polite"></div>
 
                 <!-- Pure Circular Color Swatches (No Color Names Displayed) -->
                 <div class="triad-swatch-group swatch-only-group" role="group" aria-label="3D Paint Finishes">
@@ -604,7 +612,7 @@
           <div class="featured-collection-header">
             <div class="featured-header-left">
               <h2 class="editorial-thin-heading" id="featured-collection-heading">
-                FEATURED<br>COLLECTION
+                FEATURED <br>COLLECTION
               </h2>
               <svg class="editorial-swirl-svg" width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
                 <path d="M4 12C12 10 22 18 25 24C28 30 37 28 34 18C31 9 21 12 23 25C25 36 31 41 33 46M26 40L33 46L39 39" stroke="#111115" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
@@ -647,7 +655,8 @@
                     <h3 class="featured-arch-title">${displayTitle}</h3>
                     <span class="featured-arch-spec-tag">${car.horsepower} HP</span>
                   </div>
-                  <div class="featured-arch-price">Price : ${STORE.formatPrice(car.priceUSD)}</div>
+                  <!-- Rule 2: Drop redundant labels (Clean price typography) -->
+                  <div class="featured-arch-price">${STORE.formatPrice(car.priceUSD)}</div>
                 </div>
               </article>
             `
@@ -688,10 +697,14 @@
 
         <div class="filter-bar-container" id="filter-bar">
           <div class="filter-input-wrapper">
+            <svg class="filter-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
             <label for="filter-keyword" class="sr-only">Search inventory</label>
             <input
               type="text"
-              class="filter-input"
+              class="filter-input with-icon"
               id="filter-keyword"
               placeholder="Search make, model, year, VIN..."
               value="${state.filters.keyword}"
@@ -781,11 +794,12 @@
                       `Hi Apex Auto Lounge, I am inquiring about the ${car.year} ${car.make} ${car.model} (${formattedPrice}, VIN: ${car.vin}). Is it available for private inspection?`
                     );
 
+                    const hasSpecialStatus = car.status !== 'available';
+
                     return `
               <article class="car-card" data-id="${car.id}">
                 <div class="car-card-media">
-                  <span class="car-card-badge ${statusClass}">${statusLabel}</span>
-                  ${car.sketchfabId ? '<span class="badge-3d-showcase">3D SHOWROOM</span>' : ''}
+                  ${hasSpecialStatus ? `<span class="car-card-badge ${statusClass}">${statusLabel}</span>` : ''}
                   <img
                     src="${primaryImage}"
                     alt="${car.year} ${car.make} ${car.model}"
@@ -808,16 +822,15 @@
                     <span>${car.horsepower} HP</span>
                   </div>
 
+                  <!-- Rule 2 & 8: Clean price row without redundant 'Price' label or divider line -->
                   <div class="car-card-price-row">
-                    <div>
-                      <div class="price-label">Price</div>
-                      <div class="price-value">${formattedPrice}</div>
-                    </div>
+                    <div class="price-value">${formattedPrice}</div>
                     <div class="car-vin-short">
                       VIN ${car.vin.slice(-6)}
                     </div>
                   </div>
 
+                  <!-- Rule 10: Emphasize the CTA -->
                   <div class="car-card-actions">
                     <button type="button" class="btn-card-specs btn-open-detail" data-id="${car.id}">
                       Specs & Gallery
@@ -834,8 +847,9 @@
                       target="_blank"
                       rel="noopener noreferrer"
                       class="btn-card-whatsapp"
+                      aria-label="Inquire about ${car.year} ${car.make} ${car.model} via WhatsApp"
                     >
-                      Inquire
+                      Inquire ↗
                     </a>
                   </div>
                 </div>
@@ -1111,7 +1125,7 @@
       if (prevThumb) {
         prevThumb.setAttribute('src', prevAtmObj.renderThumb);
         prevThumb.setAttribute('alt', `${prevCarObj.make} ${prevCarObj.model}`);
-        prevThumb.style.filter = `blur(4px) ${prevAtmObj.flankHue}`;
+        prevThumb.style.filter = prevAtmObj.flankHue;
       }
 
       const flankNextBtn = main.querySelector('#hero-flank-next-btn');
@@ -1123,7 +1137,7 @@
       if (nextThumb) {
         nextThumb.setAttribute('src', nextAtmObj.renderThumb);
         nextThumb.setAttribute('alt', atmosphere.nextCarName);
-        nextThumb.style.filter = `blur(4px) ${nextAtmObj.flankHue}`;
+        nextThumb.style.filter = nextAtmObj.flankHue;
       }
       const nextCardName = main.querySelector('#next-vehicle-name');
       if (nextCardName) {
@@ -1329,6 +1343,17 @@
           );
         }
 
+        // Rule 20: Animate useful feedback (Display paint lacquer toast)
+        const toastEl = main.querySelector('#swatch-feedback-toast');
+        if (toastEl && triad) {
+          toastEl.innerHTML = `<span class="toast-dot" style="background:${appliedColor}"></span> ${triad.name} Lacquer Applied`;
+          toastEl.classList.add('is-visible');
+          clearTimeout(window.__swatchToastTimeout);
+          window.__swatchToastTimeout = setTimeout(() => {
+            toastEl.classList.remove('is-visible');
+          }, 2200);
+        }
+
         // Repaint the currently active 3D vehicle in-place without switching vehicles
         if (window.Apex3DViewer && typeof window.Apex3DViewer.changeCarColor === 'function') {
           window.Apex3DViewer.changeCarColor(appliedColor);
@@ -1401,9 +1426,9 @@
       if (typeof window.Lenis === 'function' && !state.lenis) {
         try {
           state.lenis = new window.Lenis({
-            lerp: 0.09,
+            lerp: 0.14,
             smoothWheel: true,
-            wheelMultiplier: 0.95,
+            wheelMultiplier: 1.0,
             touchMultiplier: 1.0
           });
 
@@ -1444,7 +1469,7 @@
           const targetEl = document.querySelector(href);
           if (targetEl && state.lenis) {
             ev.preventDefault();
-            state.lenis.scrollTo(targetEl, { offset: -24, duration: 1.15 });
+            state.lenis.scrollTo(targetEl, { offset: -24, duration: 0.9 });
           }
         });
       });
@@ -1487,23 +1512,7 @@
       }
       state.gsapTriggers = [];
 
-      // 1. Hero Watermark Horizontal Scroll Parallax Scrub
-      const heroWatermark = main.querySelector('#hero-watermark');
-      const heroSection = main.querySelector('#hero-stage-viewport');
-      if (heroWatermark && heroSection) {
-        const stHero = ScrollTrigger.create({
-          trigger: heroSection,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 0.6,
-          onUpdate: (self) => {
-            heroWatermark.style.setProperty('--watermark-scroll-x', `${(self.progress * -95).toFixed(1)}px`);
-          }
-        });
-        state.gsapTriggers.push(stHero);
-      }
-
-      // 2. Section 2 ("MORE THAN ENGINEERING, IT'S A LIFESTYLE") GSAP ScrollTrigger Choreography
+      // Section 2 ("MORE THAN ENGINEERING, IT'S A LIFESTYLE") GPU-Composited ScrollTrigger
       const lifestyleSec = main.querySelector('#lifestyle-section');
       if (lifestyleSec) {
         const lifeLeftItems = lifestyleSec.querySelectorAll(
@@ -1516,8 +1525,9 @@
         const lifeTl = gsap.timeline({
           scrollTrigger: {
             trigger: lifestyleSec,
-            start: 'top 82%',
+            start: 'top 84%',
             toggleActions: 'play none none none',
+            once: true,
             onEnter: () => lifestyleSec.classList.add('is-in-view')
           }
         });
@@ -1525,54 +1535,47 @@
         lifeTl
           .fromTo(
             lifeLeftItems,
-            { y: 36, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.78, stagger: 0.09, ease: 'power3.out', clearProps: 'transform,opacity' },
+            { y: 28, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.65, stagger: 0.07, ease: 'power3.out', clearProps: 'transform,opacity' },
             0
           )
           .fromTo(
             lifeCapsule,
-            {
-              y: 52,
-              opacity: 0,
-              scale: 0.93,
-              clipPath: 'inset(32% 0% 0% 0% round 999px)'
-            },
+            { y: 36, opacity: 0, scale: 0.95 },
             {
               y: 0,
               opacity: 1,
               scale: 1,
-              clipPath: 'inset(0% 0% 0% 0% round 999px)',
-              duration: 1.0,
-              ease: 'expo.out',
-              clearProps: 'clipPath,transform,opacity'
+              duration: 0.78,
+              ease: 'power3.out',
+              clearProps: 'transform,opacity'
             },
-            0.08
+            0.06
           )
           .fromTo(
             lifeCapsuleImg,
-            { scale: 1.22, yPercent: 8 },
-            { scale: 1, yPercent: 0, duration: 1.15, ease: 'expo.out', clearProps: 'transform' },
-            0.08
+            { scale: 1.12 },
+            { scale: 1, duration: 0.85, ease: 'power3.out', clearProps: 'transform' },
+            0.06
           )
           .fromTo(
             lifeCircle,
-            { x: -34, scale: 0.68, rotation: -10, opacity: 0 },
+            { x: -24, scale: 0.78, opacity: 0 },
             {
               x: 0,
               scale: 1,
-              rotation: 0,
               opacity: 1,
-              duration: 0.85,
-              ease: 'back.out(1.7)',
-              clearProps: 'x,scale,rotation,opacity'
+              duration: 0.7,
+              ease: 'back.out(1.4)',
+              clearProps: 'x,scale,opacity'
             },
-            0.24
+            0.18
           );
 
         if (lifeTl.scrollTrigger) state.gsapTriggers.push(lifeTl.scrollTrigger);
       }
 
-      // 3. Section 3 ("FEATURED COLLECTION") — Exact @uiuxzaid Video Reveal & Arch Unmask Wave
+      // Section 3 ("FEATURED COLLECTION") — GPU-Composited Entrance & Lightweight Hover
       const featuredSec = main.querySelector('#featured-collection-section');
       if (featuredSec) {
         const featWatermark = featuredSec.querySelector('#featured-watermark');
@@ -1580,37 +1583,15 @@
         const featSwirlPath = featuredSec.querySelector('.editorial-swirl-svg path');
         const featRight = featuredSec.querySelector('.featured-header-right');
         const archCards = Array.from(featuredSec.querySelectorAll('.featured-arch-card'));
-        const archCapsules = archCards.map((c) => c.querySelector('.featured-arch-capsule')).filter(Boolean);
         const archImgs = archCards.map((c) => c.querySelector('.featured-arch-img')).filter(Boolean);
         const archMetas = archCards.map((c) => c.querySelector('.featured-arch-meta')).filter(Boolean);
 
-        // Colossal Warm "FEATURE" Watermark Horizontal Scrub + Differential Arch Scroll Parallax
-        const stFeatureScrub = ScrollTrigger.create({
-          trigger: featuredSec,
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: 0.65,
-          onUpdate: (self) => {
-            if (featWatermark) {
-              const shift = (0.5 - self.progress) * 145;
-              featWatermark.style.setProperty('--feature-scroll-x', `${shift.toFixed(1)}px`);
-            }
-            // Subtle differential vertical parallax on the center vs outer arches during Lenis scroll
-            const centerLift = (0.5 - self.progress) * 22;
-            archCards.forEach((card, i) => {
-              const offset = i === 1 ? -centerLift : centerLift * 0.45;
-              card.style.setProperty('--arch-scroll-y', `${offset.toFixed(1)}px`);
-            });
-          }
-        });
-        state.gsapTriggers.push(stFeatureScrub);
-
-        // Main Featured Collection Entrance Timeline (Header + Swirl Draw + 3 Stadium Arch Unmask Wave)
         const featTl = gsap.timeline({
           scrollTrigger: {
             trigger: featuredSec,
-            start: 'top 80%',
+            start: 'top 82%',
             toggleActions: 'play none none none',
+            once: true,
             onEnter: () => featuredSec.classList.add('is-in-view')
           }
         });
@@ -1618,85 +1599,68 @@
         featTl
           .fromTo(
             featHeading,
-            { y: 40, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.78, ease: 'power3.out', clearProps: 'transform,opacity' },
+            { y: 28, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.65, ease: 'power3.out', clearProps: 'transform,opacity' },
             0
           )
           .fromTo(
             featSwirlPath,
             { strokeDashoffset: 180 },
-            { strokeDashoffset: 0, duration: 0.95, ease: 'power2.inOut' },
-            0.16
-          )
-          .fromTo(
-            featRight,
-            { y: 32, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.78, ease: 'power3.out', clearProps: 'transform,opacity' },
+            { strokeDashoffset: 0, duration: 0.75, ease: 'power2.out' },
             0.12
           )
           .fromTo(
+            featRight,
+            { y: 24, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.65, ease: 'power3.out', clearProps: 'transform,opacity' },
+            0.08
+          )
+          .fromTo(
             archCards,
-            { y: 68, opacity: 0 },
+            { y: 44, opacity: 0 },
             {
               y: 0,
               opacity: 1,
-              duration: 0.95,
-              stagger: 0.14,
-              ease: 'expo.out',
-              clearProps: 'transform,opacity'
-            },
-            0.18
-          )
-          .fromTo(
-            archCapsules,
-            {
-              clipPath: 'inset(42% 0% 0% 0% round 999px)',
-              scale: 0.92
-            },
-            {
-              clipPath: 'inset(0% 0% 0% 0% round 999px)',
-              scale: 1,
-              duration: 1.05,
-              stagger: 0.14,
-              ease: 'expo.out',
-              clearProps: 'clipPath,scale'
-            },
-            0.18
-          )
-          .fromTo(
-            archImgs,
-            { scale: 1.24, yPercent: 10 },
-            {
-              scale: 1,
-              yPercent: 0,
-              duration: 1.18,
-              stagger: 0.14,
-              ease: 'expo.out',
-              clearProps: 'transform'
-            },
-            0.18
-          )
-          .fromTo(
-            archMetas,
-            { y: 20, opacity: 0 },
-            {
-              y: 0,
-              opacity: 1,
-              duration: 0.65,
-              stagger: 0.14,
+              duration: 0.78,
+              stagger: 0.1,
               ease: 'power3.out',
               clearProps: 'transform,opacity'
             },
-            0.42
+            0.12
+          )
+          .fromTo(
+            archImgs,
+            { scale: 1.12 },
+            {
+              scale: 1,
+              duration: 0.88,
+              stagger: 0.1,
+              ease: 'power3.out',
+              clearProps: 'transform'
+            },
+            0.12
+          )
+          .fromTo(
+            archMetas,
+            { y: 14, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.55,
+              stagger: 0.1,
+              ease: 'power3.out',
+              clearProps: 'transform,opacity'
+            },
+            0.28
           );
 
         if (featTl.scrollTrigger) state.gsapTriggers.push(featTl.scrollTrigger);
 
-        // Interactive GSAP Magnetic Arch Hover + Dynamic "FEATURE" Watermark Tinting
+        // Lightweight Hover without layout-thrashing mousemove getBoundingClientRect
         const watermarkTints = [
-          'rgba(186, 170, 220, 0.30)', // Arch 1 Lavender
-          'rgba(235, 178, 152, 0.30)', // Arch 2 Warm Peach
-          'rgba(162, 200, 230, 0.30)'  // Arch 3 Sky Glacier
+          'rgba(186, 170, 220, 0.30)',
+          'rgba(235, 178, 152, 0.30)',
+          'rgba(162, 200, 230, 0.30)'
         ];
 
         archCards.forEach((card, idx) => {
@@ -1706,47 +1670,28 @@
 
           card.addEventListener('mouseenter', () => {
             if (capsule) {
-              gsap.to(capsule, { y: -10, scale: 1.018, duration: 0.42, ease: 'power3.out', overwrite: 'auto' });
+              gsap.to(capsule, { y: -8, scale: 1.015, duration: 0.35, ease: 'power2.out', overwrite: 'auto' });
             }
             if (img) {
-              gsap.to(img, { scale: 1.08, duration: 0.48, ease: 'power3.out', overwrite: 'auto' });
+              gsap.to(img, { scale: 1.05, duration: 0.4, ease: 'power2.out', overwrite: 'auto' });
             }
             if (hoverPill) {
-              gsap.to(hoverPill, { y: 0, opacity: 1, duration: 0.32, ease: 'power3.out', overwrite: 'auto' });
+              gsap.to(hoverPill, { y: 0, opacity: 1, duration: 0.28, ease: 'power2.out', overwrite: 'auto' });
             }
             if (featWatermark) {
               featWatermark.style.color = watermarkTints[idx] || watermarkTints[1];
             }
           });
 
-          card.addEventListener(
-            'mousemove',
-            (ev) => {
-              if (!capsule || !img) return;
-              const rect = capsule.getBoundingClientRect();
-              const rx = (ev.clientX - rect.left) / Math.max(1, rect.width) - 0.5;
-              const ry = (ev.clientY - rect.top) / Math.max(1, rect.height) - 0.5;
-              gsap.to(img, {
-                x: rx * 14,
-                y: ry * 10,
-                scale: 1.08,
-                duration: 0.35,
-                ease: 'power2.out',
-                overwrite: 'auto'
-              });
-            },
-            { passive: true }
-          );
-
           card.addEventListener('mouseleave', () => {
             if (capsule) {
-              gsap.to(capsule, { y: 0, scale: 1, duration: 0.45, ease: 'power3.out', overwrite: 'auto' });
+              gsap.to(capsule, { y: 0, scale: 1, duration: 0.38, ease: 'power2.out', overwrite: 'auto' });
             }
             if (img) {
-              gsap.to(img, { x: 0, y: 0, scale: 1, duration: 0.5, ease: 'power3.out', overwrite: 'auto' });
+              gsap.to(img, { scale: 1, duration: 0.42, ease: 'power2.out', overwrite: 'auto' });
             }
             if (hoverPill) {
-              gsap.to(hoverPill, { y: 10, opacity: 0, duration: 0.26, ease: 'power2.in', overwrite: 'auto' });
+              gsap.to(hoverPill, { y: 10, opacity: 0, duration: 0.22, ease: 'power2.in', overwrite: 'auto' });
             }
             if (featWatermark) {
               featWatermark.style.color = 'rgba(235, 178, 152, 0.22)';
@@ -2028,7 +1973,11 @@
       overlay.className = 'modal-overlay';
       overlay.innerHTML = `
         <div class="modal-window pin-modal-window">
-          <button type="button" class="modal-close-btn" id="btn-close-pin-modal" aria-label="Close modal">✕</button>
+          <button type="button" class="modal-close-btn" id="btn-close-pin-modal" aria-label="Close modal">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 1L13 13M1 13L13 1"/>
+            </svg>
+          </button>
           <h2 class="modal-heading">Owner Access Verification</h2>
           <p class="modal-subtext">
             Enter the 4-digit showroom authorization passcode to unlock the management portal.
@@ -2111,7 +2060,11 @@
 
     overlay.innerHTML = `
       <div class="modal-window" style="max-width: 960px;">
-        <button type="button" class="modal-close-btn" id="btn-close-vehicle-modal" aria-label="Close modal">✕</button>
+        <button type="button" class="modal-close-btn" id="btn-close-vehicle-modal" aria-label="Close modal">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M1 1L13 13M1 13L13 1"/>
+          </svg>
+        </button>
 
         <div class="detail-modal-layout">
           <div class="media-tabs-bar">
@@ -2168,9 +2121,13 @@
           <div class="detail-modal-body">
             <div class="detail-title-row">
               <div>
-                <span class="car-card-badge ${statusBadgeClass}" style="position: static; display: inline-block; margin-bottom: 0.5rem;">
-                  ${car.status.toUpperCase()}
-                </span>
+                ${
+                  car.status !== 'available'
+                    ? `<span class="car-card-badge ${statusBadgeClass}" style="position: static; display: inline-block; margin-bottom: 0.5rem;">
+                        ${car.status === 'reserved' ? 'Reserved' : 'Sold Archive'}
+                      </span>`
+                    : ''
+                }
                 <h2 class="detail-car-name">${car.year} ${car.make} ${car.model}</h2>
                 <div class="detail-vin-line">
                   VIN: <span>${car.vin}</span>
@@ -2178,7 +2135,6 @@
               </div>
 
               <div>
-                <div class="detail-price-kicker">Showroom Price</div>
                 <div class="detail-car-price">${formattedPrice}</div>
               </div>
             </div>
@@ -2306,7 +2262,11 @@
 
     overlay.innerHTML = `
       <div class="modal-window" style="max-width: 800px;">
-        <button type="button" class="modal-close-btn" id="btn-close-admin-car-modal" aria-label="Close modal">✕</button>
+        <button type="button" class="modal-close-btn" id="btn-close-admin-car-modal" aria-label="Close modal">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M1 1L13 13M1 13L13 1"/>
+          </svg>
+        </button>
 
         <div class="admin-modal-header">
           <h2>${isEdit ? 'Edit Vehicle Specifications' : 'Register New Exotic Vehicle'}</h2>
