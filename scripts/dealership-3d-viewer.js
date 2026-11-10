@@ -107,6 +107,7 @@
       this.modelCache = new Map();
       this.loadingPromises = new Map();
       this.targetCameraPos = null;
+      this.spinOffset = 0;
       this.animationFrameId = null;
       this.timeoutId = null;
       this.idlePreloadId = null;
@@ -446,6 +447,7 @@
       return {
         model,
         paintMaterials,
+        baseRotationY: config.rotationY || 0,
         targetY: size.y * 0.35
       };
     }
@@ -502,17 +504,29 @@
       }
     }
 
-    activateCachedModel(entry, config, targetColor) {
+    activateCachedModel(entry, config, targetColor, direction = null) {
       if (this.currentModel && this.currentModel !== entry.model) {
         this.scene.remove(this.currentModel);
       }
 
       this.paintMaterials = entry.paintMaterials;
       this.currentModel = entry.model;
+      this.currentBaseRotationY = entry.baseRotationY !== undefined ? entry.baseRotationY : (config.rotationY || 0);
 
       if (this.currentModel.parent !== this.scene) {
         this.scene.add(this.currentModel);
       }
+
+      const prefersReducedMotion =
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (!prefersReducedMotion && direction) {
+        this.spinOffset = direction === 'prev' ? -0.32 : 0.32;
+      } else {
+        this.spinOffset = 0;
+      }
+      this.currentModel.rotation.y = this.currentBaseRotationY + this.spinOffset;
 
       this.changeCarColor(targetColor);
 
@@ -523,8 +537,13 @@
         const cy = config.cameraPos[1] * distScale;
         const cz = config.cameraPos[2] * distScale;
 
-        this.camera.position.set(cx, cy, cz);
-        this.targetCameraPos = null;
+        if (!prefersReducedMotion && direction && typeof THREE !== 'undefined') {
+          this.camera.position.set(cx * 1.06, cy * 1.04, cz * 1.06);
+          this.targetCameraPos = new THREE.Vector3(cx, cy, cz);
+        } else {
+          this.camera.position.set(cx, cy, cz);
+          this.targetCameraPos = null;
+        }
       }
 
       if (this.controls) {
@@ -544,7 +563,7 @@
       }
     }
 
-    loadModel(modelKey = 'ferrari', color = null) {
+    loadModel(modelKey = 'ferrari', color = null, direction = null) {
       const config = MODEL_CONFIG[modelKey] || MODEL_CONFIG.ferrari;
       this.currentModelKey = modelKey;
       const targetColor = color || config.defaultColor || this.currentColor;
@@ -557,14 +576,14 @@
       // Fast Path: Instantaneous <0.2ms swap if GLB is already in memory cache
       if (this.modelCache.has(config.path)) {
         const cachedEntry = this.modelCache.get(config.path);
-        this.activateCachedModel(cachedEntry, config, targetColor);
+        this.activateCachedModel(cachedEntry, config, targetColor, direction);
         return;
       }
 
       this.fetchAndCacheModel(config, targetColor)
         .then((entry) => {
           if (currentToken !== this.loadToken) return;
-          this.activateCachedModel(entry, config, targetColor);
+          this.activateCachedModel(entry, config, targetColor, direction);
           this.scheduleIdlePreload();
         })
         .catch((err) => {
@@ -669,9 +688,18 @@
     animate() {
       if (!this.isLoopRunning) return;
 
+      if (this.currentModel && Math.abs(this.spinOffset) > 0.001) {
+        this.spinOffset *= 0.8;
+        if (Math.abs(this.spinOffset) <= 0.002) {
+          this.spinOffset = 0;
+        }
+        this.currentModel.rotation.y = (this.currentBaseRotationY || 0) + this.spinOffset;
+      }
+
       if (this.targetCameraPos && this.camera) {
-        this.camera.position.lerp(this.targetCameraPos, 0.16);
-        if (this.camera.position.distanceToSquared(this.targetCameraPos) < 0.002) {
+        this.camera.position.lerp(this.targetCameraPos, 0.22);
+        if (this.camera.position.distanceToSquared(this.targetCameraPos) < 0.0015) {
+          this.camera.position.copy(this.targetCameraPos);
           this.targetCameraPos = null;
         }
       }
@@ -730,9 +758,9 @@
     }
   };
 
-  Apex3DViewer.loadModel = function (modelKeyOrCarId, color) {
+  Apex3DViewer.loadModel = function (modelKeyOrCarId, color, direction) {
     if (Apex3DViewer.activeInstance && typeof Apex3DViewer.activeInstance.loadModel === 'function') {
-      Apex3DViewer.activeInstance.loadModel(modelKeyOrCarId, color);
+      Apex3DViewer.activeInstance.loadModel(modelKeyOrCarId, color, direction);
     }
   };
 

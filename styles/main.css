@@ -251,9 +251,69 @@ img {
 }
 
 /* ==========================================================================
-   MAIN CONTENT CONTAINER: Hardware-Accelerated 3D Vehicle Cycling Transition
+   MAIN CONTENT CONTAINER & @uiuxzaid PINTEREST VIDEO CHOREOGRAPHY
    Uses composite-only properties (opacity + transform) and transient will-change
    ========================================================================== */
+@keyframes heroEditorialRise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes heroWatermarkReveal {
+  0% {
+    opacity: 0;
+    transform: translate3d(calc(-45% + var(--watermark-scroll-x, 0px)), -50%, 0) scale3d(0.94, 0.94, 1);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(calc(-50% + var(--watermark-scroll-x, 0px)), -50%, 0) scale3d(1, 1, 1);
+  }
+}
+
+@keyframes heroStageGlideIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(28px, 16px, 0) scale3d(0.94, 0.94, 1);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+  }
+}
+
+@keyframes flankDepthFloatPrev {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale3d(0.86, 0.86, 1);
+  }
+  50% {
+    transform: translate3d(-6px, -9px, 0) scale3d(0.88, 0.88, 1);
+  }
+}
+
+@keyframes flankDepthFloatNext {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale3d(0.86, 0.86, 1);
+  }
+  50% {
+    transform: translate3d(7px, -10px, 0) scale3d(0.89, 0.89, 1);
+  }
+}
+
+@keyframes circleInsetFloat {
+  0%, 100% {
+    transform: translate3d(0, -50%, 0) scale3d(1, 1, 1);
+  }
+  50% {
+    transform: translate3d(0, calc(-50% - 7px), 0) scale3d(1.015, 1.015, 1);
+  }
+}
+
 #main-content {
   flex: 1 0 auto;
   width: 100%;
@@ -279,31 +339,85 @@ img {
   transform: translate3d(0, 0, 0) scale(1);
 }
 
-#main-content.is-vehicle-fade-out .hero-watermark-text {
-  opacity: 0.25;
-  transform: translate3d(-50%, -48%, 0) scale(0.975);
+/* Directional Diagonal 3-Car Orbit Choreography (Matches @uiuxzaid Video) */
+#main-content.is-vehicle-fade-out .hero-watermark-text,
+#main-content[data-carousel-dir="next"].is-vehicle-fade-out .hero-watermark-text {
+  opacity: 0.2;
+  transform: translate3d(calc(-56% + var(--watermark-scroll-x, 0px)), -50%, 0) scale3d(0.96, 0.96, 1);
 }
 
-#main-content.is-vehicle-fade-out .hero-depth-carousel-stage {
-  opacity: 0.35;
-  transform: translate3d(0, 8px, 0) scale(0.985);
+#main-content[data-carousel-dir="prev"].is-vehicle-fade-out .hero-watermark-text {
+  opacity: 0.2;
+  transform: translate3d(calc(-44% + var(--watermark-scroll-x, 0px)), -50%, 0) scale3d(0.96, 0.96, 1);
+}
+
+#main-content.is-vehicle-fade-out .hero-depth-carousel-stage,
+#main-content[data-carousel-dir="next"].is-vehicle-fade-out .hero-depth-carousel-stage {
+  opacity: 0.32;
+  transform: translate3d(-44px, -20px, 0) scale3d(0.93, 0.93, 1);
+}
+
+#main-content[data-carousel-dir="prev"].is-vehicle-fade-out .hero-depth-carousel-stage {
+  opacity: 0.32;
+  transform: translate3d(44px, 20px, 0) scale3d(0.93, 0.93, 1);
+}
+
+#main-content[data-carousel-dir="next"].is-vehicle-fade-out .hero-flank-next {
+  transform: translate3d(-78px, -42px, 0) scale3d(1.18, 1.18, 1);
+  opacity: 0.95;
+}
+
+#main-content[data-carousel-dir="next"].is-vehicle-fade-out .hero-flank-prev {
+  transform: translate3d(-34px, -18px, 0) scale3d(0.74, 0.74, 1);
+  opacity: 0.25;
+}
+
+#main-content[data-carousel-dir="prev"].is-vehicle-fade-out .hero-flank-prev {
+  transform: translate3d(78px, 42px, 0) scale3d(1.18, 1.18, 1);
+  opacity: 0.95;
+}
+
+#main-content[data-carousel-dir="prev"].is-vehicle-fade-out .hero-flank-next {
+  transform: translate3d(34px, 18px, 0) scale3d(0.74, 0.74, 1);
+  opacity: 0.25;
 }
 
 #main-content.is-vehicle-fade-out .hero-left-editorial {
-  opacity: 0.3;
-  transform: translate3d(-6px, 0, 0);
+  opacity: 0.24;
+  transform: translate3d(0, 14px, 0);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  #main-content,
-  .hero-watermark-text,
-  .hero-depth-carousel-stage,
-  .hero-left-editorial,
-  .hero-flank-car,
-  .hero-flank-car-img {
-    transition-duration: 0.01ms !important;
-    transform: none !important;
-  }
+#main-content.is-vehicle-fade-out .hero-headline {
+  transform: translate3d(0, 14px, 0);
+  opacity: 0;
+}
+
+#main-content.is-vehicle-fade-out .hero-editorial-desc {
+  transform: translate3d(0, 18px, 0);
+  opacity: 0;
+}
+
+#main-content.is-vehicle-fade-out .hero-carousel-arrows,
+#main-content.is-vehicle-fade-out .hero-explore-row {
+  transform: translate3d(0, 20px, 0);
+  opacity: 0.15;
+}
+
+/* Staggered Editorial Reveal on Vehicle Fade-In */
+#main-content.is-vehicle-fade-in .hero-headline {
+  transition: transform 280ms var(--ease-out) 0ms, opacity 240ms var(--ease-out) 0ms;
+}
+
+#main-content.is-vehicle-fade-in .hero-editorial-desc {
+  transition: transform 300ms var(--ease-out) 45ms, opacity 260ms var(--ease-out) 45ms;
+}
+
+#main-content.is-vehicle-fade-in .hero-carousel-arrows {
+  transition: transform 320ms var(--ease-out) 85ms, opacity 260ms var(--ease-out) 85ms;
+}
+
+#main-content.is-vehicle-fade-in .hero-explore-row {
+  transition: transform 340ms var(--ease-out) 120ms, opacity 280ms var(--ease-out) 120ms;
 }
 
 /* ==========================================================================
@@ -364,11 +478,13 @@ img {
   position: absolute;
   top: 47%;
   left: 58%;
-  transform: translate3d(-50%, -50%, 0);
+  transform: translate3d(calc(-50% + var(--watermark-scroll-x, 0px)), -50%, 0) scale3d(1, 1, 1);
   opacity: 1;
+  animation: heroWatermarkReveal 720ms var(--ease-out) both;
   transition:
-    opacity 200ms var(--ease-out),
-    transform 240ms var(--ease-out);
+    opacity 240ms var(--ease-out),
+    transform 340ms var(--ease-out),
+    color 320ms var(--ease-out);
   z-index: 1;
   white-space: nowrap;
 }
@@ -386,10 +502,11 @@ img {
   justify-content: center;
   pointer-events: none;
   opacity: 1;
-  transform: translate3d(0, 0, 0) scale(1);
+  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+  animation: heroStageGlideIn 680ms var(--ease-out) 60ms both;
   transition:
-    opacity 200ms var(--ease-out),
-    transform 240ms var(--ease-out);
+    opacity 220ms var(--ease-out),
+    transform 320ms var(--ease-out);
 }
 
 .hero-flank-car {
@@ -402,12 +519,14 @@ img {
   pointer-events: auto;
   cursor: pointer;
   opacity: 0.85;
-  transition: transform var(--duration-normal) var(--ease-out), opacity var(--duration-normal) var(--ease-out);
+  transition:
+    transform 340ms var(--ease-out),
+    opacity 280ms var(--ease-out);
 }
 
 .hero-flank-car:hover {
   opacity: 0.98;
-  transform: scale3d(1.04, 1.04, 1);
+  transform: translate3d(0, -5px, 0) scale3d(1.06, 1.06, 1);
 }
 
 .hero-flank-prev {
@@ -425,7 +544,18 @@ img {
   height: auto;
   object-fit: contain;
   transform: scale3d(0.86, 0.86, 1);
-  transition: transform var(--duration-normal) var(--ease-out), opacity var(--duration-normal) var(--ease-out);
+  transition:
+    transform 340ms var(--ease-out),
+    opacity 280ms var(--ease-out),
+    filter 340ms var(--ease-out);
+}
+
+.hero-flank-prev .hero-flank-car-img {
+  animation: flankDepthFloatPrev 5.6s ease-in-out infinite;
+}
+
+.hero-flank-next .hero-flank-car-img {
+  animation: flankDepthFloatNext 6.2s ease-in-out 0.9s infinite;
 }
 
 .hero-flank-shadow {
@@ -435,6 +565,12 @@ img {
   border-radius: 50%;
   background: radial-gradient(ellipse at center, rgba(17, 17, 21, 0.26) 0%, rgba(17, 17, 21, 0) 72%);
   filter: blur(4px);
+  transition: transform 340ms var(--ease-out), opacity 280ms var(--ease-out);
+}
+
+.hero-flank-car:hover .hero-flank-shadow {
+  transform: scale3d(0.92, 0.92, 1);
+  opacity: 0.72;
 }
 
 .hero-3d-stage-viewport {
@@ -504,6 +640,7 @@ img {
   justify-content: space-between;
   gap: 1.5rem;
   width: 100%;
+  animation: heroEditorialRise 560ms var(--ease-out) 0ms both;
 }
 
 .hero-edition-kicker {
@@ -534,6 +671,10 @@ img {
   background: transparent;
   color: var(--color-text-mid);
   white-space: nowrap;
+  transition:
+    background-color 200ms var(--ease-out),
+    color 200ms var(--ease-out),
+    transform 180ms var(--ease-out);
 }
 
 .apple-switcher-btn:hover {
@@ -578,6 +719,8 @@ img {
   text-transform: uppercase;
   color: var(--color-text-high);
   text-wrap: balance;
+  animation: heroEditorialRise 600ms var(--ease-out) 75ms both;
+  transition: transform 240ms var(--ease-out), opacity 200ms var(--ease-out);
 }
 
 .hero-headline .theme-accent-text {
@@ -590,6 +733,8 @@ img {
   line-height: 1.68;
   color: var(--color-text-mid);
   max-width: 38ch;
+  animation: heroEditorialRise 620ms var(--ease-out) 140ms both;
+  transition: transform 240ms var(--ease-out), opacity 200ms var(--ease-out);
 }
 
 /* Circular 1px Outline Arrow Buttons (← / →) matching @uiuxzaid Video */
@@ -598,6 +743,8 @@ img {
   align-items: center;
   gap: 0.85rem;
   margin-top: 0.35rem;
+  animation: heroEditorialRise 640ms var(--ease-out) 195ms both;
+  transition: transform 240ms var(--ease-out), opacity 200ms var(--ease-out);
 }
 
 .hero-circle-arrow-btn {
@@ -611,23 +758,40 @@ img {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: transform var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
+  transition:
+    transform 220ms var(--ease-out),
+    border-color 200ms var(--ease-out),
+    background-color 200ms var(--ease-out),
+    color 200ms var(--ease-out);
 }
 
-.hero-circle-arrow-btn:hover {
+#hero-prev-vehicle-btn:hover {
   border-color: var(--color-text-high);
   background: var(--color-text-high);
   color: #FFFFFF;
-  transform: translateY(-1px);
+  transform: translate3d(-3px, 0, 0) scale3d(1.05, 1.05, 1);
 }
 
-/* Explore More Pill with Leading Line */
+#hero-next-vehicle-btn:hover {
+  border-color: var(--color-text-high);
+  background: var(--color-text-high);
+  color: #FFFFFF;
+  transform: translate3d(3px, 0, 0) scale3d(1.05, 1.05, 1);
+}
+
+.hero-circle-arrow-btn:active {
+  transform: scale3d(0.94, 0.94, 1);
+}
+
+/* Explore More Pill with Expanding Leading Line (@uiuxzaid Signature CTA) */
 .hero-explore-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.85rem;
   margin-top: 0.75rem;
+  animation: heroEditorialRise 660ms var(--ease-out) 240ms both;
+  transition: transform 240ms var(--ease-out), opacity 200ms var(--ease-out);
 }
 
 .btn-explore-line-pill {
@@ -641,6 +805,11 @@ img {
   height: 1.5px;
   background-color: var(--color-text-high);
   display: inline-block;
+  transition: width 260ms var(--ease-out);
+}
+
+.btn-explore-line-pill:hover .explore-lead-line {
+  width: 44px;
 }
 
 .explore-pill-box {
@@ -655,12 +824,16 @@ img {
   letter-spacing: 0.03em;
   background: #FFFFFF;
   white-space: nowrap;
-  transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+  transition:
+    background-color 220ms var(--ease-out),
+    color 220ms var(--ease-out),
+    transform 240ms var(--ease-out);
 }
 
 .btn-explore-line-pill:hover .explore-pill-box {
   background: var(--color-text-high);
   color: #FFFFFF;
+  transform: translate3d(2px, 0, 0);
 }
 
 .btn-hero-secondary-pill {
@@ -781,6 +954,42 @@ img {
   gap: 1.65rem;
 }
 
+/* Scroll-Triggered Staggered Reveal for Section 2 */
+.editorial-lifestyle-section .editorial-thin-heading,
+.editorial-lifestyle-section .editorial-body-copy,
+.editorial-lifestyle-section .lifestyle-price-cta-row,
+.editorial-lifestyle-section .lifestyle-thumbs-row {
+  opacity: 0;
+  transform: translate3d(0, 26px, 0);
+  transition:
+    opacity 540ms var(--ease-out),
+    transform 640ms var(--ease-out);
+}
+
+.editorial-lifestyle-section.is-in-view .editorial-thin-heading {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition-delay: 0ms;
+}
+
+.editorial-lifestyle-section.is-in-view .editorial-body-copy {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition-delay: 80ms;
+}
+
+.editorial-lifestyle-section.is-in-view .lifestyle-price-cta-row {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition-delay: 145ms;
+}
+
+.editorial-lifestyle-section.is-in-view .lifestyle-thumbs-row {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition-delay: 205ms;
+}
+
 /* Tall Ultra-Light Uppercase Section Heading (@uiuxzaid signature font style) */
 .editorial-thin-heading {
   font-family: var(--font-display);
@@ -814,6 +1023,14 @@ img {
   font-weight: 700;
   color: var(--color-text-high);
   font-variant-numeric: tabular-nums;
+  transition:
+    opacity 180ms var(--ease-out),
+    transform 220ms var(--ease-out);
+}
+
+.lifestyle-price-tag.is-swapping {
+  opacity: 0.25;
+  transform: translate3d(0, 6px, 0);
 }
 
 .btn-outline-pill {
@@ -830,11 +1047,16 @@ img {
   font-weight: 600;
   letter-spacing: 0.02em;
   white-space: nowrap;
+  transition:
+    background-color 220ms var(--ease-out),
+    color 220ms var(--ease-out),
+    transform 220ms var(--ease-out);
 }
 
 .btn-outline-pill:hover {
   background: var(--color-text-high);
   color: #FFFFFF;
+  transform: translate3d(0, -2px, 0);
 }
 
 .lifestyle-thumbs-row {
@@ -852,19 +1074,28 @@ img {
   border: 1.5px solid var(--color-border);
   background: var(--color-surface);
   padding: 0;
-  transition: transform var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
+  transition:
+    transform 240ms var(--ease-out),
+    border-color 200ms var(--ease-out),
+    box-shadow 240ms var(--ease-out);
 }
 
 .lifestyle-thumb-btn:hover,
 .lifestyle-thumb-btn.active {
   border-color: var(--color-text-high);
-  transform: translateY(-2px);
+  transform: translate3d(0, -4px, 0) scale3d(1.03, 1.03, 1);
+  box-shadow: var(--shadow-card);
 }
 
 .lifestyle-thumb-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 360ms var(--ease-out);
+}
+
+.lifestyle-thumb-btn:hover .lifestyle-thumb-img {
+  transform: scale3d(1.08, 1.08, 1);
 }
 
 /* Right Stadium Showcase + Circular Overlapping Inset */
@@ -891,19 +1122,39 @@ img {
   background: #ECEEF2;
   border: 8px solid #FFFFFF;
   box-shadow: var(--shadow-card);
+  opacity: 0;
+  transform: translate3d(0, 32px, 0) scale3d(0.95, 0.95, 1);
+  transition:
+    opacity 580ms var(--ease-out) 60ms,
+    transform 680ms var(--ease-out) 60ms;
+}
+
+.editorial-lifestyle-section.is-in-view .lifestyle-main-capsule {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+}
+
+.lifestyle-main-capsule.is-swapping {
+  opacity: 0.35 !important;
+  transform: translate3d(0, 4px, 0) scale3d(0.975, 0.975, 1) !important;
+  transition: opacity 120ms var(--ease-out), transform 140ms var(--ease-out) !important;
 }
 
 .lifestyle-main-photo {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 520ms var(--ease-out);
+}
+
+.lifestyle-arch-showcase:hover .lifestyle-main-photo {
+  transform: scale3d(1.05, 1.05, 1);
 }
 
 .lifestyle-circle-inset {
   position: absolute;
   left: 0;
   top: 50%;
-  transform: translateY(-50%);
   width: 148px;
   height: 148px;
   border-radius: 50%;
@@ -911,12 +1162,34 @@ img {
   border: 6px solid #FFFFFF;
   box-shadow: var(--shadow-card);
   background: #FFFFFF;
+  opacity: 0;
+  transform: translate3d(-26px, -50%, 0) scale3d(0.78, 0.78, 1);
+  transition:
+    opacity 540ms var(--ease-out) 190ms,
+    transform 640ms var(--ease-out) 190ms;
+}
+
+.editorial-lifestyle-section.is-in-view .lifestyle-circle-inset {
+  opacity: 1;
+  transform: translate3d(0, -50%, 0) scale3d(1, 1, 1);
+  animation: circleInsetFloat 5.4s ease-in-out 850ms infinite;
+}
+
+.lifestyle-circle-inset.is-swapping {
+  opacity: 0.3 !important;
+  transform: translate3d(-6px, -50%, 0) scale3d(0.9, 0.9, 1) !important;
+  transition: opacity 120ms var(--ease-out), transform 140ms var(--ease-out) !important;
 }
 
 .lifestyle-inset-photo {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 420ms var(--ease-out);
+}
+
+.lifestyle-circle-inset:hover .lifestyle-inset-photo {
+  transform: scale3d(1.09, 1.09, 1);
 }
 
 .lifestyle-caption-note {
@@ -944,7 +1217,7 @@ img {
   position: absolute;
   top: 54%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate3d(calc(-50% + var(--feature-scroll-x, 0px)), -50%, 0);
   font-family: var(--font-display);
   font-size: clamp(6.5rem, 19vw, 17.5rem);
   font-weight: 800;
@@ -955,6 +1228,14 @@ img {
   user-select: none;
   white-space: nowrap;
   z-index: 1;
+  opacity: 0;
+  transition:
+    opacity 680ms var(--ease-out),
+    transform 420ms var(--ease-out);
+}
+
+.featured-collection-section.is-in-view .featured-collection-watermark {
+  opacity: 1;
 }
 
 .featured-collection-inner {
@@ -977,6 +1258,27 @@ img {
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition:
+    opacity 540ms var(--ease-out),
+    transform 620ms var(--ease-out);
+}
+
+.featured-collection-section.is-in-view .featured-header-left {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+/* Hand-Drawn Editorial Swirl Stroke Draw Choreography */
+.editorial-swirl-svg path {
+  stroke-dasharray: 180;
+  stroke-dashoffset: 180;
+  transition: stroke-dashoffset 950ms var(--ease-out) 180ms;
+}
+
+.featured-collection-section.is-in-view .editorial-swirl-svg path {
+  stroke-dashoffset: 0;
 }
 
 .featured-header-right {
@@ -985,6 +1287,16 @@ img {
   flex-direction: column;
   align-items: flex-start;
   gap: 1rem;
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition:
+    opacity 560ms var(--ease-out) 90ms,
+    transform 640ms var(--ease-out) 90ms;
+}
+
+.featured-collection-section.is-in-view .featured-header-right {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
 }
 
 .featured-arch-grid {
@@ -998,6 +1310,29 @@ img {
   flex-direction: column;
   align-items: flex-start;
   gap: 1.15rem;
+  opacity: 0;
+  transform: translate3d(0, 34px, 0);
+  transition:
+    opacity 580ms var(--ease-out),
+    transform 680ms var(--ease-out);
+}
+
+.featured-collection-section.is-in-view .featured-arch-card:nth-child(1) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition-delay: 60ms;
+}
+
+.featured-collection-section.is-in-view .featured-arch-card:nth-child(2) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition-delay: 150ms;
+}
+
+.featured-collection-section.is-in-view .featured-arch-card:nth-child(3) {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition-delay: 225ms;
 }
 
 .featured-arch-frame-btn {
@@ -1014,7 +1349,9 @@ img {
   overflow: hidden;
   border: 6px solid #FFFFFF;
   box-shadow: var(--shadow-card);
-  transition: transform var(--duration-normal) var(--ease-out);
+  transition:
+    transform 360ms var(--ease-out),
+    box-shadow 360ms var(--ease-out);
 }
 
 .arch-tint-1 { background: #E9E4F0; }
@@ -1022,13 +1359,19 @@ img {
 .arch-tint-3 { background: #E2ECF5; }
 
 .featured-arch-frame-btn:hover .featured-arch-capsule {
-  transform: translateY(-4px);
+  transform: translate3d(0, -8px, 0);
+  box-shadow: 0 22px 44px rgba(17, 17, 21, 0.12);
 }
 
 .featured-arch-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 520ms var(--ease-out);
+}
+
+.featured-arch-frame-btn:hover .featured-arch-img {
+  transform: scale3d(1.06, 1.06, 1);
 }
 
 .featured-arch-meta {
@@ -1042,6 +1385,11 @@ img {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--color-text-high);
+  transition: transform 240ms var(--ease-out);
+}
+
+.featured-arch-card:hover .featured-arch-title {
+  transform: translate3d(4px, 0, 0);
 }
 
 .featured-arch-price {
@@ -1166,11 +1514,13 @@ img {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+  transition:
+    transform 280ms var(--ease-out),
+    box-shadow 280ms var(--ease-out);
 }
 
 .car-card:hover {
-  transform: translateY(-3px);
+  transform: translate3d(0, -5px, 0);
   box-shadow: var(--shadow-card);
 }
 
@@ -1185,6 +1535,37 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 460ms var(--ease-out);
+}
+
+.car-card:hover .car-card-img {
+  transform: scale3d(1.05, 1.05, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .editorial-lifestyle-section .editorial-thin-heading,
+  .editorial-lifestyle-section .editorial-body-copy,
+  .editorial-lifestyle-section .lifestyle-price-cta-row,
+  .editorial-lifestyle-section .lifestyle-thumbs-row,
+  .lifestyle-main-capsule,
+  .lifestyle-circle-inset,
+  .featured-collection-watermark,
+  .featured-header-left,
+  .featured-header-right,
+  .featured-arch-card {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .editorial-swirl-svg path {
+    stroke-dashoffset: 0 !important;
+  }
 }
 
 .car-card-badge {

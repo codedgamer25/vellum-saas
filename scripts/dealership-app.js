@@ -933,27 +933,40 @@
         main.querySelectorAll('.lifestyle-thumb-btn').forEach((b) => b.classList.remove('active'));
         e.currentTarget.classList.add('active');
 
-        const mainImg = main.querySelector('#lifestyle-main-img');
-        if (mainImg) {
-          mainImg.src = item.main;
-          mainImg.alt = item.caption;
-        }
-        const insetImg = main.querySelector('#lifestyle-inset-img');
-        if (insetImg) {
-          insetImg.src = item.inset;
-        }
-        const capEl = main.querySelector('#lifestyle-caption-text');
-        if (capEl) {
-          capEl.textContent = item.caption;
-        }
+        const mainCapsule = main.querySelector('.lifestyle-main-capsule');
+        const circleInset = main.querySelector('.lifestyle-circle-inset');
         const priceEl = main.querySelector('#lifestyle-price');
-        if (priceEl && car) {
-          priceEl.textContent = STORE.formatPrice(car.priceUSD);
-        }
-        const acqBtn = main.querySelector('#btn-lifestyle-acquire');
-        if (acqBtn && car) {
-          acqBtn.setAttribute('data-id', car.id);
-        }
+
+        if (mainCapsule) mainCapsule.classList.add('is-swapping');
+        if (circleInset) circleInset.classList.add('is-swapping');
+        if (priceEl) priceEl.classList.add('is-swapping');
+
+        window.setTimeout(() => {
+          const mainImg = main.querySelector('#lifestyle-main-img');
+          if (mainImg) {
+            mainImg.src = item.main;
+            mainImg.alt = item.caption;
+          }
+          const insetImg = main.querySelector('#lifestyle-inset-img');
+          if (insetImg) {
+            insetImg.src = item.inset;
+          }
+          const capEl = main.querySelector('#lifestyle-caption-text');
+          if (capEl) {
+            capEl.textContent = item.caption;
+          }
+          if (priceEl && car) {
+            priceEl.textContent = STORE.formatPrice(car.priceUSD);
+          }
+          const acqBtn = main.querySelector('#btn-lifestyle-acquire');
+          if (acqBtn && car) {
+            acqBtn.setAttribute('data-id', car.id);
+          }
+
+          if (mainCapsule) mainCapsule.classList.remove('is-swapping');
+          if (circleInset) circleInset.classList.remove('is-swapping');
+          if (priceEl) priceEl.classList.remove('is-swapping');
+        }, 120);
       });
     });
 
@@ -1011,7 +1024,7 @@
     }
 
     // Wire Hero 3D Stage & Depth-of-Field Carousel Controls with #main-content Fade-Out/Fade-In Transition
-    function applyHeroVehicleState(carId, targetHex = null, targetTheme = null) {
+    function applyHeroVehicleState(carId, targetHex = null, targetTheme = null, direction = null) {
       state.active3DCarId = carId;
       const car = STORE.getFeatured3DCar(carId);
       if (!car) return;
@@ -1136,10 +1149,10 @@
         }
       }
 
-      // Update Three.js 3D Model & Paint Color
+      // Update Three.js 3D Model & Paint Color with directional turntable entrance sweep
       if (window.Apex3DViewer) {
         if (typeof window.Apex3DViewer.loadModel === 'function') {
-          window.Apex3DViewer.loadModel(atmosphere.modelKey, appliedColor);
+          window.Apex3DViewer.loadModel(atmosphere.modelKey, appliedColor, direction);
         }
         if (typeof window.Apex3DViewer.changeCarColor === 'function') {
           window.Apex3DViewer.changeCarColor(appliedColor);
@@ -1149,6 +1162,7 @@
 
     function updateHero3DStage(carId, targetHex = null, targetTheme = null, options = {}) {
       const skipTransition = Boolean(options && options.skipTransition);
+      const direction = (options && options.direction) || 'next';
       const prefersReducedMotion =
         typeof window.matchMedia === 'function' &&
         window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1162,22 +1176,28 @@
         state.fadeInCleanupTimerId = null;
       }
 
+      const heroCard = main.querySelector('#hero-stage-card');
+
       if (skipTransition || prefersReducedMotion) {
         main.classList.remove('is-vehicle-cycling', 'is-vehicle-fade-out', 'is-vehicle-fade-in');
         main.setAttribute('data-transition-state', 'idle');
-        applyHeroVehicleState(carId, targetHex, targetTheme);
+        main.removeAttribute('data-carousel-dir');
+        if (heroCard) heroCard.removeAttribute('data-carousel-dir');
+        applyHeroVehicleState(carId, targetHex, targetTheme, null);
         return;
       }
 
-      // Phase 1: Promote GPU layer & trigger smooth fade-out on #main-content
+      // Phase 1: Promote GPU layer & trigger directional diagonal depth-of-field choreography
+      main.setAttribute('data-carousel-dir', direction);
+      if (heroCard) heroCard.setAttribute('data-carousel-dir', direction);
       main.classList.remove('is-vehicle-fade-in');
       main.classList.add('is-vehicle-cycling', 'is-vehicle-fade-out');
       main.setAttribute('data-transition-state', 'fade-out');
 
-      // Apply vehicle metadata & cached 3D model swap
-      applyHeroVehicleState(carId, targetHex, targetTheme);
+      // Apply vehicle metadata & cached 3D model swap with turntable spin sweep
+      applyHeroVehicleState(carId, targetHex, targetTheme, direction);
 
-      // Phase 2: At the fade-out trough (130ms), transition #main-content smoothly back in
+      // Phase 2: At the fade-out trough (130ms), glide elements smoothly along the diagonal axis into target slots
       state.fadeOutTimerId = window.setTimeout(() => {
         state.fadeOutTimerId = null;
         main.classList.remove('is-vehicle-fade-out');
@@ -1189,7 +1209,7 @@
           state.fadeInCleanupTimerId = null;
           main.classList.remove('is-vehicle-cycling', 'is-vehicle-fade-in');
           main.setAttribute('data-transition-state', 'idle');
-        }, 240);
+        }, 280);
       }, 130);
     }
 
@@ -1197,7 +1217,9 @@
     main.querySelectorAll('.apple-switcher-btn').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         const carId = e.currentTarget.getAttribute('data-car');
-        updateHero3DStage(carId);
+        const currentAtm = HERO_ATMOSPHERE_CONFIG[state.active3DCarId];
+        const dir = currentAtm && currentAtm.prevCarId === carId ? 'prev' : 'next';
+        updateHero3DStage(carId, null, null, { direction: dir });
       });
     });
 
@@ -1232,29 +1254,29 @@
     main.querySelectorAll('.pagination-dot').forEach((dot) => {
       dot.addEventListener('click', (e) => {
         const carId = e.currentTarget.getAttribute('data-car');
-        updateHero3DStage(carId);
+        updateHero3DStage(carId, null, null, { direction: 'next' });
       });
     });
 
     // Circular Arrow Buttons & Flanking Blurred 3D Car Click Listeners
     main.querySelector('#hero-prev-vehicle-btn')?.addEventListener('click', (e) => {
       const prevId = e.currentTarget.getAttribute('data-prev-car');
-      if (prevId) updateHero3DStage(prevId);
+      if (prevId) updateHero3DStage(prevId, null, null, { direction: 'prev' });
     });
 
     main.querySelector('#hero-next-vehicle-btn')?.addEventListener('click', (e) => {
       const nextId = e.currentTarget.getAttribute('data-next-car');
-      if (nextId) updateHero3DStage(nextId);
+      if (nextId) updateHero3DStage(nextId, null, null, { direction: 'next' });
     });
 
     main.querySelector('#hero-flank-prev-btn')?.addEventListener('click', (e) => {
       const carId = e.currentTarget.getAttribute('data-car');
-      if (carId) updateHero3DStage(carId);
+      if (carId) updateHero3DStage(carId, null, null, { direction: 'prev' });
     });
 
     main.querySelector('#hero-flank-next-btn')?.addEventListener('click', (e) => {
       const carId = e.currentTarget.getAttribute('data-car');
-      if (carId) updateHero3DStage(carId);
+      if (carId) updateHero3DStage(carId, null, null, { direction: 'next' });
     });
 
     main.querySelector('#hero-inspect-dossier')?.addEventListener('click', (e) => {
@@ -1262,10 +1284,77 @@
       openVehicleModal(id, '3d');
     });
 
+    // Scroll-Triggered Editorial Reveal Choreography (@uiuxzaid Video Sections 2, 3, 4 & Footer)
+    function initEditorialScrollAnimations() {
+      const revealTargets = [
+        ...main.querySelectorAll(
+          '.editorial-lifestyle-section, .featured-collection-section, .catalog-filter-wrapper, .car-card'
+        ),
+        ...document.querySelectorAll('.site-footer')
+      ];
+
+      const prefersReducedMotion =
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (prefersReducedMotion || typeof IntersectionObserver === 'undefined') {
+        revealTargets.forEach((el) => el.classList.add('is-in-view'));
+        return;
+      }
+
+      if (state.editorialScrollObserver) {
+        state.editorialScrollObserver.disconnect();
+      }
+
+      state.editorialScrollObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-in-view');
+            }
+          });
+        },
+        { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+      );
+
+      revealTargets.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.92) {
+          el.classList.add('is-in-view');
+        }
+        state.editorialScrollObserver.observe(el);
+      });
+
+      if (!state.hasBoundWatermarkParallax) {
+        state.hasBoundWatermarkParallax = true;
+        window.addEventListener(
+          'scroll',
+          () => {
+            const scrollY = window.scrollY || 0;
+            const heroWatermark = document.getElementById('hero-watermark');
+            if (heroWatermark && scrollY < 900) {
+              heroWatermark.style.setProperty('--watermark-scroll-x', `${(scrollY * -0.06).toFixed(1)}px`);
+            }
+            const featWatermark = document.querySelector('.featured-collection-watermark');
+            if (featWatermark) {
+              const section = featWatermark.closest('.featured-collection-section');
+              if (section) {
+                const rect = section.getBoundingClientRect();
+                const offset = (window.innerHeight * 0.5 - rect.top) * 0.045;
+                featWatermark.style.setProperty('--feature-scroll-x', `${Math.max(-42, Math.min(42, offset)).toFixed(1)}px`);
+              }
+            }
+          },
+          { passive: true }
+        );
+      }
+    }
+
     initHero3DViewer();
     if (state.active3DCarId) {
       updateHero3DStage(state.active3DCarId, state.activeColorHex, state.activeTriadId, { skipTransition: true });
     }
+    initEditorialScrollAnimations();
   }
 
   // Render Admin Owner Panel
