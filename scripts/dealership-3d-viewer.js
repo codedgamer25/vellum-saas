@@ -206,29 +206,35 @@
     }
 
     setupContactShadow() {
-      // Ground Contact Shadow plane using ferrari_ao.png
-      const textureLoader = new THREE.TextureLoader();
-      textureLoader.load(
-        './models/ferrari_ao.png',
-        (shadowTexture) => {
-          const planeGeometry = new THREE.PlaneGeometry(6.5, 6.5);
-          const planeMaterial = new THREE.MeshBasicMaterial({
-            map: shadowTexture,
-            transparent: true,
-            opacity: 0.85,
-            depthWrite: false
-          });
-          const shadowPlane = new THREE.Mesh(planeGeometry, planeMaterial);
-          shadowPlane.rotation.x = -Math.PI / 2;
-          shadowPlane.position.y = 0.01;
-          shadowPlane.name = 'groundContactShadow';
-          this.scene.add(shadowPlane);
-        },
-        undefined,
-        (err) => {
-          console.warn('Ground contact shadow texture load note:', err);
-        }
-      );
+      // Procedural soft contact shadow: 100% transparent perimeter, soft dark center
+      // Absolutely zero white pixels, zero white floor mesh
+      const shadowCanvas = document.createElement('canvas');
+      shadowCanvas.width = 512;
+      shadowCanvas.height = 512;
+      const ctx = shadowCanvas.getContext('2d');
+
+      const gradient = ctx.createRadialGradient(256, 256, 15, 256, 256, 235);
+      gradient.addColorStop(0, 'rgba(0, 0, 0, 0.85)');
+      gradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.6)');
+      gradient.addColorStop(0.65, 'rgba(0, 0, 0, 0.2)');
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 512, 512);
+
+      const shadowTexture = new THREE.CanvasTexture(shadowCanvas);
+      const planeGeometry = new THREE.PlaneGeometry(6.2, 4.2);
+      const planeMaterial = new THREE.MeshBasicMaterial({
+        map: shadowTexture,
+        transparent: true,
+        opacity: 0.72,
+        depthWrite: false
+      });
+      const shadowPlane = new THREE.Mesh(planeGeometry, planeMaterial);
+      shadowPlane.rotation.x = -Math.PI / 2;
+      shadowPlane.position.y = 0.005;
+      shadowPlane.name = 'groundContactShadow';
+      this.scene.add(shadowPlane);
     }
 
     setupControls() {
