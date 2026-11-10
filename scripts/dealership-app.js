@@ -480,61 +480,35 @@
               </div>
             </div>
 
-            <!-- Unified Collapsible Bottom Dock (Zero Side-Panel Clutter over 3D Viewport) -->
-            <footer class="hero-card-bottom-bar ${state.isHudCollapsed ? 'is-collapsed' : ''}" id="hero-bottom-dock">
-              <div class="hero-dock-toggle-row">
-                <button type="button" class="hero-dock-collapse-btn" id="btn-toggle-hero-dock" aria-expanded="${!state.isHudCollapsed}">
-                  ${state.isHudCollapsed ? '▴ Show 3D Controls & Finishes' : '▾ Hide Controls (Zen 3D View)'}
-                </button>
-              </div>
-
-              <div class="hero-stage-bottom-island">
-                <div class="island-pill-left">
-                  <span class="island-car-badge" id="island-car-name">${currentCar.year} ${currentCar.make} ${currentCar.model}</span>
-                  <span class="island-divider" aria-hidden="true">·</span>
-                  <div class="telemetry-metrics">
-                    <span class="metric-item"><strong id="island-hp">${currentCar.hp} HP</strong></span>
-                    <span class="metric-sep" aria-hidden="true">·</span>
-                    <span class="metric-item">0-60 <strong id="island-acceleration">${currentCar.zeroToSixty}</strong></span>
-                    <span class="metric-sep" aria-hidden="true">·</span>
-                    <span class="metric-item">V-Max <strong id="island-topspeed">${currentCar.topSpeed}</strong></span>
-                  </div>
+            <!-- Minimalist Zen Color Swatch Dock (Always Zen View, Swatches Only without Color Names) -->
+            <footer class="hero-card-bottom-bar is-zen-always" id="hero-bottom-dock">
+              <div class="hero-stage-bottom-island hero-swatches-only-dock">
+                <div class="sr-only" aria-hidden="true">
+                  <span id="island-car-name">${currentCar.year} ${currentCar.make} ${currentCar.model}</span>
+                  <strong id="island-hp">${currentCar.hp} HP</strong>
+                  <strong id="island-acceleration">${currentCar.zeroToSixty}</strong>
+                  <strong id="island-topspeed">${currentCar.topSpeed}</strong>
+                  <span id="island-price">${STORE.formatPrice(currentCar.priceUSD)}</span>
                 </div>
 
-                <!-- Marco Perez Color Triad Selector Pills -->
-                <div class="triad-swatch-group" role="group" aria-label="3D Paint & Triad Finishes">
+                <!-- Pure Circular Color Swatches (No Color Names Displayed) -->
+                <div class="triad-swatch-group swatch-only-group" role="group" aria-label="3D Paint Finishes">
                   ${Object.values(MARCO_PEREZ_TRIADS)
                     .map(
                       (triad) => `
                     <button
                       type="button"
-                      class="triad-pill ${state.activeTriadId === triad.id ? 'active' : ''}"
+                      class="triad-pill swatch-only-btn ${state.activeTriadId === triad.id ? 'active' : ''}"
                       data-triad="${triad.id}"
                       data-car="${triad.carId}"
                       data-color="${triad.popColor}"
-                      title="${triad.fullName}"
                       aria-label="${triad.name}"
                     >
                       <span class="triad-pop-dot" style="background-color: ${triad.popColor};"></span>
-                      <span class="triad-name">${triad.name}</span>
                     </button>
                   `
                     )
                     .join('')}
-                </div>
-
-                <!-- 4-Dot Pagination & Active Price -->
-                <div class="island-right-cluster">
-                  <div class="hero-model-pagination" role="group" aria-label="Model Pagination">
-                    <button type="button" class="pagination-dot ${currentCar.id === 'porsche-gt3-rs-2024' ? 'active' : ''}" data-car="porsche-gt3-rs-2024" aria-label="Slide 1"></button>
-                    <button type="button" class="pagination-dot ${currentCar.id === 'ferrari-roma-2023' ? 'active' : ''}" data-car="ferrari-roma-2023" aria-label="Slide 2"></button>
-                    <button type="button" class="pagination-dot ${currentCar.id === 'mercedes-amg-g63-2024' ? 'active' : ''}" data-car="mercedes-amg-g63-2024" aria-label="Slide 3"></button>
-                    <button type="button" class="pagination-dot ${currentCar.id === 'audi-rs6-avant-2024' ? 'active' : ''}" data-car="audi-rs6-avant-2024" aria-label="Slide 4"></button>
-                  </div>
-
-                  <div class="island-pill-right" id="island-price">
-                    ${STORE.formatPrice(currentCar.priceUSD)}
-                  </div>
                 </div>
               </div>
             </footer>
@@ -1234,7 +1208,6 @@
         const triad = MARCO_PEREZ_TRIADS[triadId];
         if (!triad) return;
         updateHero3DStage(triad.carId, triad.popColor, triad.id);
-        showToast(`${triad.fullName}: "${triad.tagline}"`, 'info');
       });
     });
 

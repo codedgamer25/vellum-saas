@@ -12,39 +12,43 @@
   const MODEL_CONFIG = {
     ferrari: {
       path: './models/ferrari.glb',
-      scale: 0.9,
+      scale: 0.82,
+      targetSpan: 3.45,
       positionY: 0,
       paintMaterialNames: ['Body_Color', 'Ferrari_Yellow', '_0098_DodgerBlue', 'body', 'paint'],
       defaultColor: '#FD6E6E', // Coral / Rosso
-      cameraPos: [-4.1, 1.65, -5.2],
-      targetPos: [0, 0.36, 0]
+      cameraPos: [-4.65, 1.75, -5.85],
+      targetPos: [0, 0.34, 0]
     },
     porsche: {
       path: './models/bmw_m4.glb',
-      scale: 0.9,
+      scale: 0.82,
+      targetSpan: 3.45,
       positionY: 0,
       paintMaterialNames: ['mMAT_Carpaint_Blue1', 'paint', 'coat', 'body'],
       defaultColor: '#FF3B30', // Poppy Red
-      cameraPos: [4.9, 1.95, 5.4],
-      targetPos: [0, 0.36, 0]
+      cameraPos: [5.15, 1.98, 5.85],
+      targetPos: [0, 0.34, 0]
     },
     bmw: {
       path: './models/bmw_m4.glb',
-      scale: 0.9,
+      scale: 0.82,
+      targetSpan: 3.45,
       positionY: 0,
       paintMaterialNames: ['mMAT_Carpaint_Blue1', 'paint', 'body'],
       defaultColor: '#2563EB', // Cobalt / Pine Butter Accent
-      cameraPos: [-4.9, 1.95, 5.4],
-      targetPos: [0, 0.36, 0]
+      cameraPos: [-5.15, 1.98, 5.85],
+      targetPos: [0, 0.34, 0]
     },
     audi: {
       path: './models/ferrari.glb',
-      scale: 0.9,
+      scale: 0.82,
+      targetSpan: 3.45,
       positionY: 0,
       paintMaterialNames: ['Body_Color', 'Ferrari_Yellow', '_0098_DodgerBlue', 'body', 'paint'],
       defaultColor: '#D4AF37', // Champagne Gold
-      cameraPos: [4.1, 1.65, -5.2],
-      targetPos: [0, 0.36, 0]
+      cameraPos: [4.65, 1.75, -5.85],
+      targetPos: [0, 0.34, 0]
     }
   };
 
@@ -235,8 +239,8 @@
 
       this.scene = new THREE.Scene();
 
-      this.camera = new THREE.PerspectiveCamera(32, width / height, 0.1, 100);
-      this.camera.position.set(-4.1, 1.65, -5.2);
+      this.camera = new THREE.PerspectiveCamera(31, width / height, 0.1, 100);
+      this.camera.position.set(-4.65, 1.75, -5.85);
 
       this.renderer = new THREE.WebGLRenderer({
         canvas: this.canvas,
@@ -369,7 +373,7 @@
       const rawBox = new THREE.Box3().setFromObject(model);
       const rawSize = rawBox.getSize(new THREE.Vector3());
       const maxDim = Math.max(rawSize.x, rawSize.y, rawSize.z);
-      const targetSpan = config.targetSpan || 4.15;
+      const targetSpan = config.targetSpan || 3.45;
       const normalizedScale = maxDim > 0.0001 ? targetSpan / maxDim : config.scale;
 
       model.scale.setScalar(normalizedScale);
@@ -486,16 +490,17 @@
       this.changeCarColor(targetColor);
 
       if (config.cameraPos) {
+        const aspect = this.camera && this.camera.aspect ? this.camera.aspect : 1.5;
+        const distScale = aspect < 1.4 ? Math.min(1.42, 1.4 / Math.max(aspect, 0.72)) : 1.0;
+        const cx = config.cameraPos[0] * distScale;
+        const cy = config.cameraPos[1] * distScale;
+        const cz = config.cameraPos[2] * distScale;
+
         if (!isSoftwareGl && this.camera) {
-          this.targetCameraPos = new THREE.Vector3(
-            config.cameraPos[0],
-            config.cameraPos[1],
-            config.cameraPos[2]
-          );
-          // Snap 70% toward target angle immediately so the remaining 30% glides during fade-in
+          this.targetCameraPos = new THREE.Vector3(cx, cy, cz);
           this.camera.position.lerp(this.targetCameraPos, 0.72);
         } else if (this.camera) {
-          this.camera.position.set(config.cameraPos[0], config.cameraPos[1], config.cameraPos[2]);
+          this.camera.position.set(cx, cy, cz);
           this.targetCameraPos = null;
         }
       }
