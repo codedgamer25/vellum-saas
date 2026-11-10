@@ -76,8 +76,12 @@ class CDPSession {
       this.ws.onerror = reject;
     });
 
+    this.ws.onclose = (e) => console.log('WS CLOSED:', e.code, e.reason);
+    this.ws.onerror = (e) => console.error('WS ERROR:', e);
+
     this.ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
+      console.log(`CDP RECV id=${msg.id} method=${msg.method || ''} err=${msg.error ? JSON.stringify(msg.error) : 'none'}`);
       if (msg.method === 'Runtime.consoleAPICalled') {
         if (msg.params.type === 'error') {
           const text = msg.params.args.map((a) => a.value || a.description || JSON.stringify(a)).join(' ');
@@ -100,7 +104,17 @@ class CDPSession {
   send(method, params = {}) {
     return new Promise((resolve, reject) => {
       const id = this.id++;
-      this.callbacks.set(id, { resolve, reject });
+      const timer = setTimeout(() => {
+        if (this.callbacks.has(id)) {
+          this.callbacks.delete(id);
+          reject(new Error(`CDP method ${method} timed out after 10000ms`));
+        }
+      }, 10000);
+      this.callbacks.set(id, {
+        resolve: (val) => { clearTimeout(timer); resolve(val); },
+        reject: (err) => { clearTimeout(timer); reject(err); }
+      });
+      console.log(`CDP SEND [${id}]: ${method}`);
       this.ws.send(JSON.stringify({ id, method, params }));
     });
   }
@@ -148,6 +162,7 @@ async function runDealershipTestSuite() {
       '--headless=new',
       '--no-sandbox',
       '--disable-gpu',
+      '--enable-unsafe-swiftshader',
       '--disable-dev-shm-usage',
       '--ignore-certificate-errors',
       `--remote-debugging-port=${debugPort}`,
@@ -155,6 +170,7 @@ async function runDealershipTestSuite() {
     ],
     { stdio: ['ignore', 'ignore', 'pipe'] }
   );
+  chromeProcess.stderr.on('data', (d) => console.log('CHROME_ERR:', d.toString()));
 
   let cdp;
   try {
@@ -503,6 +519,7 @@ async function runDealershipTestSuite() {
     console.log('Clicked btn-admin-exit');
     await sleep(250);
 
+    console.log('Starting Test 10: Setting mobile device metrics...');
     // Test 10: Mobile Viewport 390x844 & Zero Horizontal Scroll
     await cdp.send('Emulation.setDeviceMetricsOverride', {
       width: 390,
@@ -510,17 +527,21 @@ async function runDealershipTestSuite() {
       deviceScaleFactor: 2,
       mobile: true
     });
+    console.log('Mobile device metrics override complete, sleeping 350ms...');
     await sleep(350);
 
+    console.log('Evaluating mobile horizontal overflow...');
     const hasHorizontalOverflow = await cdp.evaluate(`
       document.documentElement.scrollWidth > document.documentElement.clientWidth
     `);
     console.log(`[PASS] Mobile viewport check (390px): horizontal overflow = ${hasHorizontalOverflow}`);
     assert.equal(hasHorizontalOverflow, false, 'No horizontal overflow allowed on mobile');
 
+    console.log('Capturing mobile proof screenshot...');
     // Capture proof: Mobile View
     const mobileProofPath = path.join(ARTIFACT_DIR, 'proof_dealership_mobile.png');
     await cdp.screenshot(mobileProofPath);
+    console.log('Mobile screenshot saved.');
 
     // Assert 0 Console and Page Errors
     console.log(`Console Errors detected: ${cdp.consoleErrors.length}`);

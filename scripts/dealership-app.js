@@ -1739,6 +1739,8 @@
 
     overlay.querySelector('#btn-close-vehicle-modal')?.addEventListener('click', () => {
       overlay.classList.remove('is-active');
+      const iframe = overlay.querySelector('.sketchfab-iframe');
+      if (iframe) iframe.src = 'about:blank';
     });
 
     const tabPhoto = overlay.querySelector('#tab-media-photo');
