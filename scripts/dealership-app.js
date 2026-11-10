@@ -130,7 +130,9 @@
     activeColorHex: '#FD6E6E',
     activeLifestyleIdx: 0,
     isHudCollapsed: false,
-    heroViewer: null
+    heroViewer: null,
+    fadeOutTimerId: null,
+    fadeInCleanupTimerId: null
   };
 
   function showToast(message, type = 'info') {
@@ -243,7 +245,7 @@
       colorTheme: 'raven-poppy',
       triadId: 'raven-poppy',
       modelKey: 'porsche',
-      prevCarId: 'ferrari-roma-2023',
+      prevCarId: 'audi-rs6-avant-2024',
       nextCarId: 'ferrari-roma-2023',
       nextCarName: 'Ferrari Roma V8',
       nextCarThumb: STUDIO_IMAGES.ferrariRender,
@@ -1034,8 +1036,8 @@
       }
     }
 
-    // Wire Hero 3D Stage & Depth-of-Field Carousel Controls
-    function updateHero3DStage(carId, targetHex = null, targetTheme = null) {
+    // Wire Hero 3D Stage & Depth-of-Field Carousel Controls with #main-content Fade-Out/Fade-In Transition
+    function applyHeroVehicleState(carId, targetHex = null, targetTheme = null) {
       state.active3DCarId = carId;
       const car = STORE.getFeatured3DCar(carId);
       if (!car) return;
@@ -1172,6 +1174,52 @@
       }
     }
 
+    function updateHero3DStage(carId, targetHex = null, targetTheme = null, options = {}) {
+      const skipTransition = Boolean(options && options.skipTransition);
+      const prefersReducedMotion =
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (state.fadeOutTimerId) {
+        clearTimeout(state.fadeOutTimerId);
+        state.fadeOutTimerId = null;
+      }
+      if (state.fadeInCleanupTimerId) {
+        clearTimeout(state.fadeInCleanupTimerId);
+        state.fadeInCleanupTimerId = null;
+      }
+
+      if (skipTransition || prefersReducedMotion) {
+        main.classList.remove('is-vehicle-cycling', 'is-vehicle-fade-out', 'is-vehicle-fade-in');
+        main.setAttribute('data-transition-state', 'idle');
+        applyHeroVehicleState(carId, targetHex, targetTheme);
+        return;
+      }
+
+      // Phase 1: Promote GPU layer & trigger smooth fade-out on #main-content
+      main.classList.remove('is-vehicle-fade-in');
+      main.classList.add('is-vehicle-cycling', 'is-vehicle-fade-out');
+      main.setAttribute('data-transition-state', 'fade-out');
+
+      // Apply vehicle metadata & cached 3D model swap
+      applyHeroVehicleState(carId, targetHex, targetTheme);
+
+      // Phase 2: At the fade-out trough (130ms), transition #main-content smoothly back in
+      state.fadeOutTimerId = window.setTimeout(() => {
+        state.fadeOutTimerId = null;
+        main.classList.remove('is-vehicle-fade-out');
+        main.classList.add('is-vehicle-fade-in');
+        main.setAttribute('data-transition-state', 'fade-in');
+
+        // Phase 3: Release temporary GPU layer promotion once fade-in settles
+        state.fadeInCleanupTimerId = window.setTimeout(() => {
+          state.fadeInCleanupTimerId = null;
+          main.classList.remove('is-vehicle-cycling', 'is-vehicle-fade-in');
+          main.setAttribute('data-transition-state', 'idle');
+        }, 240);
+      }, 130);
+    }
+
     // Switcher & Triad Listeners
     main.querySelectorAll('.apple-switcher-btn').forEach((btn) => {
       btn.addEventListener('click', (e) => {
@@ -1225,7 +1273,7 @@
 
     initHero3DViewer();
     if (state.active3DCarId) {
-      updateHero3DStage(state.active3DCarId, state.activeColorHex, state.activeTriadId);
+      updateHero3DStage(state.active3DCarId, state.activeColorHex, state.activeTriadId, { skipTransition: true });
     }
   }
 

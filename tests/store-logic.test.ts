@@ -8,6 +8,7 @@ const {
   extractSketchfabId,
   formatPriceWithRates,
   filterAndSortVehicles,
+  getAdjacentFeaturedCarIds,
   FEATURED_3D_CARS,
   INITIAL_VEHICLES
 } = require('../scripts/dealership-store.js');
@@ -57,6 +58,24 @@ test('all FEATURED_3D_CARS map to existing local .glb models and INITIAL_VEHICLE
   }
 });
 
+test('getAdjacentFeaturedCarIds cycles deterministically across all 4 3D showroom vehicles', () => {
+  const step1 = getAdjacentFeaturedCarIds('ferrari-roma-2023');
+  assert.equal(step1.prevId, 'porsche-gt3-rs-2024');
+  assert.equal(step1.nextId, 'mercedes-amg-g63-2024');
+
+  const step2 = getAdjacentFeaturedCarIds(step1.nextId);
+  assert.equal(step2.currentId, 'mercedes-amg-g63-2024');
+  assert.equal(step2.nextId, 'audi-rs6-avant-2024');
+
+  const step3 = getAdjacentFeaturedCarIds(step2.nextId);
+  assert.equal(step3.currentId, 'audi-rs6-avant-2024');
+  assert.equal(step3.nextId, 'porsche-gt3-rs-2024');
+
+  const step4 = getAdjacentFeaturedCarIds(step3.nextId);
+  assert.equal(step4.currentId, 'porsche-gt3-rs-2024');
+  assert.equal(step4.nextId, 'ferrari-roma-2023');
+});
+
 test('ApexStore CRUD and KPI calculations work deterministically', () => {
   ApexStore.resetSeedData();
   const initialKpis = ApexStore.getKPIs();
@@ -78,3 +97,4 @@ test('ApexStore CRUD and KPI calculations work deterministically', () => {
   ApexStore.deleteVehicle(added.id);
   assert.equal(ApexStore.getVehicles().length, 8);
 });
+

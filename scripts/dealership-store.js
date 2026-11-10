@@ -697,6 +697,28 @@
     }
   }
 
+  /**
+   * Pure helper: getAdjacentFeaturedCarIds(currentCarId)
+   * Returns deterministic { currentId, prevId, nextId } for 3D viewer vehicle cycling.
+   */
+  function getAdjacentFeaturedCarIds(currentCarId) {
+    const order = [
+      'ferrari-roma-2023',
+      'mercedes-amg-g63-2024',
+      'audi-rs6-avant-2024',
+      'porsche-gt3-rs-2024'
+    ];
+    const idx = order.indexOf(currentCarId);
+    const safeIdx = idx === -1 ? 0 : idx;
+    const prevIdx = (safeIdx - 1 + order.length) % order.length;
+    const nextIdx = (safeIdx + 1) % order.length;
+    return {
+      currentId: order[safeIdx],
+      prevId: order[prevIdx],
+      nextId: order[nextIdx]
+    };
+  }
+
   const storeInstance = new Store();
   if (root) {
     root.ApexStore = storeInstance;
@@ -708,8 +730,10 @@
       extractSketchfabId,
       formatPriceWithRates,
       filterAndSortVehicles,
+      getAdjacentFeaturedCarIds,
       FEATURED_3D_CARS,
       INITIAL_VEHICLES
     };
   }
 })(typeof window !== 'undefined' ? window : globalThis);
+

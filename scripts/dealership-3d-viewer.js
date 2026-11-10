@@ -91,8 +91,15 @@
       this.currentModelKey = this.options.initialModel;
       this.currentColor = this.options.initialColor;
       this.paintMaterials = [];
+      this.modelCache = new Map();
+      this.loadingPromises = new Map();
+      this.targetCameraPos = null;
       this.animationFrameId = null;
       this.timeoutId = null;
+      this.idlePreloadId = null;
+      this.intersectionObserver = null;
+      this.isVisibleInViewport = true;
+      this.isLoopRunning = false;
       this.isInitialized = false;
       this.dracoLoader = null;
       this.gltfLoader = null;
@@ -121,9 +128,12 @@
         this.setupLoaders();
         this.animate = this.animate.bind(this);
         this.onWindowResize = this.onWindowResize.bind(this);
-        window.addEventListener('resize', this.onWindowResize);
+        this.onVisibilityChange = this.onVisibilityChange.bind(this);
+        window.addEventListener('resize', this.onWindowResize, { passive: true });
+        document.addEventListener('visibilitychange', this.onVisibilityChange);
+        this.setupViewportObserver();
 
-        this.animate();
+        this.startRenderLoop();
         this.loadModel(this.currentModelKey, this.currentColor);
 
         this.isInitialized = true;
@@ -132,6 +142,50 @@
         Apex3DViewer.activeInstance = this;
         console.warn('Apex3DViewer fallback:', err);
         this.enableInteractiveTilt();
+      }
+    }
+
+    setupViewportObserver() {
+      if (typeof IntersectionObserver === 'undefined' || !this.container) return;
+      this.intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (!entry) return;
+          this.isVisibleInViewport = entry.isIntersecting;
+          if (this.isVisibleInViewport && !document.hidden) {
+            this.startRenderLoop();
+          } else {
+            this.stopRenderLoop();
+          }
+        },
+        { threshold: 0.05 }
+      );
+      this.intersectionObserver.observe(this.container);
+    }
+
+    onVisibilityChange() {
+      if (document.hidden) {
+        this.stopRenderLoop();
+      } else if (this.isVisibleInViewport) {
+        this.startRenderLoop();
+      }
+    }
+
+    startRenderLoop() {
+      if (this.isLoopRunning) return;
+      this.isLoopRunning = true;
+      this.animate();
+    }
+
+    stopRenderLoop() {
+      this.isLoopRunning = false;
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
+      }
+      if (this.timeoutId) {
+        clearTimeout(this.timeoutId);
+        this.timeoutId = null;
       }
     }
 
@@ -305,6 +359,164 @@
       }
     }
 
+    prepareModelEntry(gltf, config, initialColor) {
+      const model = gltf.scene;
+      model.position.set(0, 0, 0);
+      model.scale.set(1, 1, 1);
+      model.updateMatrixWorld(true);
+
+      // Measure unscaled world bounds and auto-normalize so 0.01x FBX exports (bmw_m4.glb) match ferrari.glb
+      const rawBox = new THREE.Box3().setFromObject(model);
+      const rawSize = rawBox.getSize(new THREE.Vector3());
+      const maxDim = Math.max(rawSize.x, rawSize.y, rawSize.z);
+      const targetSpan = config.targetSpan || 4.15;
+      const normalizedScale = maxDim > 0.0001 ? targetSpan / maxDim : config.scale;
+
+      model.scale.setScalar(normalizedScale);
+      model.updateMatrixWorld(true);
+
+      const box = new THREE.Box3().setFromObject(model);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+
+      model.position.x -= center.x;
+      model.position.z -= center.z;
+      model.position.y = (config.positionY || 0) - box.min.y;
+
+      const paintMaterials = [];
+      model.traverse((child) => {
+        if (child.isMesh && child.material) {
+          const mat = child.material;
+          const matName = (mat.name || '').toLowerCase();
+          const meshName = (child.name || '').toLowerCase();
+          const isPaint =
+            (mat.name && config.paintMaterialNames.some((pName) => mat.name.includes(pName))) ||
+            matName.includes('carpaint') ||
+            matName.includes('body') ||
+            matName.includes('paint') ||
+            meshName.includes('body') ||
+            meshName.includes('paint');
+
+          if (isPaint) {
+            if (!child.material.isMeshPhysicalMaterial) {
+              child.material = new THREE.MeshPhysicalMaterial({
+                color: new THREE.Color(initialColor),
+                metalness: 0.32,
+                roughness: 0.24,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.05
+              });
+            }
+            paintMaterials.push(child.material);
+          }
+        }
+      });
+
+      return {
+        model,
+        paintMaterials,
+        targetY: size.y * 0.35
+      };
+    }
+
+    fetchAndCacheModel(config, initialColor) {
+      if (this.modelCache.has(config.path)) {
+        return Promise.resolve(this.modelCache.get(config.path));
+      }
+      if (this.loadingPromises.has(config.path)) {
+        return this.loadingPromises.get(config.path);
+      }
+
+      const promise = new Promise((resolve, reject) => {
+        if (!this.gltfLoader) {
+          reject(new Error('GLTFLoader unavailable'));
+          return;
+        }
+        this.gltfLoader.load(
+          config.path,
+          (gltf) => {
+            const entry = this.prepareModelEntry(gltf, config, initialColor);
+            this.modelCache.set(config.path, entry);
+            this.loadingPromises.delete(config.path);
+            resolve(entry);
+          },
+          undefined,
+          (err) => {
+            this.loadingPromises.delete(config.path);
+            reject(err);
+          }
+        );
+      });
+
+      this.loadingPromises.set(config.path, promise);
+      return promise;
+    }
+
+    scheduleIdlePreload() {
+      if (this.idlePreloadId) return;
+      const runPreload = () => {
+        const secondaryKeys = ['porsche', 'ferrari'];
+        secondaryKeys.forEach((key) => {
+          const cfg = MODEL_CONFIG[key];
+          if (cfg && !this.modelCache.has(cfg.path) && !this.loadingPromises.has(cfg.path)) {
+            this.fetchAndCacheModel(cfg, cfg.defaultColor).catch(() => {});
+          }
+        });
+      };
+
+      if (typeof window.requestIdleCallback === 'function') {
+        this.idlePreloadId = window.requestIdleCallback(runPreload, { timeout: 1500 });
+      } else {
+        this.idlePreloadId = window.setTimeout(runPreload, 500);
+      }
+    }
+
+    activateCachedModel(entry, config, targetColor) {
+      if (this.currentModel && this.currentModel !== entry.model) {
+        this.scene.remove(this.currentModel);
+      }
+
+      this.paintMaterials = entry.paintMaterials;
+      this.currentModel = entry.model;
+
+      if (this.currentModel.parent !== this.scene) {
+        this.scene.add(this.currentModel);
+      }
+
+      this.changeCarColor(targetColor);
+
+      if (config.cameraPos) {
+        if (!isSoftwareGl && this.camera) {
+          this.targetCameraPos = new THREE.Vector3(
+            config.cameraPos[0],
+            config.cameraPos[1],
+            config.cameraPos[2]
+          );
+          // Snap 70% toward target angle immediately so the remaining 30% glides during fade-in
+          this.camera.position.lerp(this.targetCameraPos, 0.72);
+        } else if (this.camera) {
+          this.camera.position.set(config.cameraPos[0], config.cameraPos[1], config.cameraPos[2]);
+          this.targetCameraPos = null;
+        }
+      }
+
+      if (this.controls) {
+        this.controls.target.set(0, entry.targetY, 0);
+        this.controls.update();
+      } else if (this.camera) {
+        this.camera.lookAt(0, entry.targetY, 0);
+      }
+
+      if (this.carImageFallback) {
+        this.carImageFallback.classList.add('has-3d-loaded');
+      }
+
+      // Render an immediate frame so WebGL canvas matches the swapped vehicle before fade-in
+      if (this.renderer && this.scene && this.camera) {
+        this.renderer.render(this.scene, this.camera);
+      }
+    }
+
     loadModel(modelKey = 'ferrari', color = null) {
       const config = MODEL_CONFIG[modelKey] || MODEL_CONFIG.ferrari;
       this.currentModelKey = modelKey;
@@ -315,87 +527,23 @@
 
       const currentToken = ++this.loadToken;
 
-      this.gltfLoader.load(
-        config.path,
-        (gltf) => {
+      // Fast Path: Instantaneous <0.2ms swap if GLB is already in memory cache
+      if (this.modelCache.has(config.path)) {
+        const cachedEntry = this.modelCache.get(config.path);
+        this.activateCachedModel(cachedEntry, config, targetColor);
+        return;
+      }
+
+      this.fetchAndCacheModel(config, targetColor)
+        .then((entry) => {
           if (currentToken !== this.loadToken) return;
-
-          if (this.currentModel) {
-            this.scene.remove(this.currentModel);
-            this.currentModel.traverse((child) => {
-              if (child.isMesh && child.geometry) {
-                child.geometry.dispose();
-              }
-            });
-            this.currentModel = null;
-          }
-
-          this.paintMaterials = [];
-          const model = gltf.scene;
-          model.position.y = config.positionY;
-          model.scale.set(config.scale, config.scale, config.scale);
-
-          const box = new THREE.Box3().setFromObject(model);
-          const center = box.getCenter(new THREE.Vector3());
-          const size = box.getSize(new THREE.Vector3());
-
-          model.position.x -= center.x;
-          model.position.z -= center.z;
-          model.position.y -= box.min.y;
-
-          model.traverse((child) => {
-            if (child.isMesh && child.material) {
-              const mat = child.material;
-              const matName = (mat.name || '').toLowerCase();
-              const meshName = (child.name || '').toLowerCase();
-              const isPaint =
-                (mat.name && config.paintMaterialNames.some((pName) => mat.name.includes(pName))) ||
-                matName.includes('carpaint') ||
-                matName.includes('body') ||
-                matName.includes('paint') ||
-                meshName.includes('body') ||
-                meshName.includes('paint');
-
-              if (isPaint) {
-                if (!child.material.isMeshPhysicalMaterial) {
-                  child.material = new THREE.MeshPhysicalMaterial({
-                    color: new THREE.Color(targetColor),
-                    metalness: 0.32,
-                    roughness: 0.24,
-                    clearcoat: 1.0,
-                    clearcoatRoughness: 0.05
-                  });
-                }
-                this.paintMaterials.push(child.material);
-              }
-            }
-          });
-
-          this.changeCarColor(targetColor);
-
-          if (config.cameraPos) {
-            this.camera.position.set(config.cameraPos[0], config.cameraPos[1], config.cameraPos[2]);
-          }
-          if (this.controls) {
-            this.controls.target.set(0, size.y * 0.35, 0);
-            this.controls.update();
-          } else {
-            this.camera.lookAt(0, size.y * 0.35, 0);
-          }
-
-          this.scene.add(model);
-          this.currentModel = model;
-
-          if (this.carImageFallback) {
-            this.carImageFallback.classList.add('has-3d-loaded');
-          }
-        },
-        undefined,
-        (err) => {
+          this.activateCachedModel(entry, config, targetColor);
+          this.scheduleIdlePreload();
+        })
+        .catch((err) => {
           console.warn('Apex3DViewer: Fallback kept for ' + modelKey, err);
           this.enableInteractiveTilt();
-        }
-      );
+        });
     }
 
     changeCarColor(hexColor) {
@@ -454,8 +602,8 @@
         img.style.transform = 'perspective(900px) rotateY(0deg) rotateX(0deg) scale3d(1, 1, 1)';
       };
 
-      card.addEventListener('mousemove', handleMove);
-      card.addEventListener('mouseleave', handleLeave);
+      card.addEventListener('mousemove', handleMove, { passive: true });
+      card.addEventListener('mouseleave', handleLeave, { passive: true });
     }
 
     onWindowResize() {
@@ -470,12 +618,16 @@
     }
 
     afterDraw(cb) {
-      if (!this.renderer) return;
+      if (!this.renderer || !this.isLoopRunning) return;
       const gl = this.renderer.getContext();
       if (gl && typeof gl.fenceSync === 'function') {
         const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
         gl.flush();
         const poll = () => {
+          if (!this.isLoopRunning) {
+            if (sync) gl.deleteSync(sync);
+            return;
+          }
           const state = sync && gl.getSyncParameter(sync, gl.SYNC_STATUS);
           if (state === gl.UNSIGNALED) {
             this.timeoutId = window.setTimeout(poll, 8);
@@ -491,6 +643,15 @@
     }
 
     animate() {
+      if (!this.isLoopRunning) return;
+
+      if (this.targetCameraPos && this.camera) {
+        this.camera.position.lerp(this.targetCameraPos, 0.16);
+        if (this.camera.position.distanceToSquared(this.targetCameraPos) < 0.002) {
+          this.targetCameraPos = null;
+        }
+      }
+
       if (this.controls) {
         this.controls.update();
       }
@@ -507,17 +668,27 @@
     }
 
     destroy() {
-      if (this.animationFrameId) {
-        cancelAnimationFrame(this.animationFrameId);
-      }
-      if (this.timeoutId) {
-        clearTimeout(this.timeoutId);
-      }
+      this.stopRenderLoop();
       window.removeEventListener('resize', this.onWindowResize);
-
-      if (this.currentModel && this.scene) {
-        this.scene.remove(this.currentModel);
+      document.removeEventListener('visibilitychange', this.onVisibilityChange);
+      if (this.intersectionObserver) {
+        this.intersectionObserver.disconnect();
+        this.intersectionObserver = null;
       }
+
+      this.modelCache.forEach((entry) => {
+        if (entry.model) {
+          this.scene?.remove(entry.model);
+          entry.model.traverse((child) => {
+            if (child.isMesh && child.geometry) {
+              child.geometry.dispose();
+            }
+          });
+        }
+      });
+      this.modelCache.clear();
+      this.loadingPromises.clear();
+
       if (this.renderer) {
         this.renderer.dispose();
       }
@@ -543,3 +714,4 @@
 
   window.Apex3DViewer = Apex3DViewer;
 })(window, document);
+
