@@ -173,7 +173,7 @@
         <!-- Zone 1: Single-line Brand Wordmark -->
         <a href="#" class="brand-wordmark" id="nav-brand-home">Apex.</a>
 
-        <!-- Zone 2: 4 Concise Uppercase Nav Links -->
+        <!-- Zone 2: 4 Concise Uppercase Nav Links (Desktop) -->
         <nav class="gallery-nav-links" aria-label="Primary Navigation">
           <a href="#hero-stage-viewport" class="gallery-nav-item active">HOME</a>
           <a href="#lifestyle-section" class="gallery-nav-item">LIFESTYLE</a>
@@ -181,9 +181,9 @@
           <a href="#catalog" class="gallery-nav-item">SHOWROOM</a>
         </nav>
 
-        <!-- Zone 3: Currency & Owner Action -->
+        <!-- Zone 3: Currency, Owner Action & Apple Mobile Menu Trigger -->
         <div class="nav-actions">
-          <div class="currency-selector-group" id="header-currency-switcher" role="group" aria-label="Currency Selector">
+          <div class="currency-selector-group desktop-currency-group" id="header-currency-switcher" role="group" aria-label="Currency Selector">
             ${currencies
               .map(
                 (c) => `
@@ -195,9 +195,86 @@
               .join('')}
           </div>
 
+          <!-- Apple Mobile Compact Currency Pill (Visible on Mobile <= 768px) -->
+          <button
+            type="button"
+            class="apple-mobile-currency-btn"
+            id="btn-mobile-currency-cycle"
+            aria-label="Cycle Currency (${currentCurrency})"
+            title="Tap to switch currency"
+          >
+            <span id="mobile-currency-code">${currentCurrency}</span>
+          </button>
+
           <button type="button" class="btn-mode-toggle ${state.view === 'admin' ? 'is-admin-active' : ''}" id="btn-header-admin-mode">
             ${state.view === 'admin' ? 'Exit Admin' : 'Owner Admin'}
           </button>
+
+          <!-- Apple Signature 2-Line Equal (=) Mobile Curtain Menu Button -->
+          <button
+            type="button"
+            class="apple-mobile-menu-trigger"
+            id="btn-apple-mobile-menu"
+            aria-label="Toggle Navigation Menu"
+            aria-expanded="false"
+            aria-controls="apple-mobile-curtain"
+          >
+            <span class="apple-menu-line apple-menu-line-top" aria-hidden="true"></span>
+            <span class="apple-menu-line apple-menu-line-bottom" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Apple Frosted Curtain Mobile Navigation Drawer -->
+      <div class="apple-mobile-curtain" id="apple-mobile-curtain" aria-hidden="true">
+        <div class="apple-curtain-inner">
+          <nav class="apple-curtain-nav" aria-label="Mobile Navigation">
+            <a href="#hero-stage-viewport" class="apple-curtain-link" data-curtain-link>
+              <span>Home</span>
+              <span class="apple-curtain-chevron" aria-hidden="true">›</span>
+            </a>
+            <a href="#lifestyle-section" class="apple-curtain-link" data-curtain-link>
+              <span>Atelier Lifestyle</span>
+              <span class="apple-curtain-chevron" aria-hidden="true">›</span>
+            </a>
+            <a href="#featured-collection-section" class="apple-curtain-link" data-curtain-link>
+              <span>Featured Collection</span>
+              <span class="apple-curtain-chevron" aria-hidden="true">›</span>
+            </a>
+            <a href="#catalog" class="apple-curtain-link" data-curtain-link>
+              <span>Showroom Inventory</span>
+              <span class="apple-curtain-chevron" aria-hidden="true">›</span>
+            </a>
+          </nav>
+
+          <div class="apple-curtain-section">
+            <span class="apple-curtain-label">Display Currency</span>
+            <div class="currency-selector-group apple-curtain-currency-group" role="group" aria-label="Mobile Currency Selector">
+              ${currencies
+                .map(
+                  (c) => `
+                <button type="button" class="currency-pill ${c === currentCurrency ? 'active' : ''}" data-currency="${c}">
+                  ${c}
+                </button>
+              `
+                )
+                .join('')}
+            </div>
+          </div>
+
+          <div class="apple-curtain-actions">
+            <button type="button" class="apple-curtain-admin-btn" id="btn-curtain-admin-mode">
+              ${state.view === 'admin' ? 'Exit Owner Admin Portal' : 'Owner Admin Portal'}
+            </button>
+            <a
+              href="https://wa.me/15550192834?text=Hello%20Apex%20Auto%20Lounge%2C%20I%20would%20like%20to%20speak%20with%20a%20private%20sales%20concierge."
+              target="_blank"
+              rel="noopener noreferrer"
+              class="apple-curtain-concierge-link"
+            >
+              WhatsApp Private Concierge ↗
+            </a>
+          </div>
         </div>
       </div>
     `;
@@ -209,29 +286,77 @@
       });
     });
 
+    const mobileCurrBtn = header.querySelector('#btn-mobile-currency-cycle');
+    if (mobileCurrBtn) {
+      mobileCurrBtn.addEventListener('click', () => {
+        const active = STORE.getCurrency();
+        const nextIdx = (currencies.indexOf(active) + 1) % currencies.length;
+        STORE.setCurrency(currencies[nextIdx]);
+        triggerSuccessPulse(mobileCurrBtn);
+      });
+    }
+
+    const menuTrigger = header.querySelector('#btn-apple-mobile-menu');
+    const curtain = header.querySelector('#apple-mobile-curtain');
+    function setCurtainOpen(isOpen) {
+      if (!menuTrigger || !curtain) return;
+      menuTrigger.classList.toggle('is-open', isOpen);
+      menuTrigger.setAttribute('aria-expanded', String(isOpen));
+      curtain.classList.toggle('is-open', isOpen);
+      curtain.setAttribute('aria-hidden', String(!isOpen));
+      if (isOpen && window.gsap) {
+        window.gsap.fromTo(
+          curtain.querySelectorAll('.apple-curtain-link, .apple-curtain-section, .apple-curtain-actions'),
+          { opacity: 0, y: -8 },
+          { opacity: 1, y: 0, duration: 0.22, stagger: 0.03, ease: 'expo.out' }
+        );
+      }
+    }
+
+    if (menuTrigger && curtain) {
+      menuTrigger.addEventListener('click', () => {
+        const nextState = !curtain.classList.contains('is-open');
+        setCurtainOpen(nextState);
+      });
+      curtain.querySelectorAll('[data-curtain-link]').forEach((link) => {
+        link.addEventListener('click', () => {
+          setCurtainOpen(false);
+        });
+      });
+    }
+
     const brandHome = header.querySelector('#nav-brand-home');
     if (brandHome) {
       brandHome.addEventListener('click', (e) => {
         e.preventDefault();
+        setCurtainOpen(false);
         state.view = 'public';
         renderApp();
       });
     }
 
+    const handleAdminToggle = (triggerBtn) => {
+      setCurtainOpen(false);
+      if (state.view === 'admin') {
+        state.view = 'public';
+        renderApp();
+        showToast('Switched to Public Gallery View');
+      } else if (state.isAdmin) {
+        state.view = 'admin';
+        renderApp();
+      } else {
+        openPinModal(triggerBtn);
+      }
+    };
+
     const modeBtn = header.querySelector('#btn-header-admin-mode');
     if (modeBtn) {
-      modeBtn.addEventListener('click', () => {
-        if (state.view === 'admin') {
-          state.view = 'public';
-          renderApp();
-          showToast('Switched to Public Gallery View');
-        } else if (state.isAdmin) {
-          state.view = 'admin';
-          renderApp();
-        } else {
-          openPinModal(modeBtn);
-        }
-      });
+      modeBtn.addEventListener('click', () => handleAdminToggle(modeBtn));
+    }
+
+    const curtainAdminBtn = header.querySelector('#btn-curtain-admin-mode');
+    if (curtainAdminBtn) {
+      curtainAdminBtn.addEventListener('click', () => handleAdminToggle(curtainAdminBtn));
     }
   }
 
@@ -446,10 +571,14 @@
       if (isSelected) triggerSuccessPulse(btn);
     });
 
-    // 2. Update catalog rate note
+    // 2. Update catalog rate note & mobile currency badge
     const rateNoteCurr = document.querySelector('.catalog-rate-note strong');
     if (rateNoteCurr) {
       rateNoteCurr.textContent = newCurrency;
+    }
+    const mobileCurrCode = document.getElementById('mobile-currency-code');
+    if (mobileCurrCode) {
+      mobileCurrCode.textContent = newCurrency;
     }
 
     // 3. Update all catalog card prices and WhatsApp links
@@ -480,15 +609,18 @@
       }
     });
 
-    // 5. Update hero island price & WhatsApp link
+    // 5. Update hero island price, mobile telemetry pill & WhatsApp link
     const heroCar = STORE.getFeatured3DCar(state.active3DCarId);
     if (heroCar) {
+      const formattedHeroPrice = STORE.formatPrice(heroCar.priceUSD);
       const heroPrice = document.getElementById('island-price');
-      if (heroPrice) heroPrice.textContent = STORE.formatPrice(heroCar.priceUSD);
+      if (heroPrice) heroPrice.textContent = formattedHeroPrice;
+      const mobileTelemetryPrice = document.getElementById('hero-mobile-telemetry-price');
+      if (mobileTelemetryPrice) mobileTelemetryPrice.textContent = formattedHeroPrice;
       const waBtn = document.getElementById('hero-whatsapp-reserve');
       if (waBtn) {
         const encoded = encodeURIComponent(
-          `Hi Apex Auto Lounge, I am inquiring about the ${heroCar.year} ${heroCar.make} ${heroCar.model} featured on the 3D Showroom (${STORE.formatPrice(heroCar.priceUSD)}). Is it available for private acquisition?`
+          `Hi Apex Auto Lounge, I am inquiring about the ${heroCar.year} ${heroCar.make} ${heroCar.model} featured on the 3D Showroom (${formattedHeroPrice}). Is it available for private acquisition?`
         );
         waBtn.setAttribute('href', `https://wa.me/15550192834?text=${encoded}`);
       }
@@ -692,8 +824,17 @@
               </div>
             </div>
 
-            <!-- Minimalist Zen Color Swatch Dock (Always Zen View, Swatches Only without Color Names) -->
+            <!-- Minimalist Zen Color Swatch Dock + Apple Mobile Floating Control Pill -->
             <footer class="hero-card-bottom-bar is-zen-always" id="hero-bottom-dock">
+              <!-- Apple Mobile Telemetry Summary Pill (Visible on Mobile <= 768px) -->
+              <div class="apple-mobile-telemetry-pill" id="hero-mobile-telemetry-pill">
+                <span id="hero-mobile-telemetry-hp">${currentCar.hp} HP</span>
+                <span class="telemetry-sep" aria-hidden="true">·</span>
+                <span id="hero-mobile-telemetry-accel">${currentCar.zeroToSixty}</span>
+                <span class="telemetry-sep" aria-hidden="true">·</span>
+                <strong id="hero-mobile-telemetry-price">${STORE.formatPrice(currentCar.priceUSD)}</strong>
+              </div>
+
               <div class="hero-stage-bottom-island hero-swatches-only-dock">
                 <div class="sr-only" aria-hidden="true">
                   <span id="island-car-name">${currentCar.year} ${currentCar.make} ${currentCar.model}</span>
@@ -705,6 +846,17 @@
 
                 <!-- Rule 20: Animate useful feedback (Live Lacquer Applied Toast) -->
                 <div class="swatch-feedback-toast" id="swatch-feedback-toast" aria-live="polite"></div>
+
+                <!-- Apple Mobile Prev Stepper inside Floating Pill -->
+                <button
+                  type="button"
+                  class="apple-dock-stepper-btn"
+                  id="hero-mobile-prev-btn"
+                  data-prev-car="${currentAtmosphere.prevCarId}"
+                  aria-label="Previous 3D Vehicle"
+                >
+                  ‹
+                </button>
 
                 <!-- Pure Circular Color Swatches (No Color Names Displayed) -->
                 <div class="triad-swatch-group swatch-only-group" role="group" aria-label="3D Paint Finishes">
@@ -725,6 +877,17 @@
                     )
                     .join('')}
                 </div>
+
+                <!-- Apple Mobile Next Stepper inside Floating Pill -->
+                <button
+                  type="button"
+                  class="apple-dock-stepper-btn"
+                  id="hero-mobile-next-btn"
+                  data-next-car="${currentAtmosphere.nextCarId}"
+                  aria-label="Next 3D Vehicle"
+                >
+                  ›
+                </button>
               </div>
             </footer>
           </div>
@@ -843,7 +1006,7 @@
             </div>
           </div>
 
-          <!-- 3-Column Stadium / Arch-Framed Collection Grid -->
+          <!-- 3-Column Stadium / Arch-Framed Collection Grid (Apple Horizontal Snap Carousel on Mobile) -->
           <div class="featured-arch-grid" id="featured-arch-grid">
             ${featuredArchCars
               .map(
@@ -880,6 +1043,22 @@
               )
               .join('')}
           </div>
+
+          <!-- Apple-Style Mobile Snap Carousel Pagination Pill (Visible on Mobile <= 768px) -->
+          <div class="apple-carousel-dots-wrap" id="featured-mobile-dots" role="tablist" aria-label="Featured Collection Slides">
+            ${featuredArchCars
+              .map(
+                (item, idx) => `
+              <button
+                type="button"
+                class="apple-carousel-dot ${idx === 0 ? 'active' : ''}"
+                data-arch-dot="${idx}"
+                aria-label="Slide ${idx + 1}: ${item.displayTitle}"
+              ></button>
+            `
+              )
+              .join('')}
+          </div>
         </div>
       </section>
 
@@ -910,6 +1089,23 @@
               ${state.view === 'admin' ? 'Exit Admin View' : 'Owner Admin'}
             </button>
           </div>
+        </div>
+
+        <!-- Apple Store Horizontal Quick-Filter Make Pill Scroller -->
+        <div class="apple-make-pill-strip" id="apple-make-pill-strip" role="group" aria-label="Quick Filter by Manufacturer">
+          ${makes
+            .map(
+              (m) => `
+            <button
+              type="button"
+              class="apple-make-pill ${state.filters.make.toLowerCase() === m.toLowerCase() ? 'active' : ''}"
+              data-make-pill="${m}"
+            >
+              ${m === 'all' ? 'All Marques' : m}
+            </button>
+          `
+            )
+            .join('')}
         </div>
 
         <div class="filter-bar-container" id="filter-bar">
@@ -1002,10 +1198,74 @@
       });
     }
 
+    const syncMakePills = (selectedMake) => {
+      main.querySelectorAll('.apple-make-pill').forEach((pill) => {
+        const val = pill.getAttribute('data-make-pill') || 'all';
+        pill.classList.toggle('active', val.toLowerCase() === String(selectedMake).toLowerCase());
+      });
+    };
+
     main.querySelector('#filter-make')?.addEventListener('change', (e) => {
       state.filters.make = e.target.value;
+      syncMakePills(state.filters.make);
       updateCatalogGridOnly();
     });
+
+    main.querySelectorAll('.apple-make-pill').forEach((pill) => {
+      pill.addEventListener('click', (e) => {
+        const val = e.currentTarget.getAttribute('data-make-pill') || 'all';
+        state.filters.make = val;
+        const mkSelect = main.querySelector('#filter-make');
+        if (mkSelect) mkSelect.value = val;
+        syncMakePills(val);
+        triggerSuccessPulse(e.currentTarget);
+        updateCatalogGridOnly();
+      });
+    });
+
+    // Apple Mobile Featured Collection Horizontal Snap Carousel Pagination Sync
+    const archGrid = main.querySelector('#featured-arch-grid');
+    const archDots = main.querySelectorAll('.apple-carousel-dot');
+    if (archGrid && archDots.length > 0) {
+      archDots.forEach((dot) => {
+        dot.addEventListener('click', (e) => {
+          const idx = Number(e.currentTarget.getAttribute('data-arch-dot') || 0);
+          const cards = archGrid.querySelectorAll('.featured-arch-card');
+          const targetCard = cards[idx];
+          if (targetCard) {
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          }
+          archDots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        });
+      });
+
+      let scrollTick = false;
+      archGrid.addEventListener(
+        'scroll',
+        () => {
+          if (scrollTick) return;
+          scrollTick = true;
+          requestAnimationFrame(() => {
+            scrollTick = false;
+            const cards = archGrid.querySelectorAll('.featured-arch-card');
+            if (!cards.length) return;
+            const gridCenter = archGrid.scrollLeft + archGrid.clientWidth / 2;
+            let closestIdx = 0;
+            let minDist = Infinity;
+            cards.forEach((c, i) => {
+              const cardCenter = c.offsetLeft + c.offsetWidth / 2;
+              const dist = Math.abs(cardCenter - gridCenter);
+              if (dist < minDist) {
+                minDist = dist;
+                closestIdx = i;
+              }
+            });
+            archDots.forEach((d, i) => d.classList.toggle('active', i === closestIdx));
+          });
+        },
+        { passive: true }
+      );
+    }
 
     main.querySelector('#filter-status')?.addEventListener('change', (e) => {
       state.filters.status = e.target.value;
@@ -1023,6 +1283,7 @@
       if (kw) kw.value = '';
       const mk = main.querySelector('#filter-make');
       if (mk) mk.value = 'all';
+      syncMakePills('all');
       const st = main.querySelector('#filter-status');
       if (st) st.value = 'all';
       const srt = main.querySelector('#filter-sort');
@@ -1249,6 +1510,12 @@
       const nextBtn = main.querySelector('#hero-next-vehicle-btn');
       if (nextBtn) nextBtn.setAttribute('data-next-car', atmosphere.nextCarId);
 
+      const mobilePrevBtn = main.querySelector('#hero-mobile-prev-btn');
+      if (mobilePrevBtn) mobilePrevBtn.setAttribute('data-prev-car', atmosphere.prevCarId);
+
+      const mobileNextBtn = main.querySelector('#hero-mobile-next-btn');
+      if (mobileNextBtn) mobileNextBtn.setAttribute('data-next-car', atmosphere.nextCarId);
+
       const flankPrevBtn = main.querySelector('#hero-flank-prev-btn');
       if (flankPrevBtn) {
         flankPrevBtn.setAttribute('data-car', prevCarObj.id);
@@ -1277,7 +1544,8 @@
         nextCardName.textContent = atmosphere.nextCarName;
       }
 
-      // Update Bottom Dock Telemetry & Price
+      // Update Bottom Dock Telemetry, Mobile Pill & Price
+      const formattedPrice = STORE.formatPrice(car.priceUSD);
       const nameEl = main.querySelector('#island-car-name');
       if (nameEl) nameEl.textContent = `${car.year} ${car.make} ${car.model}`;
 
@@ -1291,7 +1559,16 @@
       if (topSpeedEl) topSpeedEl.textContent = car.topSpeed;
 
       const priceEl = main.querySelector('#island-price');
-      if (priceEl) priceEl.textContent = STORE.formatPrice(car.priceUSD);
+      if (priceEl) priceEl.textContent = formattedPrice;
+
+      const mobHpEl = main.querySelector('#hero-mobile-telemetry-hp');
+      if (mobHpEl) mobHpEl.textContent = `${car.hp} HP`;
+
+      const mobAccelEl = main.querySelector('#hero-mobile-telemetry-accel');
+      if (mobAccelEl) mobAccelEl.textContent = car.zeroToSixty;
+
+      const mobPriceEl = main.querySelector('#hero-mobile-telemetry-price');
+      if (mobPriceEl) mobPriceEl.textContent = formattedPrice;
 
       // Update WhatsApp & Dossier Links
       const waBtn = main.querySelector('#hero-whatsapp-reserve');
@@ -1516,7 +1793,7 @@
       });
     });
 
-    // Circular Arrow Buttons & Flanking Blurred 3D Car Click Listeners
+    // Circular Arrow Buttons, Mobile Dock Steppers & Flanking Blurred 3D Car Click Listeners
     main.querySelector('#hero-prev-vehicle-btn')?.addEventListener('click', (e) => {
       const btn = e.currentTarget;
       rubberBandBounce(btn, -1); // Rule 19: Rubber band elastic feedback
@@ -1527,6 +1804,20 @@
     main.querySelector('#hero-next-vehicle-btn')?.addEventListener('click', (e) => {
       const btn = e.currentTarget;
       rubberBandBounce(btn, 1); // Rule 19: Rubber band elastic feedback
+      const nextId = btn.getAttribute('data-next-car');
+      if (nextId) updateHero3DStage(nextId, null, null, { direction: 'next' });
+    });
+
+    main.querySelector('#hero-mobile-prev-btn')?.addEventListener('click', (e) => {
+      const btn = e.currentTarget;
+      rubberBandBounce(btn, -1);
+      const prevId = btn.getAttribute('data-prev-car');
+      if (prevId) updateHero3DStage(prevId, null, null, { direction: 'prev' });
+    });
+
+    main.querySelector('#hero-mobile-next-btn')?.addEventListener('click', (e) => {
+      const btn = e.currentTarget;
+      rubberBandBounce(btn, 1);
       const nextId = btn.getAttribute('data-next-car');
       if (nextId) updateHero3DStage(nextId, null, null, { direction: 'next' });
     });
@@ -1545,6 +1836,41 @@
       const id = e.currentTarget.getAttribute('data-id') || 'apex-car-01';
       openVehicleModal(id, '3d', e.currentTarget);
     });
+
+    // Apple Mobile Horizontal Touch Swipe on Hero Editorial / Bottom Dock
+    const heroStageCard = main.querySelector('#hero-stage-card');
+    if (heroStageCard) {
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchOnCanvas = false;
+      heroStageCard.addEventListener(
+        'touchstart',
+        (e) => {
+          if (!e.touches || !e.touches.length) return;
+          touchOnCanvas = Boolean(e.target.closest('#hero-3d-canvas'));
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        },
+        { passive: true }
+      );
+      heroStageCard.addEventListener(
+        'touchend',
+        (e) => {
+          if (touchOnCanvas || !e.changedTouches || !e.changedTouches.length) return;
+          const dx = e.changedTouches[0].clientX - touchStartX;
+          const dy = e.changedTouches[0].clientY - touchStartY;
+          if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+            const atm = HERO_ATMOSPHERE_CONFIG[state.active3DCarId] || HERO_ATMOSPHERE_CONFIG['ferrari-roma-2023'];
+            if (dx < 0 && atm.nextCarId) {
+              updateHero3DStage(atm.nextCarId, null, null, { direction: 'next' });
+            } else if (dx > 0 && atm.prevCarId) {
+              updateHero3DStage(atm.prevCarId, null, null, { direction: 'prev' });
+            }
+          }
+        },
+        { passive: true }
+      );
+    }
 
     // =========================================================================
     // GSAP + ScrollTrigger + Lenis Inertial Smooth Scroll & @uiuxzaid Video Choreography
