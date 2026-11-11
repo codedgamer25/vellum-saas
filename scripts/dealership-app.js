@@ -1620,113 +1620,133 @@
       }
 
       const heroCard = main.querySelector('#hero-stage-card');
+      main.classList.remove('is-vehicle-cycling', 'is-vehicle-fade-out', 'is-vehicle-fade-in');
+      main.setAttribute('data-transition-state', 'idle');
 
-      if (skipTransition || prefersReducedMotion) {
-        main.classList.remove('is-vehicle-cycling', 'is-vehicle-fade-out', 'is-vehicle-fade-in');
-        main.setAttribute('data-transition-state', 'idle');
+      if (skipTransition || prefersReducedMotion || !window.gsap) {
         main.removeAttribute('data-carousel-dir');
         if (heroCard) heroCard.removeAttribute('data-carousel-dir');
         applyHeroVehicleState(carId, targetHex, targetTheme, null);
         return;
       }
 
-      // Phase 1: Promote GPU layer & trigger directional diagonal depth-of-field choreography
       main.setAttribute('data-carousel-dir', direction);
       if (heroCard) heroCard.setAttribute('data-carousel-dir', direction);
-      main.classList.remove('is-vehicle-fade-in');
-      main.classList.add('is-vehicle-cycling', 'is-vehicle-fade-out');
-      main.setAttribute('data-transition-state', 'fade-out');
 
-      // Apply vehicle metadata & cached 3D model swap with turntable spin sweep
+      const gsap = window.gsap;
+      const dirSign = direction === 'prev' ? -1 : 1;
+      const watermarkEl = main.querySelector('#hero-watermark');
+      const stageViewport = main.querySelector('#hero-3d-stage-container');
+      const flankPrev = main.querySelector('#hero-flank-prev-btn');
+      const flankNext = main.querySelector('#hero-flank-next-btn');
+      const editorialNodes = main.querySelectorAll(
+        '#hero-main-title, #hero-editorial-summary, .hero-carousel-arrows, .hero-explore-row'
+      );
+      const mobileTelemetry = main.querySelector('#hero-mobile-telemetry-pill');
+
+      // 1. Reset any in-flight transforms so FLIP measurement captures exact rest geometry
+      const animatedNodes = [stageViewport, flankPrev, flankNext, watermarkEl, ...editorialNodes, mobileTelemetry].filter(Boolean);
+      gsap.killTweensOf(animatedNodes);
+      gsap.set([stageViewport, flankPrev, flankNext].filter(Boolean), { clearProps: 'transform,opacity' });
+
+      const pRect = flankPrev ? flankPrev.getBoundingClientRect() : null;
+      const cRect = stageViewport ? stageViewport.getBoundingClientRect() : null;
+      const nRect = flankNext ? flankNext.getBoundingClientRect() : null;
+      const hasDesktopFlanks = Boolean(pRect && nRect && cRect && pRect.width > 10 && nRect.width > 10);
+
+      // 2. Swap vehicle state & cached 3D model immediately (zero page dimming, zero blur)
       applyHeroVehicleState(carId, targetHex, targetTheme, direction);
 
-      // Phase 2: Overlap old & new states (Rule 16: crossfade overlap at 90ms)
-      state.fadeOutTimerId = window.setTimeout(() => {
-        state.fadeOutTimerId = null;
-        main.classList.remove('is-vehicle-fade-out');
-        main.classList.add('is-vehicle-fade-in');
-        main.setAttribute('data-transition-state', 'fade-in');
+      // 3. Play 60fps FLIP diagonal conveyor glide between Top-Left Prev ⇄ Center Stage ⇄ Bottom-Right Next
+      if (hasDesktopFlanks) {
+        const px = pRect.left + pRect.width * 0.5;
+        const py = pRect.top + pRect.height * 0.5;
+        const cx = cRect.left + cRect.width * 0.5;
+        const cy = cRect.top + cRect.height * 0.5;
+        const nx = nRect.left + nRect.width * 0.5;
+        const ny = nRect.top + nRect.height * 0.5;
 
-        if (window.gsap) {
-          const dirSign = direction === 'prev' ? -1 : 1;
-          const watermarkEl = main.querySelector('#hero-watermark');
-          const stageViewport = main.querySelector('#hero-3d-stage-container');
-          const flankPrev = main.querySelector('#hero-flank-prev-btn');
-          const flankNext = main.querySelector('#hero-flank-next-btn');
-          const editorialNodes = main.querySelectorAll(
-            '#hero-main-title, #hero-editorial-summary, .hero-carousel-arrows, .hero-explore-row'
+        if (direction === 'next') {
+          // Incoming Center Car glides up-and-left from the Bottom-Right Next slot into Center Stage
+          gsap.fromTo(
+            stageViewport,
+            { x: (nx - cx) * 0.54, y: (ny - cy) * 0.54, scale: 0.62 },
+            { x: 0, y: 0, scale: 1, duration: 0.68, ease: 'expo.out', clearProps: 'transform' }
           );
-          const bottomIsland = main.querySelector('#hero-stage-bottom-island');
-
-          if (watermarkEl) {
-            window.gsap.fromTo(
-              watermarkEl,
-              { xPercent: -50 + dirSign * 6, opacity: 0.35, scale: 0.96 },
-              { xPercent: -50, opacity: 1, scale: 1, duration: 0.52, ease: 'expo.out', overwrite: 'auto' }
-            );
-          }
-
-          // Rule 7: Arcs for object movement (Parabolic curved vehicular momentum with subtle upward arc apex)
-          if (stageViewport) {
-            window.gsap.fromTo(
-              stageViewport,
-              { x: dirSign * 46, y: -14, scale: 0.94 },
-              { x: 0, y: 0, scale: 1, duration: 0.52, ease: 'expo.out', overwrite: 'auto', clearProps: 'transform' }
-            );
-          }
-
-          if (flankPrev && flankNext) {
-            window.gsap.fromTo(
-              [flankPrev, flankNext],
-              { x: -dirSign * 38, y: 12, scale: 0.86, opacity: 0.45 },
-              {
-                x: 0,
-                y: 0,
-                scale: 1,
-                opacity: 0.85,
-                duration: 0.54,
-                stagger: 0.04,
-                ease: 'expo.out',
-                overwrite: 'auto',
-                clearProps: 'transform,opacity'
-              }
-            );
-          }
-
-          // Rule 1: Ease-out for entrances & Rule 3: Stagger list rows/text by 35ms
-          if (editorialNodes.length) {
-            window.gsap.fromTo(
-              editorialNodes,
-              { y: 16, opacity: 0.2 },
-              {
-                y: 0,
-                opacity: 1,
-                duration: 0.42,
-                stagger: 0.035,
-                ease: 'power3.out',
-                overwrite: 'auto',
-                clearProps: 'transform,opacity'
-              }
-            );
-          }
-
-          // Rule 6: Stagger as details settle (Telemetry bottom island trails by 50ms)
-          if (bottomIsland) {
-            window.gsap.fromTo(
-              bottomIsland,
-              { y: 12, opacity: 0.4 },
-              { y: 0, opacity: 1, duration: 0.44, delay: 0.05, ease: 'power3.out', overwrite: 'auto', clearProps: 'transform,opacity' }
-            );
-          }
+          // Outgoing Center Car glides up-and-left from Center Stage into the Top-Left Prev slot
+          gsap.fromTo(
+            flankPrev,
+            { x: (cx - px) * 0.62, y: (cy - py) * 0.62, scale: 1.42 },
+            { x: 0, y: 0, scale: 1, duration: 0.68, ease: 'expo.out', clearProps: 'transform' }
+          );
+          // New Bottom-Right Next Car glides in along the diagonal
+          gsap.fromTo(
+            flankNext,
+            { x: 96, y: 44, scale: 0.68, opacity: 0 },
+            { x: 0, y: 0, scale: 1, opacity: 1, duration: 0.68, ease: 'expo.out', clearProps: 'transform,opacity' }
+          );
+        } else {
+          // Incoming Center Car glides down-and-right from the Top-Left Prev slot into Center Stage
+          gsap.fromTo(
+            stageViewport,
+            { x: (px - cx) * 0.54, y: (py - cy) * 0.54, scale: 0.62 },
+            { x: 0, y: 0, scale: 1, duration: 0.68, ease: 'expo.out', clearProps: 'transform' }
+          );
+          // Outgoing Center Car glides down-and-right from Center Stage into the Bottom-Right Next slot
+          gsap.fromTo(
+            flankNext,
+            { x: (cx - nx) * 0.62, y: (cy - ny) * 0.62, scale: 1.42 },
+            { x: 0, y: 0, scale: 1, duration: 0.68, ease: 'expo.out', clearProps: 'transform' }
+          );
+          // New Top-Left Prev Car glides in along the diagonal
+          gsap.fromTo(
+            flankPrev,
+            { x: -96, y: -44, scale: 0.68, opacity: 0 },
+            { x: 0, y: 0, scale: 1, opacity: 1, duration: 0.68, ease: 'expo.out', clearProps: 'transform,opacity' }
+          );
         }
+      } else if (stageViewport) {
+        // Mobile horizontal stage glide
+        gsap.fromTo(
+          stageViewport,
+          { x: dirSign * 76, scale: 0.91 },
+          { x: 0, scale: 1, duration: 0.58, ease: 'expo.out', clearProps: 'transform' }
+        );
+      }
 
-        // Phase 3: Release temporary GPU layer promotion once fade-in settles
-        state.fadeInCleanupTimerId = window.setTimeout(() => {
-          state.fadeInCleanupTimerId = null;
-          main.classList.remove('is-vehicle-cycling', 'is-vehicle-fade-in');
-          main.setAttribute('data-transition-state', 'idle');
-        }, 260);
-      }, 95);
+      // Colossal Watermark smooth horizontal parallax glide
+      if (watermarkEl) {
+        gsap.fromTo(
+          watermarkEl,
+          { xPercent: -50 + dirSign * 10, opacity: 0 },
+          { xPercent: -50, opacity: 1, duration: 0.66, ease: 'expo.out', overwrite: 'auto' }
+        );
+      }
+
+      // Left Editorial Stack staggered smooth rise
+      if (editorialNodes.length) {
+        gsap.fromTo(
+          editorialNodes,
+          { y: dirSign * 16, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.52,
+            stagger: 0.04,
+            ease: 'power3.out',
+            overwrite: 'auto',
+            clearProps: 'transform,opacity'
+          }
+        );
+      }
+
+      if (mobileTelemetry) {
+        gsap.fromTo(
+          mobileTelemetry,
+          { y: 8, opacity: 0.3 },
+          { y: 0, opacity: 1, duration: 0.44, ease: 'power3.out', overwrite: 'auto', clearProps: 'transform,opacity' }
+        );
+      }
     }
 
     // Switcher & Triad Listeners
