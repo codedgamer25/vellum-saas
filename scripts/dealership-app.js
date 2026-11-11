@@ -25,6 +25,31 @@
     audiStudio: './src/assets/images/audi_rs6_studio_1794305860108.jpg'
   };
 
+  // Unlock native 120Hz ProMotion refresh rate in GSAP & pre-decode all 4 studio car PNGs into GPU bitmap memory
+  if (window.gsap) {
+    if (window.gsap.ticker && typeof window.gsap.ticker.lagSmoothing === 'function') {
+      window.gsap.ticker.lagSmoothing(0);
+    }
+    if (typeof window.gsap.defaults === 'function') {
+      window.gsap.defaults({ force3D: true });
+    }
+  }
+  [
+    './models/render_porsche.png',
+    './models/render_ferrari.png',
+    './models/render_mercedes.png',
+    './models/render_audi.png'
+  ].forEach((src) => {
+    try {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = src;
+      if (typeof img.decode === 'function') {
+        img.decode().catch(() => {});
+      }
+    } catch (e) {}
+  });
+
   // Studio Paint Finish Swatches (Repaints the active 3D vehicle in-place without switching cars)
   const MARCO_PEREZ_TRIADS = {
     'midnight-coral': {
@@ -1610,16 +1635,20 @@
         }
       }
 
-      // Update Three.js 3D Model & Paint Color with directional turntable entrance sweep
+      // Update Three.js 3D Model & Paint Color synchronously (single GPU frame, zero per-frame WebGL overhead during glide)
       if (window.Apex3DViewer) {
         if (typeof window.Apex3DViewer.loadModel === 'function') {
           window.Apex3DViewer.loadModel(atmosphere.modelKey, appliedColor, direction);
-        }
-        if (typeof window.Apex3DViewer.changeCarColor === 'function') {
+        } else if (typeof window.Apex3DViewer.changeCarColor === 'function') {
           window.Apex3DViewer.changeCarColor(appliedColor);
         }
       }
     }
+
+    // 120Hz ProMotion custom quintic/cubic-bezier ease-out curve (liquid acceleration, weightless settle)
+    const proMotionConveyorEase = function (t) {
+      return 1 - Math.pow(1 - t, 3.25);
+    };
 
     function updateHero3DStage(carId, targetHex = null, targetTheme = null, options = {}) {
       const skipTransition = Boolean(options && options.skipTransition);
@@ -1684,29 +1713,28 @@
         clearProps: 'transform,opacity'
       });
 
-      const pRect = flankPrev ? flankPrev.getBoundingClientRect() : null;
+      const pRect = (prevThumb || flankPrev) ? (prevThumb || flankPrev).getBoundingClientRect() : null;
       const cRect = stageViewport ? stageViewport.getBoundingClientRect() : null;
-      const nRect = flankNext ? flankNext.getBoundingClientRect() : null;
+      const nRect = (nextThumb || flankNext) ? (nextThumb || flankNext).getBoundingClientRect() : null;
       const hasFlanks = Boolean(pRect && nRect && cRect && pRect.width > 10 && nRect.width > 10);
 
-      // 2. Swap vehicle state & cached 3D model immediately (zero page dimming, zero blur)
+      // 2. Swap vehicle state & cached 3D model immediately (rendered once on GPU, zero per-frame WebGL draw calls during glide)
       applyHeroVehicleState(carId, targetHex, targetTheme, direction);
 
-      // 3. Play 60fps 4-Car 1:1 FLIP Diagonal Conveyor Transition (Top-Left ⇄ Center Stage ⇄ Bottom-Right)
+      // 3. Play 120fps Hardware-Composited 4-Car 1:1 FLIP Diagonal Conveyor Transition
       if (hasFlanks) {
         const px = pRect.left + pRect.width * 0.5;
         const py = pRect.top + pRect.height * 0.5;
         const cx = cRect.left + cRect.width * 0.5;
-        const cy = cRect.top + cRect.height * 0.5;
+        const cy = cRect.top + cRect.height * 0.52;
         const nx = nRect.left + nRect.width * 0.5;
         const ny = nRect.top + nRect.height * 0.5;
 
         const isMobileViewport = window.innerWidth <= 768;
-        const centerCarVisualWidth = Math.max(cRect.width * (isMobileViewport ? 0.62 : 0.56), pRect.width * 1.35);
+        const centerCarVisualWidth = Math.max(cRect.width * (isMobileViewport ? 0.62 : 0.55), pRect.width * 1.35);
         const flankToCenterScale = Math.min(Math.max(nRect.width / centerCarVisualWidth, 0.36), 0.78);
         const centerToFlankScale = Math.min(Math.max(centerCarVisualWidth / pRect.width, 1.28), 2.35);
-        const dur = 0.72;
-        const easeCurve = 'power4.out';
+        const dur = 0.78;
 
         if (direction === 'next') {
           // (A) 4th Car Ghost: Old Top-Left Prev Car glides up-and-left off-stage
@@ -1716,14 +1744,15 @@
             flankGhost.classList.add('is-ghost-prev', 'is-active');
             gsap.fromTo(
               flankGhost,
-              { x: 0, y: 0, scale: 1, opacity: 1 },
+              { x: 0, y: 0, scale: 1, opacity: 1, transformOrigin: '50% 50%', force3D: true },
               {
-                x: -(cx - px) * 0.46,
-                y: -(cy - py) * 0.46,
-                scale: 0.52,
+                x: -(cx - px) * 0.48,
+                y: -(cy - py) * 0.48,
+                scale: 0.54,
                 opacity: 0,
                 duration: dur,
-                ease: easeCurve,
+                ease: proMotionConveyorEase,
+                force3D: true,
                 onComplete: () => flankGhost.classList.remove('is-active')
               }
             );
@@ -1732,22 +1761,38 @@
           // (B) Outgoing Center Car glides 1:1 from exact Center Stage (cx, cy) into Top-Left Prev slot (px, py)
           gsap.fromTo(
             flankPrev,
-            { x: cx - px, y: cy - py, scale: centerToFlankScale },
-            { x: 0, y: 0, scale: 1, duration: dur, ease: easeCurve, clearProps: 'transform' }
+            { x: cx - px, y: cy - py, scale: centerToFlankScale, transformOrigin: '50% 50%', force3D: true },
+            { x: 0, y: 0, scale: 1, duration: dur, ease: proMotionConveyorEase, force3D: true, clearProps: 'transform' }
           );
 
           // (C) Incoming Center Car glides 1:1 from exact Bottom-Right Next slot (nx, ny) into Center Stage (cx, cy)
           gsap.fromTo(
             stageViewport,
-            { x: nx - cx, y: ny - cy, scale: flankToCenterScale },
-            { x: 0, y: 0, scale: 1, duration: dur, ease: easeCurve, clearProps: 'transform' }
+            { x: nx - cx, y: ny - cy, scale: flankToCenterScale, transformOrigin: '50% 50%', force3D: true },
+            { x: 0, y: 0, scale: 1, duration: dur, ease: proMotionConveyorEase, force3D: true, clearProps: 'transform' }
           );
 
           // (D) Incoming New Bottom-Right Next Car glides in along the same diagonal vector
           gsap.fromTo(
             flankNext,
-            { x: (nx - cx) * 0.46, y: (ny - cy) * 0.46, scale: 0.52, opacity: 0 },
-            { x: 0, y: 0, scale: 1, opacity: 1, duration: dur, ease: easeCurve, clearProps: 'transform,opacity' }
+            {
+              x: (nx - cx) * 0.48,
+              y: (ny - cy) * 0.48,
+              scale: 0.54,
+              opacity: 0,
+              transformOrigin: '50% 50%',
+              force3D: true
+            },
+            {
+              x: 0,
+              y: 0,
+              scale: 1,
+              opacity: 1,
+              duration: dur,
+              ease: proMotionConveyorEase,
+              force3D: true,
+              clearProps: 'transform,opacity'
+            }
           );
         } else {
           // (A) 4th Car Ghost: Old Bottom-Right Next Car glides down-and-right off-stage
@@ -1757,14 +1802,15 @@
             flankGhost.classList.add('is-ghost-next', 'is-active');
             gsap.fromTo(
               flankGhost,
-              { x: 0, y: 0, scale: 1, opacity: 1 },
+              { x: 0, y: 0, scale: 1, opacity: 1, transformOrigin: '50% 50%', force3D: true },
               {
-                x: -(cx - nx) * 0.46,
-                y: -(cy - ny) * 0.46,
-                scale: 0.52,
+                x: -(cx - nx) * 0.48,
+                y: -(cy - ny) * 0.48,
+                scale: 0.54,
                 opacity: 0,
                 duration: dur,
-                ease: easeCurve,
+                ease: proMotionConveyorEase,
+                force3D: true,
                 onComplete: () => flankGhost.classList.remove('is-active')
               }
             );
@@ -1773,29 +1819,45 @@
           // (B) Outgoing Center Car glides 1:1 from exact Center Stage (cx, cy) into Bottom-Right Next slot (nx, ny)
           gsap.fromTo(
             flankNext,
-            { x: cx - nx, y: cy - ny, scale: centerToFlankScale },
-            { x: 0, y: 0, scale: 1, duration: dur, ease: easeCurve, clearProps: 'transform' }
+            { x: cx - nx, y: cy - ny, scale: centerToFlankScale, transformOrigin: '50% 50%', force3D: true },
+            { x: 0, y: 0, scale: 1, duration: dur, ease: proMotionConveyorEase, force3D: true, clearProps: 'transform' }
           );
 
           // (C) Incoming Center Car glides 1:1 from exact Top-Left Prev slot (px, py) into Center Stage (cx, cy)
           gsap.fromTo(
             stageViewport,
-            { x: px - cx, y: py - cy, scale: flankToCenterScale },
-            { x: 0, y: 0, scale: 1, duration: dur, ease: easeCurve, clearProps: 'transform' }
+            { x: px - cx, y: py - cy, scale: flankToCenterScale, transformOrigin: '50% 50%', force3D: true },
+            { x: 0, y: 0, scale: 1, duration: dur, ease: proMotionConveyorEase, force3D: true, clearProps: 'transform' }
           );
 
           // (D) Incoming New Top-Left Prev Car glides in along the same diagonal vector
           gsap.fromTo(
             flankPrev,
-            { x: (px - cx) * 0.46, y: (py - cy) * 0.46, scale: 0.52, opacity: 0 },
-            { x: 0, y: 0, scale: 1, opacity: 1, duration: dur, ease: easeCurve, clearProps: 'transform,opacity' }
+            {
+              x: (px - cx) * 0.48,
+              y: (py - cy) * 0.48,
+              scale: 0.54,
+              opacity: 0,
+              transformOrigin: '50% 50%',
+              force3D: true
+            },
+            {
+              x: 0,
+              y: 0,
+              scale: 1,
+              opacity: 1,
+              duration: dur,
+              ease: proMotionConveyorEase,
+              force3D: true,
+              clearProps: 'transform,opacity'
+            }
           );
         }
       } else if (stageViewport) {
         gsap.fromTo(
           stageViewport,
-          { x: dirSign * 76, scale: 0.91 },
-          { x: 0, scale: 1, duration: 0.58, ease: 'expo.out', clearProps: 'transform' }
+          { x: dirSign * 76, scale: 0.91, force3D: true },
+          { x: 0, scale: 1, duration: 0.64, ease: proMotionConveyorEase, force3D: true, clearProps: 'transform' }
         );
       }
 
@@ -1803,8 +1865,8 @@
       if (watermarkEl) {
         gsap.fromTo(
           watermarkEl,
-          { xPercent: -50 + dirSign * 10, opacity: 0 },
-          { xPercent: -50, opacity: 1, duration: 0.68, ease: 'power4.out', overwrite: 'auto' }
+          { xPercent: -50 + dirSign * 9, opacity: 0, force3D: true },
+          { xPercent: -50, opacity: 1, duration: 0.74, ease: proMotionConveyorEase, force3D: true, overwrite: 'auto' }
         );
       }
 
@@ -1812,13 +1874,14 @@
       if (editorialNodes.length) {
         gsap.fromTo(
           editorialNodes,
-          { y: dirSign * 16, opacity: 0 },
+          { y: dirSign * 14, opacity: 0, force3D: true },
           {
             y: 0,
             opacity: 1,
-            duration: 0.52,
-            stagger: 0.04,
-            ease: 'power3.out',
+            duration: 0.56,
+            stagger: 0.035,
+            ease: proMotionConveyorEase,
+            force3D: true,
             overwrite: 'auto',
             clearProps: 'transform,opacity'
           }

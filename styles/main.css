@@ -462,6 +462,8 @@ img {
   opacity: 1;
   filter: none !important;
   will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .hero-flank-prev,
@@ -494,6 +496,8 @@ img {
   transform: scale3d(1, 1, 1);
   filter: none !important;
   transition: transform 220ms var(--ease-out);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .hero-flank-car:hover .hero-flank-car-img {
@@ -525,6 +529,8 @@ img {
   justify-content: center;
   overflow: visible;
   will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .hero-3d-canvas {

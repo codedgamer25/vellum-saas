@@ -491,6 +491,12 @@
           config.path,
           (gltf) => {
             const entry = this.prepareModelEntry(gltf, config, initialColor);
+            // Pre-compile WebGL shaders during background load so switching cars has 0ms frame-0 GPU stall
+            try {
+              if (this.renderer && this.camera && this.scene && typeof this.renderer.compile === 'function') {
+                this.renderer.compile(entry.model, this.camera, this.scene);
+              }
+            } catch (e) {}
             this.modelCache.set(config.path, entry);
             this.loadingPromises.delete(config.path);
             resolve(entry);
@@ -511,18 +517,18 @@
       if (this.hasPreloadedAll) return;
       this.hasPreloadedAll = true;
       const keys = ['ferrari', 'porsche', 'mercedes', 'audi'];
-      let delayMs = 80;
+      let delayMs = 40;
       keys.forEach((key) => {
         const cfg = MODEL_CONFIG[key];
         if (!cfg || this.modelCache.has(cfg.path) || this.loadingPromises.has(cfg.path)) return;
         window.setTimeout(() => {
           this.fetchAndCacheModel(cfg, cfg.defaultColor).catch(() => {});
         }, delayMs);
-        delayMs += 110;
+        delayMs += 70;
       });
     }
 
-    activateCachedModel(entry, config, targetColor, direction = null) {
+    activateCachedModel(entry, config, targetColor) {
       if (this.currentModel && this.currentModel !== entry.model) {
         this.scene.remove(this.currentModel);
       }
@@ -535,12 +541,12 @@
         this.scene.add(this.currentModel);
       }
 
-      const prefersReducedMotion =
-        typeof window.matchMedia === 'function' &&
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      // Apply target paint color immediately when switching vehicles
-      this.changeCarColor(targetColor, false);
+      if (window.gsap && this.currentModel) {
+        window.gsap.killTweensOf(this.currentModel.rotation);
+      }
+      this.spinOffset = 0;
+      this.currentModel.rotation.y = this.currentBaseRotationY;
+      this.currentModel.updateMatrixWorld(true);
 
       if (config.cameraPos && this.camera) {
         const aspect = this.camera.aspect ? this.camera.aspect : 1.5;
@@ -564,31 +570,8 @@
         this.carImageFallback.classList.add('has-3d-loaded');
       }
 
-      // Smooth 60fps 3D yaw settle when moving between cars
-      if (!prefersReducedMotion && direction && window.gsap && this.currentModel) {
-        const dirSign = direction === 'prev' ? -1 : 1;
-        const startYaw = this.currentBaseRotationY + dirSign * 0.28;
-        this.spinOffset = 0;
-        this.currentModel.rotation.y = startYaw;
-        window.gsap.killTweensOf(this.currentModel.rotation);
-        window.gsap.to(this.currentModel.rotation, {
-          y: this.currentBaseRotationY,
-          duration: 0.66,
-          ease: 'power3.out',
-          onUpdate: () => {
-            if (this.renderer && this.scene && this.camera) {
-              this.renderer.render(this.scene, this.camera);
-            }
-          }
-        });
-      } else {
-        this.spinOffset = 0;
-        this.currentModel.rotation.y = this.currentBaseRotationY;
-      }
-
-      if (this.renderer && this.scene && this.camera) {
-        this.renderer.render(this.scene, this.camera);
-      }
+      // Apply target paint color synchronously and render once so the 120fps CSS compositor glide has 0 WebGL overhead
+      this.changeCarColor(targetColor, false);
 
       // Preload remaining 3D vehicles so subsequent clicks are 0ms memory swaps
       this.preloadAllModels();
@@ -653,13 +636,15 @@
 
       if (this.paintMaterials && this.paintMaterials.length > 0) {
         this.paintMaterials.forEach((mat) => {
-          if (animate && window.gsap && mat.color) {
+          if (window.gsap && mat.color) {
             window.gsap.killTweensOf(mat.color);
+          }
+          if (animate && window.gsap && mat.color) {
             window.gsap.to(mat.color, {
               r: threeColor.r,
               g: threeColor.g,
               b: threeColor.b,
-              duration: 0.42,
+              duration: 0.36,
               ease: 'power2.out',
               onUpdate: () => {
                 if (this.renderer && this.scene && this.camera) {
@@ -667,12 +652,9 @@
                 }
               }
             });
-          } else {
+          } else if (mat.color) {
             mat.color.copy(threeColor);
           }
-          if (mat.metalness !== undefined) mat.metalness = 0.38;
-          if (mat.roughness !== undefined) mat.roughness = 0.18;
-          mat.needsUpdate = true;
         });
       }
 
@@ -680,7 +662,7 @@
         this.carImageFallback.style.setProperty('--car-color-accent', hexColor);
       }
 
-      if (this.renderer && this.scene && this.camera) {
+      if (!animate && this.renderer && this.scene && this.camera) {
         this.renderer.render(this.scene, this.camera);
       }
     }
