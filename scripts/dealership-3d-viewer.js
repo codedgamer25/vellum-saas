@@ -612,8 +612,18 @@
         return;
       }
 
-      // Rule 19: Add loading states (Show minimal atelier loader during fetch)
-      if (this.container) this.container.classList.add('is-loading');
+      // If target GLB is still downloading, remove the previous vehicle's 3D mesh immediately
+      // and reveal the matching high-res studio render (#hero-3d-fallback-img) during the diagonal glide
+      if (this.currentModel && this.scene) {
+        this.scene.remove(this.currentModel);
+        this.currentModel = null;
+        if (this.renderer && this.camera) {
+          this.renderer.render(this.scene, this.camera);
+        }
+      }
+      if (this.carImageFallback) {
+        this.carImageFallback.classList.remove('has-3d-loaded');
+      }
 
       this.fetchAndCacheModel(config, targetColor)
         .then((entry) => {

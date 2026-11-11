@@ -464,14 +464,27 @@ img {
   will-change: transform, opacity;
 }
 
-.hero-flank-prev {
+.hero-flank-prev,
+.hero-flank-ghost.is-ghost-prev {
   left: 5%;
   top: 12%;
 }
 
-.hero-flank-next {
+.hero-flank-next,
+.hero-flank-ghost.is-ghost-next {
   right: -2%;
   bottom: 14%;
+}
+
+.hero-flank-ghost {
+  pointer-events: none !important;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1;
+}
+
+.hero-flank-ghost.is-active {
+  visibility: visible;
 }
 
 .hero-flank-car-img {
@@ -2506,8 +2519,8 @@ html.lenis body {
     width: 100%;
   }
   .hero-flank-car {
-    width: 160px;
-    opacity: 0.45;
+    width: 190px;
+    opacity: 1;
   }
   .editorial-lifestyle-grid {
     grid-template-columns: 1fr;
@@ -2845,20 +2858,36 @@ html.lenis body {
     margin-top: 0.1rem;
   }
 
-  /* Order 2: Dedicated Unobstructed 3D Car Stage in Center */
+  /* Order 2: 3-Car Diagonal Conveyor Stage on Mobile (Top-Left Prev + Center 3D + Bottom-Right Next) */
   .hero-depth-carousel-stage {
     order: 2;
     position: relative;
     inset: auto;
     left: 0;
     width: 100%;
-    height: 250px;
+    height: 270px;
     margin: 0.15rem 0;
     pointer-events: auto;
+    overflow: visible;
   }
 
   .hero-flank-car {
-    display: none !important;
+    display: flex !important;
+    width: 112px;
+    opacity: 1;
+    z-index: 4;
+  }
+
+  .hero-flank-prev,
+  .hero-flank-ghost.is-ghost-prev {
+    left: -1%;
+    top: 2%;
+  }
+
+  .hero-flank-next,
+  .hero-flank-ghost.is-ghost-next {
+    right: -1%;
+    bottom: 4%;
   }
 
   .hero-3d-stage-viewport {

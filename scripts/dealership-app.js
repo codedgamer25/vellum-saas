@@ -757,6 +757,18 @@
               <span class="hero-flank-shadow" aria-hidden="true"></span>
               <span class="sr-only" id="next-vehicle-name">${currentAtmosphere.nextCarName}</span>
             </button>
+
+            <!-- Exiting 4th Car Ghost Layer for Seamless 4-Car Diagonal Conveyor Continuity -->
+            <div class="hero-flank-car hero-flank-ghost" id="hero-flank-ghost" aria-hidden="true">
+              <img
+                id="ghost-vehicle-thumb"
+                src="${prevAtm.renderThumb}"
+                alt=""
+                class="hero-flank-car-img"
+                referrerPolicy="no-referrer"
+              />
+              <span class="hero-flank-shadow" aria-hidden="true"></span>
+            </div>
           </div>
 
           <!-- Foreground Editorial Overlay Content -->
@@ -1544,6 +1556,12 @@
         nextCardName.textContent = atmosphere.nextCarName;
       }
 
+      const fallbackImg = main.querySelector('#hero-3d-fallback-img');
+      if (fallbackImg && atmosphere.renderThumb) {
+        fallbackImg.setAttribute('src', atmosphere.renderThumb);
+        fallbackImg.setAttribute('alt', `${car.make} ${car.model} 3D Showcase`);
+      }
+
       // Update Bottom Dock Telemetry, Mobile Pill & Price
       const formattedPrice = STORE.formatPrice(car.priceUSD);
       const nameEl = main.querySelector('#island-car-name');
@@ -1639,26 +1657,43 @@
       const stageViewport = main.querySelector('#hero-3d-stage-container');
       const flankPrev = main.querySelector('#hero-flank-prev-btn');
       const flankNext = main.querySelector('#hero-flank-next-btn');
+      const flankGhost = main.querySelector('#hero-flank-ghost');
+      const ghostThumb = main.querySelector('#ghost-vehicle-thumb');
+      const prevThumb = main.querySelector('#prev-vehicle-thumb');
+      const nextThumb = main.querySelector('#next-vehicle-thumb');
       const editorialNodes = main.querySelectorAll(
         '#hero-main-title, #hero-editorial-summary, .hero-carousel-arrows, .hero-explore-row'
       );
       const mobileTelemetry = main.querySelector('#hero-mobile-telemetry-pill');
 
-      // 1. Reset any in-flight transforms so FLIP measurement captures exact rest geometry
-      const animatedNodes = [stageViewport, flankPrev, flankNext, watermarkEl, ...editorialNodes, mobileTelemetry].filter(Boolean);
+      // 1. Capture outgoing flank image for the 4th exiting car ghost & reset transforms for exact FLIP measurement
+      const oldPrevSrc = prevThumb ? prevThumb.getAttribute('src') : '';
+      const oldNextSrc = nextThumb ? nextThumb.getAttribute('src') : '';
+
+      const animatedNodes = [
+        stageViewport,
+        flankPrev,
+        flankNext,
+        flankGhost,
+        watermarkEl,
+        ...editorialNodes,
+        mobileTelemetry
+      ].filter(Boolean);
       gsap.killTweensOf(animatedNodes);
-      gsap.set([stageViewport, flankPrev, flankNext].filter(Boolean), { clearProps: 'transform,opacity' });
+      gsap.set([stageViewport, flankPrev, flankNext, flankGhost].filter(Boolean), {
+        clearProps: 'transform,opacity'
+      });
 
       const pRect = flankPrev ? flankPrev.getBoundingClientRect() : null;
       const cRect = stageViewport ? stageViewport.getBoundingClientRect() : null;
       const nRect = flankNext ? flankNext.getBoundingClientRect() : null;
-      const hasDesktopFlanks = Boolean(pRect && nRect && cRect && pRect.width > 10 && nRect.width > 10);
+      const hasFlanks = Boolean(pRect && nRect && cRect && pRect.width > 10 && nRect.width > 10);
 
       // 2. Swap vehicle state & cached 3D model immediately (zero page dimming, zero blur)
       applyHeroVehicleState(carId, targetHex, targetTheme, direction);
 
-      // 3. Play 60fps FLIP diagonal conveyor glide between Top-Left Prev ⇄ Center Stage ⇄ Bottom-Right Next
-      if (hasDesktopFlanks) {
+      // 3. Play 60fps 4-Car 1:1 FLIP Diagonal Conveyor Transition (Top-Left ⇄ Center Stage ⇄ Bottom-Right)
+      if (hasFlanks) {
         const px = pRect.left + pRect.width * 0.5;
         const py = pRect.top + pRect.height * 0.5;
         const cx = cRect.left + cRect.width * 0.5;
@@ -1666,47 +1701,97 @@
         const nx = nRect.left + nRect.width * 0.5;
         const ny = nRect.top + nRect.height * 0.5;
 
+        const isMobileViewport = window.innerWidth <= 768;
+        const centerCarVisualWidth = Math.max(cRect.width * (isMobileViewport ? 0.62 : 0.56), pRect.width * 1.35);
+        const flankToCenterScale = Math.min(Math.max(nRect.width / centerCarVisualWidth, 0.36), 0.78);
+        const centerToFlankScale = Math.min(Math.max(centerCarVisualWidth / pRect.width, 1.28), 2.35);
+        const dur = 0.72;
+        const easeCurve = 'power4.out';
+
         if (direction === 'next') {
-          // Incoming Center Car glides up-and-left from the Bottom-Right Next slot into Center Stage
-          gsap.fromTo(
-            stageViewport,
-            { x: (nx - cx) * 0.54, y: (ny - cy) * 0.54, scale: 0.62 },
-            { x: 0, y: 0, scale: 1, duration: 0.68, ease: 'expo.out', clearProps: 'transform' }
-          );
-          // Outgoing Center Car glides up-and-left from Center Stage into the Top-Left Prev slot
+          // (A) 4th Car Ghost: Old Top-Left Prev Car glides up-and-left off-stage
+          if (flankGhost && ghostThumb && oldPrevSrc) {
+            ghostThumb.setAttribute('src', oldPrevSrc);
+            flankGhost.classList.remove('is-ghost-next');
+            flankGhost.classList.add('is-ghost-prev', 'is-active');
+            gsap.fromTo(
+              flankGhost,
+              { x: 0, y: 0, scale: 1, opacity: 1 },
+              {
+                x: -(cx - px) * 0.46,
+                y: -(cy - py) * 0.46,
+                scale: 0.52,
+                opacity: 0,
+                duration: dur,
+                ease: easeCurve,
+                onComplete: () => flankGhost.classList.remove('is-active')
+              }
+            );
+          }
+
+          // (B) Outgoing Center Car glides 1:1 from exact Center Stage (cx, cy) into Top-Left Prev slot (px, py)
           gsap.fromTo(
             flankPrev,
-            { x: (cx - px) * 0.62, y: (cy - py) * 0.62, scale: 1.42 },
-            { x: 0, y: 0, scale: 1, duration: 0.68, ease: 'expo.out', clearProps: 'transform' }
+            { x: cx - px, y: cy - py, scale: centerToFlankScale },
+            { x: 0, y: 0, scale: 1, duration: dur, ease: easeCurve, clearProps: 'transform' }
           );
-          // New Bottom-Right Next Car glides in along the diagonal
+
+          // (C) Incoming Center Car glides 1:1 from exact Bottom-Right Next slot (nx, ny) into Center Stage (cx, cy)
+          gsap.fromTo(
+            stageViewport,
+            { x: nx - cx, y: ny - cy, scale: flankToCenterScale },
+            { x: 0, y: 0, scale: 1, duration: dur, ease: easeCurve, clearProps: 'transform' }
+          );
+
+          // (D) Incoming New Bottom-Right Next Car glides in along the same diagonal vector
           gsap.fromTo(
             flankNext,
-            { x: 96, y: 44, scale: 0.68, opacity: 0 },
-            { x: 0, y: 0, scale: 1, opacity: 1, duration: 0.68, ease: 'expo.out', clearProps: 'transform,opacity' }
+            { x: (nx - cx) * 0.46, y: (ny - cy) * 0.46, scale: 0.52, opacity: 0 },
+            { x: 0, y: 0, scale: 1, opacity: 1, duration: dur, ease: easeCurve, clearProps: 'transform,opacity' }
           );
         } else {
-          // Incoming Center Car glides down-and-right from the Top-Left Prev slot into Center Stage
-          gsap.fromTo(
-            stageViewport,
-            { x: (px - cx) * 0.54, y: (py - cy) * 0.54, scale: 0.62 },
-            { x: 0, y: 0, scale: 1, duration: 0.68, ease: 'expo.out', clearProps: 'transform' }
-          );
-          // Outgoing Center Car glides down-and-right from Center Stage into the Bottom-Right Next slot
+          // (A) 4th Car Ghost: Old Bottom-Right Next Car glides down-and-right off-stage
+          if (flankGhost && ghostThumb && oldNextSrc) {
+            ghostThumb.setAttribute('src', oldNextSrc);
+            flankGhost.classList.remove('is-ghost-prev');
+            flankGhost.classList.add('is-ghost-next', 'is-active');
+            gsap.fromTo(
+              flankGhost,
+              { x: 0, y: 0, scale: 1, opacity: 1 },
+              {
+                x: -(cx - nx) * 0.46,
+                y: -(cy - ny) * 0.46,
+                scale: 0.52,
+                opacity: 0,
+                duration: dur,
+                ease: easeCurve,
+                onComplete: () => flankGhost.classList.remove('is-active')
+              }
+            );
+          }
+
+          // (B) Outgoing Center Car glides 1:1 from exact Center Stage (cx, cy) into Bottom-Right Next slot (nx, ny)
           gsap.fromTo(
             flankNext,
-            { x: (cx - nx) * 0.62, y: (cy - ny) * 0.62, scale: 1.42 },
-            { x: 0, y: 0, scale: 1, duration: 0.68, ease: 'expo.out', clearProps: 'transform' }
+            { x: cx - nx, y: cy - ny, scale: centerToFlankScale },
+            { x: 0, y: 0, scale: 1, duration: dur, ease: easeCurve, clearProps: 'transform' }
           );
-          // New Top-Left Prev Car glides in along the diagonal
+
+          // (C) Incoming Center Car glides 1:1 from exact Top-Left Prev slot (px, py) into Center Stage (cx, cy)
+          gsap.fromTo(
+            stageViewport,
+            { x: px - cx, y: py - cy, scale: flankToCenterScale },
+            { x: 0, y: 0, scale: 1, duration: dur, ease: easeCurve, clearProps: 'transform' }
+          );
+
+          // (D) Incoming New Top-Left Prev Car glides in along the same diagonal vector
           gsap.fromTo(
             flankPrev,
-            { x: -96, y: -44, scale: 0.68, opacity: 0 },
-            { x: 0, y: 0, scale: 1, opacity: 1, duration: 0.68, ease: 'expo.out', clearProps: 'transform,opacity' }
+            { x: (px - cx) * 0.46, y: (py - cy) * 0.46, scale: 0.52, opacity: 0 },
+            { x: 0, y: 0, scale: 1, opacity: 1, duration: dur, ease: easeCurve, clearProps: 'transform,opacity' }
           );
         }
       } else if (stageViewport) {
-        // Mobile horizontal stage glide
         gsap.fromTo(
           stageViewport,
           { x: dirSign * 76, scale: 0.91 },
@@ -1719,7 +1804,7 @@
         gsap.fromTo(
           watermarkEl,
           { xPercent: -50 + dirSign * 10, opacity: 0 },
-          { xPercent: -50, opacity: 1, duration: 0.66, ease: 'expo.out', overwrite: 'auto' }
+          { xPercent: -50, opacity: 1, duration: 0.68, ease: 'power4.out', overwrite: 'auto' }
         );
       }
 
