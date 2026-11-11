@@ -434,7 +434,7 @@ img {
   white-space: nowrap;
 }
 
-/* 3-Car Hero Stage (Crisp Prev + Sharp 3D Center + Crisp Next, Zero Blur) */
+/* 4-Car Persistent Diagonal Conveyor Stage (Zero-Seam 120Hz ProMotion Glide, Zero Blur) */
 .hero-depth-carousel-stage {
   position: absolute;
   inset: 0;
@@ -450,79 +450,146 @@ img {
   transform: translate3d(0, 0, 0);
 }
 
-.hero-flank-car {
+.hero-conveyor-track {
   position: absolute;
-  z-index: 2;
-  width: 340px;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.hero-conveyor-car {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 94%;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  pointer-events: auto;
-  cursor: pointer;
-  opacity: 1;
+  justify-content: center;
+  pointer-events: none;
   filter: none !important;
   will-change: transform, opacity;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+  transform: translate3d(-50%, -50%, 0) scale3d(1, 1, 1);
+  opacity: 1;
+  z-index: 5;
+  transition:
+    transform 720ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 540ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-conveyor-car.is-no-transition {
+  transition: none !important;
+}
+
+.hero-conveyor-car[data-slot="-2"] {
+  transform: translate3d(-101%, -96%, 0) scale3d(0.14, 0.14, 1);
+  opacity: 0;
+  z-index: 1;
+}
+
+.hero-conveyor-car[data-slot="-1"] {
+  transform: translate3d(-75.5%, -73%, 0) scale3d(0.28, 0.28, 1);
+  opacity: 1;
+  z-index: 3;
+}
+
+.hero-conveyor-car[data-slot="0"] {
+  transform: translate3d(-50%, -50%, 0) scale3d(1, 1, 1);
+  opacity: 1;
+  z-index: 5;
+}
+
+.hero-conveyor-car[data-slot="1"] {
+  transform: translate3d(-24.5%, -27%, 0) scale3d(0.28, 0.28, 1);
+  opacity: 1;
+  z-index: 3;
+}
+
+.hero-conveyor-car[data-slot="2"] {
+  transform: translate3d(1%, -4%, 0) scale3d(0.14, 0.14, 1);
+  opacity: 0;
+  z-index: 1;
+}
+
+.hero-conveyor-car-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  filter: none !important;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* When user orbits 3D canvas or changes paint swatch, show interactive 3D canvas for center slot */
+.hero-depth-carousel-stage.is-3d-canvas-visible .hero-conveyor-car[data-slot="0"] {
+  opacity: 0 !important;
+  transition: none !important;
+}
+
+.hero-flank-car {
+  position: absolute;
+  z-index: 8;
+  width: 340px;
+  height: 196px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+  opacity: 0 !important;
+  background: transparent;
+  border: none;
+  filter: none !important;
 }
 
 .hero-flank-prev,
 .hero-flank-ghost.is-ghost-prev {
-  left: 5%;
-  top: 12%;
+  left: 4%;
+  top: 10%;
 }
 
 .hero-flank-next,
 .hero-flank-ghost.is-ghost-next {
   right: -2%;
-  bottom: 14%;
+  bottom: 12%;
 }
 
 .hero-flank-ghost {
   pointer-events: none !important;
-  opacity: 0;
-  visibility: hidden;
+  opacity: 0 !important;
+  visibility: hidden !important;
   z-index: 1;
-}
-
-.hero-flank-ghost.is-active {
-  visibility: visible;
 }
 
 .hero-flank-car-img {
   width: 100%;
   height: auto;
   object-fit: contain;
-  transform: scale3d(1, 1, 1);
+  opacity: 0 !important;
+  pointer-events: none;
   filter: none !important;
-  transition: transform 220ms var(--ease-out);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.hero-flank-car:hover .hero-flank-car-img {
-  transform: translate3d(0, -4px, 0) scale3d(1.03, 1.03, 1);
 }
 
 .hero-flank-shadow {
-  width: 72%;
-  height: 16px;
-  margin-top: -10px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(17, 17, 21, 0.22) 0%, rgba(17, 17, 21, 0) 72%);
-  transition: transform 340ms var(--ease-out), opacity 280ms var(--ease-out);
-}
-
-.hero-flank-car:hover .hero-flank-shadow {
-  transform: scale3d(0.92, 0.92, 1);
-  opacity: 0.72;
+  display: none !important;
 }
 
 .hero-3d-stage-viewport {
   position: relative;
   width: 100%;
   height: 94%;
-  z-index: 3;
+  z-index: 5;
   pointer-events: auto;
   display: flex;
   align-items: center;
@@ -539,6 +606,12 @@ img {
   display: block;
   outline: none;
   cursor: grab;
+  opacity: 0;
+  transition: none;
+}
+
+.hero-depth-carousel-stage.is-3d-canvas-visible .hero-3d-canvas {
+  opacity: 1;
 }
 
 .hero-3d-canvas:active {
@@ -554,11 +627,12 @@ img {
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  transition: opacity 400ms var(--ease-out);
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 .hero-3d-instant-fallback.has-3d-loaded {
-  opacity: 0;
+  opacity: 0 !important;
   pointer-events: none;
 }
 
@@ -566,7 +640,7 @@ img {
   max-width: 78%;
   max-height: 70%;
   object-fit: contain;
-  filter: drop-shadow(0 24px 36px rgba(17, 17, 21, 0.22));
+  filter: none !important;
 }
 
 /* Foreground Content Layer */
@@ -653,7 +727,8 @@ img {
   letter-spacing: -0.02em;
   text-transform: uppercase;
   color: var(--color-text-high);
-  text-wrap: balance;
+  max-width: 9.2ch;
+  min-height: 2.12em;
   will-change: transform, opacity;
 }
 
@@ -667,6 +742,7 @@ img {
   line-height: 1.68;
   color: var(--color-text-mid);
   max-width: 38ch;
+  min-height: 5.04em;
   will-change: transform, opacity;
 }
 
@@ -2811,6 +2887,8 @@ html.lenis body {
     font-size: clamp(1.95rem, 8.2vw, 2.45rem);
     line-height: 1.05;
     letter-spacing: -0.03em;
+    max-width: 100%;
+    min-height: 1.05em;
   }
 
   .hero-editorial-desc {
@@ -2818,6 +2896,7 @@ html.lenis body {
     line-height: 1.5;
     color: #515154;
     max-width: 34ch;
+    min-height: 4.5em;
     margin: 0 auto;
   }
 
@@ -2864,7 +2943,7 @@ html.lenis body {
     margin-top: 0.1rem;
   }
 
-  /* Order 2: 3-Car Diagonal Conveyor Stage on Mobile (Top-Left Prev + Center 3D + Bottom-Right Next) */
+  /* Order 2: 4-Car Persistent Diagonal Conveyor Stage on Mobile (Top-Left Prev + Center + Bottom-Right Next) */
   .hero-depth-carousel-stage {
     order: 2;
     position: relative;
@@ -2877,22 +2956,58 @@ html.lenis body {
     overflow: visible;
   }
 
+  .hero-conveyor-car {
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-conveyor-car[data-slot="-2"] {
+    transform: translate3d(-112%, -112%, 0) scale3d(0.18, 0.18, 1);
+    opacity: 0;
+    z-index: 1;
+  }
+
+  .hero-conveyor-car[data-slot="-1"] {
+    transform: translate3d(-81%, -81%, 0) scale3d(0.35, 0.35, 1);
+    opacity: 1;
+    z-index: 3;
+  }
+
+  .hero-conveyor-car[data-slot="0"] {
+    transform: translate3d(-50%, -50%, 0) scale3d(1, 1, 1);
+    opacity: 1;
+    z-index: 5;
+  }
+
+  .hero-conveyor-car[data-slot="1"] {
+    transform: translate3d(-19%, -19%, 0) scale3d(0.35, 0.35, 1);
+    opacity: 1;
+    z-index: 3;
+  }
+
+  .hero-conveyor-car[data-slot="2"] {
+    transform: translate3d(12%, 12%, 0) scale3d(0.18, 0.18, 1);
+    opacity: 0;
+    z-index: 1;
+  }
+
   .hero-flank-car {
     display: flex !important;
-    width: 112px;
-    opacity: 1;
-    z-index: 4;
+    width: 124px;
+    height: 76px;
+    opacity: 0 !important;
+    z-index: 8;
   }
 
   .hero-flank-prev,
   .hero-flank-ghost.is-ghost-prev {
-    left: -1%;
+    left: 0%;
     top: 2%;
   }
 
   .hero-flank-next,
   .hero-flank-ghost.is-ghost-next {
-    right: -1%;
+    right: 0%;
     bottom: 4%;
   }
 

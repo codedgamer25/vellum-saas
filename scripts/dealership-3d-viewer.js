@@ -517,14 +517,21 @@
       if (this.hasPreloadedAll) return;
       this.hasPreloadedAll = true;
       const keys = ['ferrari', 'porsche', 'mercedes', 'audi'];
-      let delayMs = 40;
+      let delayMs = 1200;
       keys.forEach((key) => {
         const cfg = MODEL_CONFIG[key];
         if (!cfg || this.modelCache.has(cfg.path) || this.loadingPromises.has(cfg.path)) return;
         window.setTimeout(() => {
-          this.fetchAndCacheModel(cfg, cfg.defaultColor).catch(() => {});
+          const runPreload = () => {
+            this.fetchAndCacheModel(cfg, cfg.defaultColor).catch(() => {});
+          };
+          if (typeof window.requestIdleCallback === 'function') {
+            window.requestIdleCallback(runPreload, { timeout: 2000 });
+          } else {
+            runPreload();
+          }
         }, delayMs);
-        delayMs += 70;
+        delayMs += 900;
       });
     }
 
@@ -577,7 +584,7 @@
       this.preloadAllModels();
     }
 
-    loadModel(modelKey = 'ferrari', color = null, direction = null) {
+    loadModel(modelKey = 'ferrari', color = null, direction = null, onReady = null) {
       const config = MODEL_CONFIG[modelKey] || MODEL_CONFIG.ferrari;
       this.currentModelKey = modelKey;
       const targetColor = color || config.defaultColor || this.currentColor;
@@ -592,11 +599,11 @@
         if (this.container) this.container.classList.remove('is-loading');
         const cachedEntry = this.modelCache.get(config.path);
         this.activateCachedModel(cachedEntry, config, targetColor, direction);
+        if (typeof onReady === 'function') onReady(cachedEntry);
         return;
       }
 
       // If target GLB is still downloading, remove the previous vehicle's 3D mesh immediately
-      // and reveal the matching high-res studio render (#hero-3d-fallback-img) during the diagonal glide
       if (this.currentModel && this.scene) {
         this.scene.remove(this.currentModel);
         this.currentModel = null;
@@ -613,6 +620,7 @@
           if (currentToken !== this.loadToken) return;
           if (this.container) this.container.classList.remove('is-loading');
           this.activateCachedModel(entry, config, targetColor, direction);
+          if (typeof onReady === 'function') onReady(entry);
         })
         .catch((err) => {
           if (this.container) this.container.classList.remove('is-loading');
@@ -798,9 +806,9 @@
     }
   };
 
-  Apex3DViewer.loadModel = function (modelKeyOrCarId, color, direction) {
+  Apex3DViewer.loadModel = function (modelKeyOrCarId, color, direction, onReady) {
     if (Apex3DViewer.activeInstance && typeof Apex3DViewer.activeInstance.loadModel === 'function') {
-      Apex3DViewer.activeInstance.loadModel(modelKeyOrCarId, color, direction);
+      Apex3DViewer.activeInstance.loadModel(modelKeyOrCarId, color, direction, onReady);
     }
   };
 

@@ -28,10 +28,7 @@
   // Unlock native 120Hz ProMotion refresh rate in GSAP & pre-decode all 4 studio car PNGs into GPU bitmap memory
   if (window.gsap) {
     if (window.gsap.ticker && typeof window.gsap.ticker.lagSmoothing === 'function') {
-      window.gsap.ticker.lagSmoothing(0);
-    }
-    if (typeof window.gsap.defaults === 'function') {
-      window.gsap.defaults({ force3D: true });
+      window.gsap.ticker.lagSmoothing(33, 16);
     }
   }
   [
@@ -50,7 +47,8 @@
     } catch (e) {}
   });
 
-  // Studio Paint Finish Swatches (Repaints the active 3D vehicle in-place without switching cars)
+  // Studio Paint Finish & Vehicle Swatches ordered in exact 4-Car Conveyor sequence:
+  // Ferrari Roma (Red) -> Mercedes-AMG G63 (Green) -> Audi RS6 Avant (Gold) -> Porsche 911 GT3 RS (Blue)
   const MARCO_PEREZ_TRIADS = {
     'midnight-coral': {
       id: 'midnight-coral',
@@ -63,18 +61,6 @@
       baseSoft: '#B6DFED',
       hueFilter: 'hue-rotate(0deg) saturate(1.05)',
       tagline: 'Soft blue & midnight navy. Add coral orange, now it feels like a brand.'
-    },
-    'raven-poppy': {
-      id: 'raven-poppy',
-      name: 'Gentian Sapphire Blue',
-      fullName: 'Gentian Sapphire Blue',
-      carId: 'porsche-gt3-rs-2024',
-      watermark: '911 GT3 RS',
-      popColor: '#2563EB',
-      baseDark: '#0B0D12',
-      baseSoft: '#8BB4D0',
-      hueFilter: 'hue-rotate(215deg) saturate(1.35) brightness(0.95)',
-      tagline: 'Raven black & powder blue. Add Sapphire blue, now it is impossible to ignore.'
     },
     'pine-butter': {
       id: 'pine-butter',
@@ -99,14 +85,26 @@
       baseSoft: '#1A1A24',
       hueFilter: 'hue-rotate(38deg) saturate(1.4) brightness(0.98)',
       tagline: 'The smallest color can make the biggest difference.'
+    },
+    'raven-poppy': {
+      id: 'raven-poppy',
+      name: 'Gentian Sapphire Blue',
+      fullName: 'Gentian Sapphire Blue',
+      carId: 'porsche-gt3-rs-2024',
+      watermark: '911 GT3 RS',
+      popColor: '#2563EB',
+      baseDark: '#0B0D12',
+      baseSoft: '#8BB4D0',
+      hueFilter: 'hue-rotate(215deg) saturate(1.35) brightness(0.95)',
+      tagline: 'Raven black & powder blue. Add Sapphire blue, now it is impossible to ignore.'
     }
   };
 
   const HERO_CAR_ORDER = [
     'ferrari-roma-2023',
-    'porsche-gt3-rs-2024',
     'mercedes-amg-g63-2024',
-    'audi-rs6-avant-2024'
+    'audi-rs6-avant-2024',
+    'porsche-gt3-rs-2024'
   ];
 
   const LIFESTYLE_GALLERY_ITEMS = [
@@ -720,9 +718,49 @@
             ${currentAtmosphere.watermark}
           </div>
 
-          <!-- 3-Car Depth-of-Field Stage: Blurred Prev 3D Car + Sharp Center 3D GLB Car + Blurred Next 3D Car -->
-          <div class="hero-depth-carousel-stage">
-            <!-- Left Flanking Blurred 3D Car Preview (Depth-of-Field Previous) -->
+          <!-- 3-Car Depth-of-Field Stage: Persistent 4-Car 120fps Diagonal Conveyor + Interactive 3D Canvas -->
+          <div class="hero-depth-carousel-stage" id="hero-depth-carousel-stage">
+            <!-- Persistent 4-Car Diagonal Conveyor Track (Zero DOM/Image Swap Seams) -->
+            <div class="hero-conveyor-track" id="hero-conveyor-track" aria-hidden="true">
+              <div class="hero-conveyor-car" data-conveyor-car="porsche-gt3-rs-2024" data-slot="-1">
+                <img
+                  src="./models/render_porsche.png"
+                  alt="Porsche 911 GT3 RS"
+                  class="hero-conveyor-car-img"
+                  decoding="async"
+                  loading="eager"
+                />
+              </div>
+              <div class="hero-conveyor-car" data-conveyor-car="ferrari-roma-2023" data-slot="0">
+                <img
+                  src="./models/render_ferrari.png"
+                  alt="Ferrari Roma V8"
+                  class="hero-conveyor-car-img"
+                  decoding="async"
+                  loading="eager"
+                />
+              </div>
+              <div class="hero-conveyor-car" data-conveyor-car="mercedes-amg-g63-2024" data-slot="1">
+                <img
+                  src="./models/render_mercedes.png"
+                  alt="Mercedes-AMG G63"
+                  class="hero-conveyor-car-img"
+                  decoding="async"
+                  loading="eager"
+                />
+              </div>
+              <div class="hero-conveyor-car" data-conveyor-car="audi-rs6-avant-2024" data-slot="2">
+                <img
+                  src="./models/render_audi.png"
+                  alt="Audi RS6 Avant"
+                  class="hero-conveyor-car-img"
+                  decoding="async"
+                  loading="eager"
+                />
+              </div>
+            </div>
+
+            <!-- Left Flanking Click Target (Previous Vehicle) -->
             <button
               type="button"
               class="hero-flank-car hero-flank-prev"
@@ -736,15 +774,12 @@
                 src="${prevAtm.renderThumb}"
                 alt="${prevCar.make} ${prevCar.model}"
                 class="hero-flank-car-img"
-                style="filter: ${prevAtm.flankHue};"
                 referrerPolicy="no-referrer"
               />
-              <span class="hero-flank-shadow" aria-hidden="true"></span>
             </button>
 
             <!-- Center Interactive Local Three.js 3D Model Stage Canvas -->
             <div class="hero-3d-stage-viewport" id="hero-3d-stage-container" data-testid="hero-3d-stage">
-              <!-- Rule 19: Add loading states -->
               <div class="hero-3d-loading-chip" id="hero-3d-loading-chip" aria-hidden="true">
                 <span class="hero-3d-spinner"></span>
                 <span class="hero-3d-loading-text">Calibrating Atelier 3D Model...</span>
@@ -762,7 +797,7 @@
               </div>
             </div>
 
-            <!-- Right Flanking Blurred 3D Car Preview (Depth-of-Field Next) -->
+            <!-- Right Flanking Click Target (Next Vehicle) -->
             <button
               type="button"
               class="hero-flank-car hero-flank-next"
@@ -776,24 +811,10 @@
                 src="${nextAtm.renderThumb}"
                 alt="${nextCar.make} ${nextCar.model}"
                 class="hero-flank-car-img"
-                style="filter: ${nextAtm.flankHue};"
                 referrerPolicy="no-referrer"
               />
-              <span class="hero-flank-shadow" aria-hidden="true"></span>
               <span class="sr-only" id="next-vehicle-name">${currentAtmosphere.nextCarName}</span>
             </button>
-
-            <!-- Exiting 4th Car Ghost Layer for Seamless 4-Car Diagonal Conveyor Continuity -->
-            <div class="hero-flank-car hero-flank-ghost" id="hero-flank-ghost" aria-hidden="true">
-              <img
-                id="ghost-vehicle-thumb"
-                src="${prevAtm.renderThumb}"
-                alt=""
-                class="hero-flank-car-img"
-                referrerPolicy="no-referrer"
-              />
-              <span class="hero-flank-shadow" aria-hidden="true"></span>
-            </div>
           </div>
 
           <!-- Foreground Editorial Overlay Content -->
@@ -1635,20 +1656,160 @@
         }
       }
 
-      // Update Three.js 3D Model & Paint Color synchronously (single GPU frame, zero per-frame WebGL overhead during glide)
-      if (window.Apex3DViewer) {
-        if (typeof window.Apex3DViewer.loadModel === 'function') {
-          window.Apex3DViewer.loadModel(atmosphere.modelKey, appliedColor, direction);
-        } else if (typeof window.Apex3DViewer.changeCarColor === 'function') {
-          window.Apex3DViewer.changeCarColor(appliedColor);
-        }
+      // Keep 0ms of main-thread WebGL/GLB work during Hero conveyor transitions.
+      // Interactive WebGL 3D orbit is booted lazily only if the user explicitly drags #hero-3d-stage-container.
+      if (state.deferred3DLoadTimer) {
+        clearTimeout(state.deferred3DLoadTimer);
+        state.deferred3DLoadTimer = null;
       }
     }
 
-    // 120Hz ProMotion custom quintic/cubic-bezier ease-out curve (liquid acceleration, weightless settle)
+    const CONVEYOR_CAR_IDS = [
+      'porsche-gt3-rs-2024',
+      'ferrari-roma-2023',
+      'mercedes-amg-g63-2024',
+      'audi-rs6-avant-2024'
+    ];
+
+    // 120Hz ProMotion smooth ease-out curve (gentle initial acceleration, weightless settle)
     const proMotionConveyorEase = function (t) {
-      return 1 - Math.pow(1 - t, 3.25);
+      return 1 - Math.pow(1 - t, 2.75);
     };
+
+    function syncPersistentConveyor(activeCarId, direction = 'next', animate = true) {
+      const stageEl = main.querySelector('#hero-depth-carousel-stage');
+      if (stageEl) {
+        stageEl.classList.remove('is-3d-canvas-visible');
+      }
+      const activeIdx = Math.max(0, CONVEYOR_CAR_IDS.indexOf(activeCarId));
+      const carNodes = Array.from(main.querySelectorAll('.hero-conveyor-car'));
+      if (!carNodes.length) return;
+
+      const plan = carNodes
+        .map((carEl) => {
+          const id = carEl.getAttribute('data-conveyor-car');
+          const idx = CONVEYOR_CAR_IDS.indexOf(id);
+          if (idx === -1) return null;
+
+          const prevSlot = Number(carEl.getAttribute('data-slot') || 0);
+          const diff = ((idx - activeIdx) % 4 + 4) % 4;
+          let targetSlot = 0;
+          if (diff === 0) {
+            targetSlot = 0;
+          } else if (diff === 1) {
+            targetSlot = 1;
+          } else if (diff === 3) {
+            targetSlot = -1;
+          } else {
+            targetSlot = direction === 'prev' ? 2 : -2;
+          }
+          return { carEl, prevSlot, targetSlot };
+        })
+        .filter(Boolean);
+
+      if (!animate) {
+        plan.forEach(({ carEl, targetSlot }) => {
+          carEl.classList.add('is-no-transition');
+          carEl.setAttribute('data-slot', String(targetSlot));
+        });
+        if (stageEl) void stageEl.offsetWidth;
+        plan.forEach(({ carEl }) => {
+          carEl.classList.remove('is-no-transition');
+        });
+        return;
+      }
+
+      // PASS 1: Silently position any off-stage entering car at its invisible entry gate (-2 or +2)
+      // BEFORE any active/flanking cars receive their new data-slot, so the single reflow never
+      // prematurely flushes any other car's transition.
+      const gatedCars = [];
+      plan.forEach(({ carEl, prevSlot, targetSlot }) => {
+        if (targetSlot === 1 && direction === 'next' && prevSlot !== 0 && prevSlot !== 1 && prevSlot !== 2) {
+          carEl.classList.add('is-no-transition');
+          carEl.setAttribute('data-slot', '2');
+          gatedCars.push(carEl);
+        } else if (targetSlot === -1 && direction === 'prev' && prevSlot !== 0 && prevSlot !== -1 && prevSlot !== -2) {
+          carEl.classList.add('is-no-transition');
+          carEl.setAttribute('data-slot', '-2');
+          gatedCars.push(carEl);
+        }
+      });
+
+      if (gatedCars.length > 0) {
+        if (stageEl) void stageEl.offsetWidth;
+        gatedCars.forEach((carEl) => {
+          carEl.classList.remove('is-no-transition');
+        });
+      }
+
+      // PASS 2: Simultaneously update data-slot on all 4 cars on the exact same frame
+      plan.forEach(({ carEl, targetSlot }) => {
+        carEl.setAttribute('data-slot', String(targetSlot));
+      });
+    }
+
+    // Initialize persistent conveyor positions immediately on mount
+    syncPersistentConveyor(state.active3DCarId, 'next', false);
+
+    // Reveal live interactive 3D canvas only when user explicitly drags to orbit-rotate the Center 3D car
+    const stageContainerEl = main.querySelector('#hero-3d-stage-container');
+    if (stageContainerEl) {
+      let dragStartX = 0;
+      let dragStartY = 0;
+      let isPointerDown = false;
+      stageContainerEl.addEventListener(
+        'pointerdown',
+        (e) => {
+          isPointerDown = true;
+          dragStartX = e.clientX;
+          dragStartY = e.clientY;
+        },
+        { passive: true }
+      );
+      stageContainerEl.addEventListener(
+        'pointermove',
+        (e) => {
+          if (!isPointerDown) return;
+          const dist = Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY);
+          if (dist > 6) {
+            const stageEl = main.querySelector('#hero-depth-carousel-stage');
+            const activeAtm =
+              HERO_ATMOSPHERE_CONFIG[state.active3DCarId] || HERO_ATMOSPHERE_CONFIG['ferrari-roma-2023'];
+            if (!state.heroViewer) {
+              initHero3DViewer();
+            }
+            const viewerInst = window.Apex3DViewer && window.Apex3DViewer.activeInstance;
+            if (
+              viewerInst &&
+              viewerInst.currentModel &&
+              viewerInst.currentModelKey === activeAtm.modelKey
+            ) {
+              if (stageEl) stageEl.classList.add('is-3d-canvas-visible');
+            } else if (window.Apex3DViewer && typeof window.Apex3DViewer.loadModel === 'function') {
+              const targetCarId = state.active3DCarId;
+              window.Apex3DViewer.loadModel(
+                activeAtm.modelKey,
+                state.activeColorHex || activeAtm.accentColor,
+                null,
+                () => {
+                  if (state.active3DCarId === targetCarId && stageEl) {
+                    stageEl.classList.add('is-3d-canvas-visible');
+                  }
+                }
+              );
+            }
+          }
+        },
+        { passive: true }
+      );
+      window.addEventListener(
+        'pointerup',
+        () => {
+          isPointerDown = false;
+        },
+        { passive: true }
+      );
+    }
 
     function updateHero3DStage(carId, targetHex = null, targetTheme = null, options = {}) {
       const skipTransition = Boolean(options && options.skipTransition);
@@ -1674,6 +1835,7 @@
         main.removeAttribute('data-carousel-dir');
         if (heroCard) heroCard.removeAttribute('data-carousel-dir');
         applyHeroVehicleState(carId, targetHex, targetTheme, null);
+        syncPersistentConveyor(carId, direction, false);
         return;
       }
 
@@ -1683,205 +1845,37 @@
       const gsap = window.gsap;
       const dirSign = direction === 'prev' ? -1 : 1;
       const watermarkEl = main.querySelector('#hero-watermark');
-      const stageViewport = main.querySelector('#hero-3d-stage-container');
-      const flankPrev = main.querySelector('#hero-flank-prev-btn');
-      const flankNext = main.querySelector('#hero-flank-next-btn');
-      const flankGhost = main.querySelector('#hero-flank-ghost');
-      const ghostThumb = main.querySelector('#ghost-vehicle-thumb');
-      const prevThumb = main.querySelector('#prev-vehicle-thumb');
-      const nextThumb = main.querySelector('#next-vehicle-thumb');
       const editorialNodes = main.querySelectorAll(
-        '#hero-main-title, #hero-editorial-summary, .hero-carousel-arrows, .hero-explore-row'
+        '#hero-main-title, #hero-editorial-summary'
       );
       const mobileTelemetry = main.querySelector('#hero-mobile-telemetry-pill');
 
-      // 1. Capture outgoing flank image for the 4th exiting car ghost & reset transforms for exact FLIP measurement
-      const oldPrevSrc = prevThumb ? prevThumb.getAttribute('src') : '';
-      const oldNextSrc = nextThumb ? nextThumb.getAttribute('src') : '';
-
-      const animatedNodes = [
-        stageViewport,
-        flankPrev,
-        flankNext,
-        flankGhost,
-        watermarkEl,
-        ...editorialNodes,
-        mobileTelemetry
-      ].filter(Boolean);
-      gsap.killTweensOf(animatedNodes);
-      gsap.set([stageViewport, flankPrev, flankNext, flankGhost].filter(Boolean), {
-        clearProps: 'transform,opacity'
-      });
-
-      const pRect = (prevThumb || flankPrev) ? (prevThumb || flankPrev).getBoundingClientRect() : null;
-      const cRect = stageViewport ? stageViewport.getBoundingClientRect() : null;
-      const nRect = (nextThumb || flankNext) ? (nextThumb || flankNext).getBoundingClientRect() : null;
-      const hasFlanks = Boolean(pRect && nRect && cRect && pRect.width > 10 && nRect.width > 10);
-
-      // 2. Swap vehicle state & cached 3D model immediately (rendered once on GPU, zero per-frame WebGL draw calls during glide)
+      // 1. Update vehicle metadata & cached 3D model state
       applyHeroVehicleState(carId, targetHex, targetTheme, direction);
 
-      // 3. Play 120fps Hardware-Composited 4-Car 1:1 FLIP Diagonal Conveyor Transition
-      if (hasFlanks) {
-        const px = pRect.left + pRect.width * 0.5;
-        const py = pRect.top + pRect.height * 0.5;
-        const cx = cRect.left + cRect.width * 0.5;
-        const cy = cRect.top + cRect.height * 0.52;
-        const nx = nRect.left + nRect.width * 0.5;
-        const ny = nRect.top + nRect.height * 0.5;
+      // 2. Glide all 4 persistent conveyor cars seamlessly along the collinear diagonal track (-2 ⇄ -1 ⇄ 0 ⇄ +1 ⇄ +2)
+      syncPersistentConveyor(carId, direction, true);
 
-        const isMobileViewport = window.innerWidth <= 768;
-        const centerCarVisualWidth = Math.max(cRect.width * (isMobileViewport ? 0.62 : 0.55), pRect.width * 1.35);
-        const flankToCenterScale = Math.min(Math.max(nRect.width / centerCarVisualWidth, 0.36), 0.78);
-        const centerToFlankScale = Math.min(Math.max(centerCarVisualWidth / pRect.width, 1.28), 2.35);
-        const dur = 0.78;
-
-        if (direction === 'next') {
-          // (A) 4th Car Ghost: Old Top-Left Prev Car glides up-and-left off-stage
-          if (flankGhost && ghostThumb && oldPrevSrc) {
-            ghostThumb.setAttribute('src', oldPrevSrc);
-            flankGhost.classList.remove('is-ghost-next');
-            flankGhost.classList.add('is-ghost-prev', 'is-active');
-            gsap.fromTo(
-              flankGhost,
-              { x: 0, y: 0, scale: 1, opacity: 1, transformOrigin: '50% 50%', force3D: true },
-              {
-                x: -(cx - px) * 0.48,
-                y: -(cy - py) * 0.48,
-                scale: 0.54,
-                opacity: 0,
-                duration: dur,
-                ease: proMotionConveyorEase,
-                force3D: true,
-                onComplete: () => flankGhost.classList.remove('is-active')
-              }
-            );
-          }
-
-          // (B) Outgoing Center Car glides 1:1 from exact Center Stage (cx, cy) into Top-Left Prev slot (px, py)
-          gsap.fromTo(
-            flankPrev,
-            { x: cx - px, y: cy - py, scale: centerToFlankScale, transformOrigin: '50% 50%', force3D: true },
-            { x: 0, y: 0, scale: 1, duration: dur, ease: proMotionConveyorEase, force3D: true, clearProps: 'transform' }
-          );
-
-          // (C) Incoming Center Car glides 1:1 from exact Bottom-Right Next slot (nx, ny) into Center Stage (cx, cy)
-          gsap.fromTo(
-            stageViewport,
-            { x: nx - cx, y: ny - cy, scale: flankToCenterScale, transformOrigin: '50% 50%', force3D: true },
-            { x: 0, y: 0, scale: 1, duration: dur, ease: proMotionConveyorEase, force3D: true, clearProps: 'transform' }
-          );
-
-          // (D) Incoming New Bottom-Right Next Car glides in along the same diagonal vector
-          gsap.fromTo(
-            flankNext,
-            {
-              x: (nx - cx) * 0.48,
-              y: (ny - cy) * 0.48,
-              scale: 0.54,
-              opacity: 0,
-              transformOrigin: '50% 50%',
-              force3D: true
-            },
-            {
-              x: 0,
-              y: 0,
-              scale: 1,
-              opacity: 1,
-              duration: dur,
-              ease: proMotionConveyorEase,
-              force3D: true,
-              clearProps: 'transform,opacity'
-            }
-          );
-        } else {
-          // (A) 4th Car Ghost: Old Bottom-Right Next Car glides down-and-right off-stage
-          if (flankGhost && ghostThumb && oldNextSrc) {
-            ghostThumb.setAttribute('src', oldNextSrc);
-            flankGhost.classList.remove('is-ghost-prev');
-            flankGhost.classList.add('is-ghost-next', 'is-active');
-            gsap.fromTo(
-              flankGhost,
-              { x: 0, y: 0, scale: 1, opacity: 1, transformOrigin: '50% 50%', force3D: true },
-              {
-                x: -(cx - nx) * 0.48,
-                y: -(cy - ny) * 0.48,
-                scale: 0.54,
-                opacity: 0,
-                duration: dur,
-                ease: proMotionConveyorEase,
-                force3D: true,
-                onComplete: () => flankGhost.classList.remove('is-active')
-              }
-            );
-          }
-
-          // (B) Outgoing Center Car glides 1:1 from exact Center Stage (cx, cy) into Bottom-Right Next slot (nx, ny)
-          gsap.fromTo(
-            flankNext,
-            { x: cx - nx, y: cy - ny, scale: centerToFlankScale, transformOrigin: '50% 50%', force3D: true },
-            { x: 0, y: 0, scale: 1, duration: dur, ease: proMotionConveyorEase, force3D: true, clearProps: 'transform' }
-          );
-
-          // (C) Incoming Center Car glides 1:1 from exact Top-Left Prev slot (px, py) into Center Stage (cx, cy)
-          gsap.fromTo(
-            stageViewport,
-            { x: px - cx, y: py - cy, scale: flankToCenterScale, transformOrigin: '50% 50%', force3D: true },
-            { x: 0, y: 0, scale: 1, duration: dur, ease: proMotionConveyorEase, force3D: true, clearProps: 'transform' }
-          );
-
-          // (D) Incoming New Top-Left Prev Car glides in along the same diagonal vector
-          gsap.fromTo(
-            flankPrev,
-            {
-              x: (px - cx) * 0.48,
-              y: (py - cy) * 0.48,
-              scale: 0.54,
-              opacity: 0,
-              transformOrigin: '50% 50%',
-              force3D: true
-            },
-            {
-              x: 0,
-              y: 0,
-              scale: 1,
-              opacity: 1,
-              duration: dur,
-              ease: proMotionConveyorEase,
-              force3D: true,
-              clearProps: 'transform,opacity'
-            }
-          );
-        }
-      } else if (stageViewport) {
-        gsap.fromTo(
-          stageViewport,
-          { x: dirSign * 76, scale: 0.91, force3D: true },
-          { x: 0, scale: 1, duration: 0.64, ease: proMotionConveyorEase, force3D: true, clearProps: 'transform' }
-        );
-      }
-
-      // Colossal Watermark smooth horizontal parallax glide
+      // 3. Colossal Watermark smooth horizontal parallax glide
       if (watermarkEl) {
         gsap.fromTo(
           watermarkEl,
-          { xPercent: -50 + dirSign * 9, opacity: 0, force3D: true },
-          { xPercent: -50, opacity: 1, duration: 0.74, ease: proMotionConveyorEase, force3D: true, overwrite: 'auto' }
+          { xPercent: -50 + dirSign * 8, opacity: 0 },
+          { xPercent: -50, opacity: 1, duration: 0.68, ease: proMotionConveyorEase, overwrite: 'auto' }
         );
       }
 
-      // Left Editorial Stack staggered smooth rise
+      // 4. Left Editorial Stack staggered smooth rise
       if (editorialNodes.length) {
         gsap.fromTo(
           editorialNodes,
-          { y: dirSign * 14, opacity: 0, force3D: true },
+          { y: dirSign * 12, opacity: 0 },
           {
             y: 0,
             opacity: 1,
-            duration: 0.56,
-            stagger: 0.035,
+            duration: 0.54,
+            stagger: 0.032,
             ease: proMotionConveyorEase,
-            force3D: true,
             overwrite: 'auto',
             clearProps: 'transform,opacity'
           }
@@ -1891,8 +1885,8 @@
       if (mobileTelemetry) {
         gsap.fromTo(
           mobileTelemetry,
-          { y: 8, opacity: 0.3 },
-          { y: 0, opacity: 1, duration: 0.44, ease: 'power3.out', overwrite: 'auto', clearProps: 'transform,opacity' }
+          { y: 6, opacity: 0.35 },
+          { y: 0, opacity: 1, duration: 0.42, ease: 'power3.out', overwrite: 'auto', clearProps: 'transform,opacity' }
         );
       }
     }
@@ -1914,19 +1908,10 @@
         const triad = MARCO_PEREZ_TRIADS[triadId];
         if (!triad && !colorHex) return;
 
-        const appliedColor = colorHex || triad.popColor;
-        state.activeColorHex = appliedColor;
-        if (triadId) state.activeTriadId = triadId;
-
-        // Highlight only the clicked color swatch without changing the active car
-        main.querySelectorAll('.triad-pill').forEach((p) => {
-          p.classList.toggle('active', p === e.currentTarget);
-        });
-
-        const heroCard = main.querySelector('#hero-stage-card');
-        if (heroCard && triadId) {
-          heroCard.setAttribute('data-color-theme', triadId);
-        }
+        const appliedColor = colorHex || (triad && triad.popColor);
+        const targetCarId = (triad && triad.carId) || state.active3DCarId;
+        const currentAtm = HERO_ATMOSPHERE_CONFIG[state.active3DCarId];
+        const dir = currentAtm && currentAtm.prevCarId === targetCarId ? 'prev' : 'next';
 
         if (window.gsap) {
           window.gsap.fromTo(
@@ -1947,9 +1932,11 @@
           }, 2200);
         }
 
-        // Repaint the currently active 3D vehicle in-place without switching vehicles
-        if (window.Apex3DViewer && typeof window.Apex3DViewer.changeCarColor === 'function') {
-          window.Apex3DViewer.changeCarColor(appliedColor);
+        // Smoothly glide the 4-car conveyor to the selected triad's vehicle & theme
+        if (targetCarId !== state.active3DCarId) {
+          updateHero3DStage(targetCarId, appliedColor, triadId, { direction: dir });
+        } else {
+          applyHeroVehicleState(targetCarId, appliedColor, triadId, null);
         }
       });
     });
@@ -1964,28 +1951,24 @@
     // Circular Arrow Buttons, Mobile Dock Steppers & Flanking Blurred 3D Car Click Listeners
     main.querySelector('#hero-prev-vehicle-btn')?.addEventListener('click', (e) => {
       const btn = e.currentTarget;
-      rubberBandBounce(btn, -1); // Rule 19: Rubber band elastic feedback
       const prevId = btn.getAttribute('data-prev-car');
       if (prevId) updateHero3DStage(prevId, null, null, { direction: 'prev' });
     });
 
     main.querySelector('#hero-next-vehicle-btn')?.addEventListener('click', (e) => {
       const btn = e.currentTarget;
-      rubberBandBounce(btn, 1); // Rule 19: Rubber band elastic feedback
       const nextId = btn.getAttribute('data-next-car');
       if (nextId) updateHero3DStage(nextId, null, null, { direction: 'next' });
     });
 
     main.querySelector('#hero-mobile-prev-btn')?.addEventListener('click', (e) => {
       const btn = e.currentTarget;
-      rubberBandBounce(btn, -1);
       const prevId = btn.getAttribute('data-prev-car');
       if (prevId) updateHero3DStage(prevId, null, null, { direction: 'prev' });
     });
 
     main.querySelector('#hero-mobile-next-btn')?.addEventListener('click', (e) => {
       const btn = e.currentTarget;
-      rubberBandBounce(btn, 1);
       const nextId = btn.getAttribute('data-next-car');
       if (nextId) updateHero3DStage(nextId, null, null, { direction: 'next' });
     });
@@ -2005,17 +1988,15 @@
       openVehicleModal(id, '3d', e.currentTarget);
     });
 
-    // Apple Mobile Horizontal Touch Swipe on Hero Editorial / Bottom Dock
+    // Apple Mobile Horizontal Touch Swipe across the entire Hero Stage Card
     const heroStageCard = main.querySelector('#hero-stage-card');
     if (heroStageCard) {
       let touchStartX = 0;
       let touchStartY = 0;
-      let touchOnCanvas = false;
       heroStageCard.addEventListener(
         'touchstart',
         (e) => {
           if (!e.touches || !e.touches.length) return;
-          touchOnCanvas = Boolean(e.target.closest('#hero-3d-canvas'));
           touchStartX = e.touches[0].clientX;
           touchStartY = e.touches[0].clientY;
         },
@@ -2024,10 +2005,10 @@
       heroStageCard.addEventListener(
         'touchend',
         (e) => {
-          if (touchOnCanvas || !e.changedTouches || !e.changedTouches.length) return;
+          if (!e.changedTouches || !e.changedTouches.length) return;
           const dx = e.changedTouches[0].clientX - touchStartX;
           const dy = e.changedTouches[0].clientY - touchStartY;
-          if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+          if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy) * 1.35) {
             const atm = HERO_ATMOSPHERE_CONFIG[state.active3DCarId] || HERO_ATMOSPHERE_CONFIG['ferrari-roma-2023'];
             if (dx < 0 && atm.nextCarId) {
               updateHero3DStage(atm.nextCarId, null, null, { direction: 'next' });
@@ -2351,7 +2332,6 @@
       }
     }
 
-    initHero3DViewer();
     if (state.active3DCarId) {
       updateHero3DStage(state.active3DCarId, state.activeColorHex, state.activeTriadId, { skipTransition: true });
     }
