@@ -198,20 +198,20 @@ async function runDealershipTestSuite() {
     console.log(`[PASS] Initial catalog rendered with ${carCardCount} vehicle cards`);
     assert.equal(carCardCount, 8, 'Expected 8 vehicle cards rendered');
 
-    // Test 1b: Verify cars with sketchfabId have .badge-3d-showcase
-    const badge3DCount = await cdp.evaluate(`document.querySelectorAll('.badge-3d-showcase').length`);
-    console.log(`[PASS] Found ${badge3DCount} cars with 3D Virtual Showroom badge`);
-    assert.ok(badge3DCount >= 4, 'Expected at least 4 cars with .badge-3d-showcase');
+    // Test 1b: Verify interactive 3D showcase buttons and WebGL/Sketchfab UI are removed
+    const badge3DCount = await cdp.evaluate(`document.querySelectorAll('.badge-3d-showcase, .btn-open-3d').length`);
+    console.log(`[PASS] Found ${badge3DCount} 3D card buttons (expected 0)`);
+    assert.equal(badge3DCount, 0, 'Expected 0 interactive 3D buttons on vehicle cards');
 
     // =========================================================================
-    // Stage 3 & 4: Hero Stage Viewport & Local Three.js 3D Model Tests
+    // Stage 3 & 4: Hero Stage Viewport (Studio Conveyor Showcase)
     // =========================================================================
-    // Test 1c: Check #hero-stage-viewport and #hero-3d-canvas are present and visible
     const heroStageInfo = await cdp.evaluate(`
       (() => {
         const stage = document.getElementById('hero-stage-viewport');
         const card = document.getElementById('hero-stage-card');
         const canvas = document.getElementById('hero-3d-canvas');
+        const conveyorCars = document.querySelectorAll('.hero-conveyor-car').length;
         if (!stage) return null;
         const rect = stage.getBoundingClientRect();
         return {
@@ -221,15 +221,17 @@ async function runDealershipTestSuite() {
           cardTheme: card?.getAttribute('data-color-theme'),
           watermark: document.getElementById('hero-watermark')?.textContent.trim(),
           hasCanvas: !!canvas,
-          hasViewer: !!(window.Apex3DViewer)
+          hasViewer: !!(window.Apex3DViewer),
+          conveyorCars
         };
       })()
     `);
-    console.log(`[PASS] #hero-stage-viewport & Three.js canvas present:`, heroStageInfo);
+    console.log(`[PASS] #hero-stage-viewport studio showcase present:`, heroStageInfo);
     assert.ok(heroStageInfo, '#hero-stage-viewport must be rendered');
     assert.ok(heroStageInfo.height >= 500, '#hero-stage-viewport must have height >= 500px');
-    assert.ok(heroStageInfo.hasCanvas, '#hero-3d-canvas must be rendered');
-    assert.ok(heroStageInfo.hasViewer, 'window.Apex3DViewer must be exported');
+    assert.equal(heroStageInfo.hasCanvas, false, '#hero-3d-canvas must not be rendered');
+    assert.equal(heroStageInfo.hasViewer, false, 'window.Apex3DViewer must not be loaded');
+    assert.equal(heroStageInfo.conveyorCars, 4, '4 studio conveyor cars must be rendered');
     const triadPillCount = await cdp.evaluate("document.querySelectorAll('.triad-pill').length");
     console.log(`[PASS] Found ${triadPillCount} Marco Perez Triad Pills`);
     assert.equal(triadPillCount, 4, 'Must render 4 Marco Perez Triad Pills');
@@ -409,26 +411,11 @@ async function runDealershipTestSuite() {
     assert.ok(modalVisible, 'Vehicle modal overlay must be active');
     assert.ok(modalTitle.includes('Porsche 911 GT3 RS'), 'Modal title must be Porsche 911 GT3 RS');
 
-    // Test 5b: Switch to tab-media-3d and verify Sketchfab iframe
-    await cdp.evaluate(`document.getElementById('tab-media-3d').click();`);
-    await sleep(350);
-    const is3DActive = await cdp.evaluate(`document.getElementById('tab-media-3d').classList.contains('active')`);
-    const iframeSrc = await cdp.evaluate(`document.querySelector('.sketchfab-iframe')?.getAttribute('src') || ''`);
-    console.log(`[PASS] Switched to 3D tab: active=${is3DActive}, iframe src=${iframeSrc}`);
-    assert.ok(is3DActive, '3D tab must have active class');
-    assert.ok(iframeSrc.includes('456b3d9d60b646369d76667848d6d027'), 'Iframe src must contain Porsche 911 GT3 RS Sketchfab ID');
-
-    // Capture proof: Vehicle Detail 3D Modal
-    const proof3DPath = path.join(ARTIFACT_DIR, 'proof_dealership_3d_modal.png');
-    await cdp.screenshot(proof3DPath);
-
-    // Test 5c: Switch back to tab-media-photo
-    await cdp.evaluate(`document.getElementById('tab-media-photo').click();`);
-    await sleep(250);
-    const isPhotoActive = await cdp.evaluate(`document.getElementById('tab-media-photo').classList.contains('active')`);
-    const photoViewerVisible = await cdp.evaluate(`document.getElementById('media-viewer-photo').style.display !== 'none'`);
-    console.log(`[PASS] Switched back to photo gallery: active=${isPhotoActive}, photoViewerVisible=${photoViewerVisible}`);
-    assert.ok(isPhotoActive, 'Photo tab must have active class');
+    // Test 5b: Verify Sketchfab 3D tab and iframe are removed and photo studio gallery is shown
+    const has3DTabOrIframe = await cdp.evaluate(`!!(document.getElementById('tab-media-3d') || document.querySelector('.sketchfab-iframe'))`);
+    const photoViewerVisible = await cdp.evaluate(`(() => { const el = document.getElementById('media-viewer-photo'); return !!el && el.style.display !== 'none'; })()`);
+    console.log(`[PASS] Sketchfab removed (${!has3DTabOrIframe}), photoViewerVisible=${photoViewerVisible}`);
+    assert.equal(has3DTabOrIframe, false, 'Sketchfab 3D tab and iframe must be completely removed');
     assert.ok(photoViewerVisible, 'Photo viewer must be visible');
 
     // Capture proof: Vehicle Detail Modal

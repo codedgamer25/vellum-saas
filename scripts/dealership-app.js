@@ -25,6 +25,37 @@
     audiStudio: './src/assets/images/audi_rs6_studio_1794305860108.jpg'
   };
 
+  function formatVehicleName(car) {
+    if (!car) return '';
+    const make = String(car.make || '').trim();
+    const model = String(car.model || '').trim();
+    if (!make) return model;
+    if (!model) return make;
+    const makePrefix = make.split(/[-\s]/)[0].toLowerCase();
+    if (makePrefix && model.toLowerCase().includes(makePrefix)) {
+      return model;
+    }
+    return `${make} ${model}`;
+  }
+
+  function escapeHTML(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  window.__apexImgFallback = function (imgEl) {
+    if (!imgEl || imgEl.dataset.fallbackApplied === 'true') return;
+    imgEl.dataset.fallbackApplied = 'true';
+    const parent = imgEl.parentElement;
+    if (parent) parent.classList.add('media-fallback-active');
+    const altLabel = escapeHTML(imgEl.getAttribute('alt') || 'Apex Motorcar');
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F1F3F6"/><stop offset="100%" stop-color="#E2E5EC"/></linearGradient></defs><rect width="800" height="600" fill="url(#g)"/><text x="50%" y="48%" text-anchor="middle" fill="#64748B" font-family="sans-serif" font-size="18" font-weight="600" letter-spacing="3">APEX AUTO LOUNGE</text><text x="50%" y="55%" text-anchor="middle" fill="#111115" font-family="sans-serif" font-size="15" font-weight="500">${altLabel}</text></svg>`;
+    imgEl.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  };
+
   // Unlock native 120Hz ProMotion refresh rate in GSAP & pre-decode all 4 studio car PNGs into GPU bitmap memory
   if (window.gsap) {
     if (window.gsap.ticker && typeof window.gsap.ticker.lagSmoothing === 'function') {
@@ -466,9 +497,10 @@
         ? car.images[0]
         : STUDIO_IMAGES.porscheStudio;
 
+    const displayName = formatVehicleName(car);
     const formattedPrice = STORE.formatPrice(car.priceUSD);
     const whatsappMsg = encodeURIComponent(
-      `Hi Apex Auto Lounge, I am inquiring about the ${car.year} ${car.make} ${car.model} (${formattedPrice}, VIN: ${car.vin}). Is it available for private inspection?`
+      `Hi Apex Auto Lounge, I am inquiring about the ${car.year} ${displayName} (${formattedPrice}, VIN: ${car.vin}). Is it available for private inspection?`
     );
 
     const hasSpecialStatus = car.status !== 'available';
@@ -479,17 +511,18 @@
           ${hasSpecialStatus ? `<span class="car-card-badge ${statusClass}">${statusLabel}</span>` : ''}
           <img
             src="${primaryImage}"
-            alt="${car.year} ${car.make} ${car.model}"
+            alt="${car.year} ${displayName}"
             class="car-card-img"
             loading="lazy"
             decoding="async"
             referrerPolicy="no-referrer"
+            onerror="window.__apexImgFallback && window.__apexImgFallback(this)"
           />
         </div>
         <div class="car-card-body">
           <div class="car-card-header">
             <div class="car-card-year">${car.year} · ${car.bodyType || 'Coupe'} · ${car.exteriorColor}</div>
-            <h3 class="car-card-title">${car.make} ${car.model}</h3>
+            <h3 class="car-card-title">${displayName}</h3>
           </div>
 
           <div class="car-card-specs">
@@ -500,7 +533,7 @@
             <span>${car.horsepower} HP</span>
           </div>
 
-          <!-- Clean price row without redundant labels -->
+          <!-- Clean price row with tabular price & quiet monospace VIN -->
           <div class="car-card-price-row">
             <div class="price-value">${formattedPrice}</div>
             <div class="car-vin-short">
@@ -512,19 +545,12 @@
             <button type="button" class="btn-card-specs btn-open-detail" data-id="${car.id}">
               Specs & Gallery
             </button>
-            ${
-              car.sketchfabId
-                ? `<button type="button" class="btn-card-specs btn-open-3d" data-id="${car.id}" title="Launch Interactive 3D Model">
-                    3D Model
-                  </button>`
-                : ''
-            }
             <a
               href="https://wa.me/15550192834?text=${whatsappMsg}"
               target="_blank"
               rel="noopener noreferrer"
               class="btn-card-whatsapp"
-              aria-label="Inquire about ${car.year} ${car.make} ${car.model} via WhatsApp"
+              aria-label="Inquire about ${car.year} ${displayName} via WhatsApp"
             >
               Inquire ↗
             </a>
@@ -632,18 +658,21 @@
       }
     });
 
-    // 5. Update hero island price, mobile telemetry pill & WhatsApp link
+    // 5. Update hero island price, inline desktop telemetry, mobile telemetry pill & WhatsApp link
     const heroCar = STORE.getFeatured3DCar(state.active3DCarId);
     if (heroCar) {
       const formattedHeroPrice = STORE.formatPrice(heroCar.priceUSD);
+      const heroDisplayName = formatVehicleName(heroCar);
       const heroPrice = document.getElementById('island-price');
       if (heroPrice) heroPrice.textContent = formattedHeroPrice;
+      const inlineHeroPrice = document.getElementById('hero-inline-price');
+      if (inlineHeroPrice) inlineHeroPrice.textContent = formattedHeroPrice;
       const mobileTelemetryPrice = document.getElementById('hero-mobile-telemetry-price');
       if (mobileTelemetryPrice) mobileTelemetryPrice.textContent = formattedHeroPrice;
       const waBtn = document.getElementById('hero-whatsapp-reserve');
       if (waBtn) {
         const encoded = encodeURIComponent(
-          `Hi Apex Auto Lounge, I am inquiring about the ${heroCar.year} ${heroCar.make} ${heroCar.model} featured on the 3D Showroom (${formattedHeroPrice}). Is it available for private acquisition?`
+          `Hi Apex Auto Lounge, I am inquiring about the ${heroCar.year} ${heroDisplayName} featured in the Showroom (${formattedHeroPrice}). Is it available for private acquisition?`
         );
         waBtn.setAttribute('href', `https://wa.me/15550192834?text=${encoded}`);
       }
@@ -657,12 +686,18 @@
       if (lifestylePrice) lifestylePrice.textContent = STORE.formatPrice(lifestyleCar.priceUSD);
     }
 
-    // 7. Update active modal price if open
-    const modal = document.getElementById('modal-vehicle-detail');
+    // 7. Update active modal price & monthly estimate if open
+    const modal = document.getElementById('modal-vehicle-detail') || document.getElementById('vehicle-modal-overlay');
     if (modal && modal.classList.contains('is-active')) {
       const modalPrice = modal.querySelector('.detail-car-price');
       if (modalPrice && modalPrice.dataset.rawPrice) {
-        modalPrice.textContent = STORE.formatPrice(Number(modalPrice.dataset.rawPrice));
+        const rawUsd = Number(modalPrice.dataset.rawPrice);
+        modalPrice.textContent = STORE.formatPrice(rawUsd);
+        const monthlyEl = modal.querySelector('#detail-monthly-estimate');
+        if (monthlyEl) {
+          const estMonthlyUsd = Math.round((rawUsd * 0.8) / 51.4);
+          monthlyEl.textContent = `Est. ${STORE.formatPrice(estMonthlyUsd)}/mo`;
+        }
       }
     }
   }
@@ -718,7 +753,7 @@
             ${currentAtmosphere.watermark}
           </div>
 
-          <!-- 3-Car Depth-of-Field Stage: Persistent 4-Car 120fps Diagonal Conveyor + Interactive 3D Canvas -->
+          <!-- 3-Car Depth-of-Field Studio Showcase Stage: Persistent 4-Car 120fps Diagonal Conveyor -->
           <div class="hero-depth-carousel-stage" id="hero-depth-carousel-stage">
             <!-- Persistent 4-Car Diagonal Conveyor Track (Zero DOM/Image Swap Seams) -->
             <div class="hero-conveyor-track" id="hero-conveyor-track" aria-hidden="true">
@@ -766,7 +801,7 @@
               class="hero-flank-car hero-flank-prev"
               id="hero-flank-prev-btn"
               data-car="${prevCar.id}"
-              aria-label="Previous 3D Model: ${prevCar.make} ${prevCar.model}"
+              aria-label="Previous Vehicle: ${prevCar.make} ${prevCar.model}"
               title="Inspect Previous: ${prevCar.make} ${prevCar.model}"
             >
               <img
@@ -778,32 +813,13 @@
               />
             </button>
 
-            <!-- Center Interactive Local Three.js 3D Model Stage Canvas -->
-            <div class="hero-3d-stage-viewport" id="hero-3d-stage-container" data-testid="hero-3d-stage">
-              <div class="hero-3d-loading-chip" id="hero-3d-loading-chip" aria-hidden="true">
-                <span class="hero-3d-spinner"></span>
-                <span class="hero-3d-loading-text">Calibrating Atelier 3D Model...</span>
-              </div>
-              <canvas id="hero-3d-canvas" class="hero-3d-canvas"></canvas>
-              <div class="hero-3d-instant-fallback" id="hero-3d-instant-fallback">
-                <img
-                  id="hero-3d-fallback-img"
-                  class="hero-3d-car-img"
-                  src="${currentAtmosphere.renderThumb}"
-                  alt="${currentCar.make} ${currentCar.model} 3D Showcase"
-                  loading="eager"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-            </div>
-
             <!-- Right Flanking Click Target (Next Vehicle) -->
             <button
               type="button"
               class="hero-flank-car hero-flank-next"
               id="hero-flank-next-btn"
               data-car="${nextCar.id}"
-              aria-label="Next 3D Model: ${nextCar.make} ${nextCar.model}"
+              aria-label="Next Vehicle: ${nextCar.make} ${nextCar.model}"
               title="Inspect Next: ${nextCar.make} ${nextCar.model}"
             >
               <img
@@ -825,19 +841,28 @@
                 <h1 class="hero-headline" id="hero-main-title">
                   <span class="theme-accent-text" id="hero-accent-text">${currentAtmosphere.heroHeadline}</span>
                 </h1>
+
+                <div class="hero-inline-specs" id="hero-inline-specs" aria-label="Featured Vehicle Telemetry">
+                  <span class="hero-inline-price" id="hero-inline-price">${STORE.formatPrice(currentCar.priceUSD)}</span>
+                  <span class="hero-telemetry-sep" aria-hidden="true">·</span>
+                  <span id="hero-inline-hp">${currentCar.hp} HP</span>
+                  <span class="hero-telemetry-sep" aria-hidden="true">·</span>
+                  <span id="hero-inline-accel">0–60 in ${currentCar.zeroToSixty}</span>
+                </div>
+
                 <p class="hero-editorial-desc" id="hero-editorial-summary">
                   ${currentCar.summary}
                 </p>
 
-                <!-- Circular 1px Outline Arrow Buttons (← / →) matching @uiuxzaid Video -->
-                <div class="hero-carousel-arrows" role="group" aria-label="Cycle 3D Vehicles">
+                <!-- Circular 1px Outline Arrow Buttons (← / →) -->
+                <div class="hero-carousel-arrows" role="group" aria-label="Cycle Featured Vehicles">
                   <button
                     type="button"
                     class="hero-circle-arrow-btn"
                     id="hero-prev-vehicle-btn"
                     data-prev-car="${currentAtmosphere.prevCarId}"
                     aria-label="Previous Vehicle"
-                    title="Previous Vehicle"
+                    title="Previous Vehicle (←)"
                   >
                     ←
                   </button>
@@ -847,13 +872,13 @@
                     id="hero-next-vehicle-btn"
                     data-next-car="${currentAtmosphere.nextCarId}"
                     aria-label="Next Vehicle"
-                    title="Next Vehicle"
+                    title="Next Vehicle (→)"
                   >
                     →
                   </button>
                 </div>
 
-                <!-- Explore More Pill with Leading Architectural Line + Dossier / WhatsApp -->
+                <!-- Explore More Pill + Dossier / WhatsApp -->
                 <div class="hero-explore-row">
                   <a href="#featured-collection-section" class="btn-explore-line-pill" id="hero-explore-more-btn">
                     <span class="explore-lead-line" aria-hidden="true"></span>
@@ -870,7 +895,7 @@
                   </button>
 
                   <a
-                    href="https://wa.me/15550192834?text=Hi%20Apex%20Auto%20Lounge%2C%20I%20am%20inquiring%20about%20the%20featured%203D%20Showroom%20motorcar."
+                    href="https://wa.me/15550192834?text=Hi%20Apex%20Auto%20Lounge%2C%20I%20am%20inquiring%20about%20the%20featured%20Showroom%20motorcar."
                     target="_blank"
                     rel="noopener noreferrer"
                     class="btn-hero-whatsapp-link"
@@ -895,7 +920,7 @@
 
               <div class="hero-stage-bottom-island hero-swatches-only-dock">
                 <div class="sr-only" aria-hidden="true">
-                  <span id="island-car-name">${currentCar.year} ${currentCar.make} ${currentCar.model}</span>
+                  <span id="island-car-name">${currentCar.year} ${formatVehicleName(currentCar)}</span>
                   <strong id="island-hp">${currentCar.hp} HP</strong>
                   <strong id="island-acceleration">${currentCar.zeroToSixty}</strong>
                   <strong id="island-topspeed">${currentCar.topSpeed}</strong>
@@ -911,13 +936,13 @@
                   class="apple-dock-stepper-btn"
                   id="hero-mobile-prev-btn"
                   data-prev-car="${currentAtmosphere.prevCarId}"
-                  aria-label="Previous 3D Vehicle"
+                  aria-label="Previous Vehicle"
                 >
                   ‹
                 </button>
 
                 <!-- Pure Circular Color Swatches (No Color Names Displayed) -->
-                <div class="triad-swatch-group swatch-only-group" role="group" aria-label="3D Paint Finishes">
+                <div class="triad-swatch-group swatch-only-group" role="group" aria-label="Atelier Paint Finishes">
                   ${Object.values(MARCO_PEREZ_TRIADS)
                     .map(
                       (triad) => `
@@ -942,7 +967,7 @@
                   class="apple-dock-stepper-btn"
                   id="hero-mobile-next-btn"
                   data-next-car="${currentAtmosphere.nextCarId}"
-                  aria-label="Next 3D Vehicle"
+                  aria-label="Next Vehicle"
                 >
                   ›
                 </button>
@@ -1074,16 +1099,17 @@
                   type="button"
                   class="featured-arch-frame-btn btn-open-detail"
                   data-id="${car.id}"
-                  aria-label="Inspect ${car.year} ${car.make} ${car.model}"
+                  aria-label="Inspect ${car.year} ${formatVehicleName(car)}"
                 >
                   <div class="featured-arch-capsule arch-tint-${idx + 1}">
                     <img
                       src="${car.images && car.images[0] ? car.images[0] : archPhoto}"
-                      alt="${car.year} ${car.make} ${car.model}"
+                      alt="${car.year} ${formatVehicleName(car)}"
                       class="featured-arch-img"
                       loading="lazy"
                       decoding="async"
                       referrerPolicy="no-referrer"
+                      onerror="window.__apexImgFallback && window.__apexImgFallback(this)"
                     />
                     <span class="featured-arch-hover-pill" aria-hidden="true">Inspect Dossier ↗</span>
                   </div>
@@ -1091,9 +1117,8 @@
                 <div class="featured-arch-meta">
                   <div class="featured-arch-meta-top">
                     <h3 class="featured-arch-title">${displayTitle}</h3>
-                    <span class="featured-arch-spec-tag">${car.horsepower} HP</span>
+                    <span class="featured-arch-spec-tag">${car.horsepower} HP · ${car.bodyType || 'Coupe'}</span>
                   </div>
-                  <!-- Rule 2: Drop redundant labels (Clean price typography) -->
                   <div class="featured-arch-price">${STORE.formatPrice(car.priceUSD)}</div>
                 </div>
               </article>
@@ -1127,11 +1152,11 @@
         <div class="catalog-utility-bar">
           <div class="catalog-heading-wrap">
             <h2 class="catalog-section-title">SHOWROOM INVENTORY</h2>
-            <span class="catalog-vehicle-count">${filtered.length} Motorcars Available</span>
+            <span class="catalog-vehicle-count">${filtered.length} Motorcars</span>
           </div>
 
           <div class="catalog-utility-actions">
-            <div class="currency-selector-group" id="currency-switcher" role="group" aria-label="Currency Selector">
+            <div class="currency-selector-group catalog-currency-subtle" id="currency-switcher" role="group" aria-label="Currency Selector">
               ${currencies
                 .map(
                   (c) => `
@@ -1143,8 +1168,8 @@
                 .join('')}
             </div>
 
-            <button type="button" class="btn-mode-toggle ${state.view === 'admin' ? 'is-admin-active' : ''}" id="btn-toggle-mode">
-              ${state.view === 'admin' ? 'Exit Admin View' : 'Owner Admin'}
+            <button type="button" class="btn-mode-toggle-subtle ${state.view === 'admin' ? 'is-admin-active' : ''}" id="btn-toggle-mode">
+              ${state.view === 'admin' ? 'Exit Admin View' : 'Owner Portal ↗'}
             </button>
           </div>
         </div>
@@ -1459,13 +1484,6 @@
         return;
       }
 
-      const threeBtn = e.target.closest('.btn-open-3d');
-      if (threeBtn) {
-        const id = threeBtn.getAttribute('data-id');
-        if (id) openVehicleModal(id, '3d', threeBtn);
-        return;
-      }
-
       const clearBtn = e.target.closest('#btn-clear-empty-filter');
       if (clearBtn) {
         resetFiltersHandler();
@@ -1483,33 +1501,12 @@
         btn.setAttribute('aria-expanded', String(!state.isHudCollapsed));
         btn.classList.remove('icon-blur-crossfade');
         void btn.offsetWidth;
-        btn.textContent = state.isHudCollapsed ? '▴ Show 3D Controls & Finishes' : '▾ Hide Controls (Zen 3D View)';
+        btn.textContent = state.isHudCollapsed ? '▴ Show Finishes' : '▾ Hide Finishes';
         btn.classList.add('icon-blur-crossfade');
       }
     });
 
-    // Initialize Local Three.js 3D Viewer inside Hero Stage (on-demand rendering, 0% idle GPU)
-    function initHero3DViewer() {
-      const container = main.querySelector('#hero-3d-stage-container');
-      if (!container) return;
-
-      if (window.Apex3DViewer) {
-        if (state.heroViewer) {
-          try {
-            state.heroViewer.destroy();
-          } catch (e) {}
-        }
-        const initialAtm = HERO_ATMOSPHERE_CONFIG[state.active3DCarId] || HERO_ATMOSPHERE_CONFIG['ferrari-roma-2023'];
-        state.heroViewer = new window.Apex3DViewer('hero-3d-stage-container', {
-          initialModel: initialAtm.modelKey,
-          initialColor: state.activeColorHex || initialAtm.accentColor,
-          autoRotate: false,
-          autoRotateSpeed: 0.75
-        });
-      }
-    }
-
-    // Wire Hero 3D Stage & Depth-of-Field Carousel Controls with #main-content Fade-Out/Fade-In Transition
+    // Wire Hero Showcase & Depth-of-Field Carousel Controls with Smooth Transitions
     function applyHeroVehicleState(carId, targetHex = null, targetTheme = null, direction = null) {
       state.active3DCarId = carId;
       const car = STORE.getFeatured3DCar(carId);
@@ -1577,7 +1574,7 @@
       const flankPrevBtn = main.querySelector('#hero-flank-prev-btn');
       if (flankPrevBtn) {
         flankPrevBtn.setAttribute('data-car', prevCarObj.id);
-        flankPrevBtn.setAttribute('aria-label', `Previous 3D Model: ${prevCarObj.make} ${prevCarObj.model}`);
+        flankPrevBtn.setAttribute('aria-label', `Previous Vehicle: ${prevCarObj.make} ${prevCarObj.model}`);
       }
       const prevThumb = main.querySelector('#prev-vehicle-thumb');
       if (prevThumb) {
@@ -1589,7 +1586,7 @@
       const flankNextBtn = main.querySelector('#hero-flank-next-btn');
       if (flankNextBtn) {
         flankNextBtn.setAttribute('data-car', nextCarObj.id);
-        flankNextBtn.setAttribute('aria-label', `Next 3D Model: ${nextCarObj.make} ${nextCarObj.model}`);
+        flankNextBtn.setAttribute('aria-label', `Next Vehicle: ${nextCarObj.make} ${nextCarObj.model}`);
       }
       const nextThumb = main.querySelector('#next-vehicle-thumb');
       if (nextThumb) {
@@ -1602,16 +1599,11 @@
         nextCardName.textContent = atmosphere.nextCarName;
       }
 
-      const fallbackImg = main.querySelector('#hero-3d-fallback-img');
-      if (fallbackImg && atmosphere.renderThumb) {
-        fallbackImg.setAttribute('src', atmosphere.renderThumb);
-        fallbackImg.setAttribute('alt', `${car.make} ${car.model} 3D Showcase`);
-      }
-
-      // Update Bottom Dock Telemetry, Mobile Pill & Price
+      // Update Bottom Dock Telemetry, Desktop Inline Telemetry, Mobile Pill & Price
       const formattedPrice = STORE.formatPrice(car.priceUSD);
+      const displayName = formatVehicleName(car);
       const nameEl = main.querySelector('#island-car-name');
-      if (nameEl) nameEl.textContent = `${car.year} ${car.make} ${car.model}`;
+      if (nameEl) nameEl.textContent = `${car.year} ${displayName}`;
 
       const hpEl = main.querySelector('#island-hp');
       if (hpEl) hpEl.textContent = `${car.hp} HP`;
@@ -1624,6 +1616,15 @@
 
       const priceEl = main.querySelector('#island-price');
       if (priceEl) priceEl.textContent = formattedPrice;
+
+      const inlinePriceEl = main.querySelector('#hero-inline-price');
+      if (inlinePriceEl) inlinePriceEl.textContent = formattedPrice;
+
+      const inlineHpEl = main.querySelector('#hero-inline-hp');
+      if (inlineHpEl) inlineHpEl.textContent = `${car.hp} HP`;
+
+      const inlineAccelEl = main.querySelector('#hero-inline-accel');
+      if (inlineAccelEl) inlineAccelEl.textContent = `0–60 in ${car.zeroToSixty}`;
 
       const mobHpEl = main.querySelector('#hero-mobile-telemetry-hp');
       if (mobHpEl) mobHpEl.textContent = `${car.hp} HP`;
@@ -1638,7 +1639,7 @@
       const waBtn = main.querySelector('#hero-whatsapp-reserve');
       if (waBtn) {
         const encoded = encodeURIComponent(
-          `Hi Apex Auto Lounge, I am inquiring about the ${car.year} ${car.make} ${car.model} featured on the 3D Showroom (${STORE.formatPrice(car.priceUSD)}). Is it available for private acquisition?`
+          `Hi Apex Auto Lounge, I am inquiring about the ${car.year} ${displayName} featured in the Showroom (${formattedPrice}). Is it available for private acquisition?`
         );
         waBtn.setAttribute('href', `https://wa.me/15550192834?text=${encoded}`);
       }
@@ -1654,13 +1655,6 @@
         if (catalogVehicle) {
           dossierBtn.setAttribute('data-id', catalogVehicle.id);
         }
-      }
-
-      // Keep 0ms of main-thread WebGL/GLB work during Hero conveyor transitions.
-      // Interactive WebGL 3D orbit is booted lazily only if the user explicitly drags #hero-3d-stage-container.
-      if (state.deferred3DLoadTimer) {
-        clearTimeout(state.deferred3DLoadTimer);
-        state.deferred3DLoadTimer = null;
       }
     }
 
@@ -1751,66 +1745,6 @@
     // Initialize persistent conveyor positions immediately on mount
     syncPersistentConveyor(state.active3DCarId, 'next', false);
 
-    // Reveal live interactive 3D canvas only when user explicitly drags to orbit-rotate the Center 3D car
-    const stageContainerEl = main.querySelector('#hero-3d-stage-container');
-    if (stageContainerEl) {
-      let dragStartX = 0;
-      let dragStartY = 0;
-      let isPointerDown = false;
-      stageContainerEl.addEventListener(
-        'pointerdown',
-        (e) => {
-          isPointerDown = true;
-          dragStartX = e.clientX;
-          dragStartY = e.clientY;
-        },
-        { passive: true }
-      );
-      stageContainerEl.addEventListener(
-        'pointermove',
-        (e) => {
-          if (!isPointerDown) return;
-          const dist = Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY);
-          if (dist > 6) {
-            const stageEl = main.querySelector('#hero-depth-carousel-stage');
-            const activeAtm =
-              HERO_ATMOSPHERE_CONFIG[state.active3DCarId] || HERO_ATMOSPHERE_CONFIG['ferrari-roma-2023'];
-            if (!state.heroViewer) {
-              initHero3DViewer();
-            }
-            const viewerInst = window.Apex3DViewer && window.Apex3DViewer.activeInstance;
-            if (
-              viewerInst &&
-              viewerInst.currentModel &&
-              viewerInst.currentModelKey === activeAtm.modelKey
-            ) {
-              if (stageEl) stageEl.classList.add('is-3d-canvas-visible');
-            } else if (window.Apex3DViewer && typeof window.Apex3DViewer.loadModel === 'function') {
-              const targetCarId = state.active3DCarId;
-              window.Apex3DViewer.loadModel(
-                activeAtm.modelKey,
-                state.activeColorHex || activeAtm.accentColor,
-                null,
-                () => {
-                  if (state.active3DCarId === targetCarId && stageEl) {
-                    stageEl.classList.add('is-3d-canvas-visible');
-                  }
-                }
-              );
-            }
-          }
-        },
-        { passive: true }
-      );
-      window.addEventListener(
-        'pointerup',
-        () => {
-          isPointerDown = false;
-        },
-        { passive: true }
-      );
-    }
-
     function updateHero3DStage(carId, targetHex = null, targetTheme = null, options = {}) {
       const skipTransition = Boolean(options && options.skipTransition);
       const direction = (options && options.direction) || 'next';
@@ -1846,7 +1780,7 @@
       const dirSign = direction === 'prev' ? -1 : 1;
       const watermarkEl = main.querySelector('#hero-watermark');
       const editorialNodes = main.querySelectorAll(
-        '#hero-main-title, #hero-editorial-summary'
+        '#hero-main-title, #hero-inline-specs, #hero-editorial-summary'
       );
       const mobileTelemetry = main.querySelector('#hero-mobile-telemetry-pill');
 
@@ -1985,8 +1919,27 @@
 
     main.querySelector('#hero-inspect-dossier')?.addEventListener('click', (e) => {
       const id = e.currentTarget.getAttribute('data-id') || 'apex-car-01';
-      openVehicleModal(id, '3d', e.currentTarget);
+      openVehicleModal(id, 'photo', e.currentTarget);
     });
+
+    // Global Keyboard Left/Right Arrow Navigation for Hero 3D Carousel (when idle in public view)
+    if (!state.hasKeyboardNavBound) {
+      state.hasKeyboardNavBound = true;
+      document.addEventListener('keydown', (e) => {
+        if (state.view !== 'public') return;
+        const activeModal = document.querySelector('.modal-overlay.is-active');
+        if (activeModal) return;
+        const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+        if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+        if (e.key === 'ArrowRight') {
+          const nextBtn = document.getElementById('hero-next-vehicle-btn');
+          if (nextBtn) nextBtn.click();
+        } else if (e.key === 'ArrowLeft') {
+          const prevBtn = document.getElementById('hero-prev-vehicle-btn');
+          if (prevBtn) prevBtn.click();
+        }
+      });
+    }
 
     // Apple Mobile Horizontal Touch Swipe across the entire Hero Stage Card
     const heroStageCard = main.querySelector('#hero-stage-card');
@@ -2416,9 +2369,9 @@
                   <tr data-id="${car.id}">
                     <td>
                       <div class="admin-vehicle-cell">
-                        <img src="${img}" alt="${car.make} ${car.model}" class="admin-thumb" referrerPolicy="no-referrer" />
+                        <img src="${img}" alt="${formatVehicleName(car)}" class="admin-thumb" referrerPolicy="no-referrer" onerror="window.__apexImgFallback && window.__apexImgFallback(this)" />
                         <div>
-                          <div class="admin-car-title">${car.year} ${car.make} ${car.model}</div>
+                          <div class="admin-car-title">${car.year} ${formatVehicleName(car)}</div>
                           <div class="admin-car-vin">VIN: ${car.vin} · ${car.exteriorColor}</div>
                         </div>
                       </div>
@@ -2570,7 +2523,7 @@
         <div>
           <h4 class="footer-col-title">RESOURCES</h4>
           <ul class="footer-link-list">
-            <li><a href="#hero-stage-viewport">3D Configurator Guide</a></li>
+            <li><a href="#hero-stage-viewport">Showroom Showcase</a></li>
             <li><a href="https://wa.me/15550192834" target="_blank" rel="noopener noreferrer">WhatsApp Concierge</a></li>
             <li><a href="#catalog">742 Evergreen Motorway, BH</a></li>
           </ul>
@@ -2790,6 +2743,9 @@
     }
 
     const formattedPrice = STORE.formatPrice(car.priceUSD);
+    const displayName = formatVehicleName(car);
+    const estMonthlyUsd = Math.round((Number(car.priceUSD || 0) * 0.8) / 51.4);
+    const formattedMonthly = STORE.formatPrice(estMonthlyUsd);
     const images = car.images && car.images.length > 0 ? car.images : [STUDIO_IMAGES.porscheStudio];
     const activeImg = images[0];
 
@@ -2801,11 +2757,10 @@
         : 'badge-sold';
 
     const whatsappMsg = encodeURIComponent(
-      `Hello Apex Auto Lounge, I am inquiring about the ${car.year} ${car.make} ${car.model} (${formattedPrice}, VIN: ${car.vin}). I would like to schedule a viewing.`
+      `Hello Apex Auto Lounge, I am inquiring about the ${car.year} ${displayName} (${formattedPrice}, VIN: ${car.vin}). I would like to schedule a viewing.`
     );
 
-    const has3D = Boolean(car.sketchfabId);
-    const startWith3D = defaultTab === '3d' && has3D;
+    const minViewingDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
     overlay.innerHTML = `
       <div class="modal-window" style="max-width: 960px;">
@@ -2816,17 +2771,12 @@
         </button>
 
         <div class="detail-modal-layout">
-          <div class="media-tabs-bar">
-            <button class="media-tab-btn ${!startWith3D ? 'active' : ''}" id="tab-media-photo" type="button">
-              4K Studio Gallery
-            </button>
-            <button class="media-tab-btn ${startWith3D ? 'active' : ''}" id="tab-media-3d" type="button" ${has3D ? '' : 'style="display:none;"'}>
-              Interactive 3D 360° (Sketchfab)
-            </button>
+          <div class="detail-gallery-topbar">
+            <span class="detail-gallery-kicker">Studio Dossier · ${car.bodyType || 'Coupe'}</span>
           </div>
 
-          <div class="detail-modal-gallery" id="media-viewer-photo" style="${startWith3D ? 'display: none;' : ''}">
-            <img src="${activeImg}" alt="${car.make} ${car.model}" class="detail-main-img" id="detail-main-display" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
+          <div class="detail-modal-gallery" id="media-viewer-photo">
+            <img src="${activeImg}" alt="${displayName}" class="detail-main-img" id="detail-main-display" loading="lazy" decoding="async" referrerPolicy="no-referrer" onerror="window.__apexImgFallback && window.__apexImgFallback(this)" />
             ${
               images.length > 1
                 ? `
@@ -2834,33 +2784,10 @@
                 ${images
                   .map(
                     (img, idx) => `
-                  <img src="${img}" alt="Thumbnail ${idx + 1}" class="detail-thumb-item ${idx === 0 ? 'active' : ''}" data-src="${img}" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
+                  <img src="${img}" alt="Thumbnail ${idx + 1}" class="detail-thumb-item ${idx === 0 ? 'active' : ''}" data-src="${img}" loading="lazy" decoding="async" referrerPolicy="no-referrer" onerror="window.__apexImgFallback && window.__apexImgFallback(this)" />
                 `
                   )
                   .join('')}
-              </div>
-            `
-                : ''
-            }
-          </div>
-
-          <div id="media-viewer-3d" style="${!startWith3D ? 'display: none;' : ''}">
-            ${
-              has3D
-                ? `
-              <div class="sketchfab-embed-wrapper">
-                <iframe title="${car.year} ${car.make} ${car.model} 3D Model"
-                  class="sketchfab-iframe"
-                  frameborder="0"
-                  allowfullscreen
-                  allow="autoplay; fullscreen; xr-spatial-tracking"
-                  src="https://sketchfab.com/models/${car.sketchfabId}/embed?autostart=1&camera=0&preload=1&ui_theme=dark&ui_infos=0&ui_controls=1&ui_stop=0">
-                </iframe>
-                <div class="sketchfab-controls-hint">
-                  <span>Left-Click: Orbit 360°</span>
-                  <span>Right-Click: Pan</span>
-                  <span>Scroll: Zoom In / Out</span>
-                </div>
               </div>
             `
                 : ''
@@ -2877,14 +2804,17 @@
                       </span>`
                     : ''
                 }
-                <h2 class="detail-car-name">${car.year} ${car.make} ${car.model}</h2>
+                <h2 class="detail-car-name">${car.year} ${displayName}</h2>
                 <div class="detail-vin-line">
                   VIN: <span>${car.vin}</span>
                 </div>
               </div>
 
-              <div>
+              <div class="detail-price-stack">
                 <div class="detail-car-price" data-raw-price="${car.priceUSD}">${formattedPrice}</div>
+                <div class="detail-monthly-estimate" id="detail-monthly-estimate" title="Indicative 60-month acquisition estimate with 20% down">
+                  Est. ${formattedMonthly}/mo
+                </div>
               </div>
             </div>
 
@@ -2935,22 +2865,69 @@
             </div>
 
             <div class="detail-modal-cta-row">
+              <button
+                type="button"
+                class="btn-gold-primary"
+                id="btn-toggle-private-viewing"
+                aria-expanded="false"
+                style="flex: 1; justify-content: center;"
+              >
+                Schedule Private Viewing
+              </button>
               <a
                 href="https://wa.me/15550192834?text=${whatsappMsg}"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="btn-gold-primary"
-                style="flex: 1; justify-content: center;"
+                class="btn-secondary"
+                style="flex: 1; text-align: center; justify-content: center; display: inline-flex; align-items: center;"
               >
-                Inquire on WhatsApp
+                Inquire on WhatsApp ↗
               </a>
               <a
                 href="tel:+18005552739"
                 class="btn-secondary"
                 style="flex: 1; text-align: center; justify-content: center; display: inline-flex; align-items: center;"
               >
-                Call Showroom (+1 800 555-APEX)
+                Call Showroom
               </a>
+            </div>
+
+            <!-- Inline Private Viewing Concierge Drawer -->
+            <div class="private-viewing-panel" id="private-viewing-panel" hidden>
+              <div class="private-viewing-header">
+                <div>
+                  <h4 class="private-viewing-title">Beverly Hills Salon Private Appointment</h4>
+                  <p class="private-viewing-sub">Reserve an enclosed inspection for the ${car.year} ${displayName}.</p>
+                </div>
+              </div>
+              <form id="private-viewing-form" class="private-viewing-form-grid">
+                <div>
+                  <label class="form-label" for="pv-name">Full Name</label>
+                  <input type="text" id="pv-name" name="name" class="form-input" required placeholder="Alex Rivera" />
+                </div>
+                <div>
+                  <label class="form-label" for="pv-contact">Email or Phone</label>
+                  <input type="text" id="pv-contact" name="contact" class="form-input" required placeholder="alex@domain.com / +1..." />
+                </div>
+                <div>
+                  <label class="form-label" for="pv-date">Preferred Date</label>
+                  <input type="date" id="pv-date" name="date" class="form-input" required min="${minViewingDate}" value="${minViewingDate}" />
+                </div>
+                <div>
+                  <label class="form-label" for="pv-slot">Salon Session</label>
+                  <select id="pv-slot" name="slot" class="form-select">
+                    <option value="10:00 AM PST — Morning Salon">10:00 AM — Morning Salon</option>
+                    <option value="02:00 PM PST — Afternoon Concierge">02:00 PM — Afternoon Concierge</option>
+                    <option value="06:00 PM PST — Evening Private Gallery">06:00 PM — Evening Private Gallery</option>
+                  </select>
+                </div>
+                <div class="private-viewing-submit-row">
+                  <button type="submit" class="btn-gold-primary" id="btn-confirm-private-viewing">
+                    Confirm Viewing Request
+                  </button>
+                </div>
+              </form>
+              <div class="private-viewing-confirmation" id="private-viewing-confirmation" hidden></div>
             </div>
           </div>
         </div>
@@ -2962,7 +2939,7 @@
 
     // Rule 20: Shared element morph from trigger to modal main image
     const mainImg = overlay.querySelector('#detail-main-display');
-    if (triggerEl && mainImg && !startWith3D) {
+    if (triggerEl && mainImg) {
       runSharedElementMorph(triggerEl, mainImg);
     }
 
@@ -2986,10 +2963,7 @@
 
     // Dismissal handlers (Rule 15: 20% shorter exits)
     function closeModal() {
-      animateModalClose(overlay, () => {
-        const iframe = overlay.querySelector('.sketchfab-iframe');
-        if (iframe) iframe.src = 'about:blank';
-      });
+      animateModalClose(overlay);
     }
 
     overlay.querySelector('#btn-close-vehicle-modal')?.addEventListener('click', closeModal);
@@ -2997,32 +2971,61 @@
       if (e.target === overlay) closeModal();
     };
 
-    const tabPhoto = overlay.querySelector('#tab-media-photo');
-    const tab3D = overlay.querySelector('#tab-media-3d');
-    const viewPhoto = overlay.querySelector('#media-viewer-photo');
-    const view3D = overlay.querySelector('#media-viewer-3d');
-
-    tabPhoto?.addEventListener('click', () => {
-      tabPhoto.classList.add('active');
-      tab3D?.classList.remove('active');
-      if (viewPhoto) viewPhoto.style.display = '';
-      if (view3D) view3D.style.display = 'none';
-    });
-
-    tab3D?.addEventListener('click', () => {
-      tab3D.classList.add('active');
-      tabPhoto?.classList.remove('active');
-      if (viewPhoto) viewPhoto.style.display = 'none';
-      if (view3D) view3D.style.display = '';
-    });
-
     overlay.querySelectorAll('.detail-thumb-item').forEach((thumb) => {
       thumb.addEventListener('click', (e) => {
         overlay.querySelectorAll('.detail-thumb-item').forEach((t) => t.classList.remove('active'));
         e.currentTarget.classList.add('active');
-        const mainImg = overlay.querySelector('#detail-main-display');
-        if (mainImg) mainImg.src = e.currentTarget.getAttribute('data-src');
+        const mainImgEl = overlay.querySelector('#detail-main-display');
+        if (mainImgEl) mainImgEl.src = e.currentTarget.getAttribute('data-src');
       });
+    });
+
+    const togglePvBtn = overlay.querySelector('#btn-toggle-private-viewing');
+    const pvPanel = overlay.querySelector('#private-viewing-panel');
+    const pvForm = overlay.querySelector('#private-viewing-form');
+    const pvConf = overlay.querySelector('#private-viewing-confirmation');
+    togglePvBtn?.addEventListener('click', () => {
+      if (!pvPanel) return;
+      const willShow = pvPanel.hasAttribute('hidden');
+      if (willShow) {
+        pvPanel.removeAttribute('hidden');
+        togglePvBtn.setAttribute('aria-expanded', 'true');
+        overlay.querySelector('#pv-name')?.focus();
+      } else {
+        pvPanel.setAttribute('hidden', '');
+        togglePvBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    pvForm?.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const fd = new FormData(pvForm);
+      const guestName = String(fd.get('name') || '').trim();
+      const contact = String(fd.get('contact') || '').trim();
+      const date = String(fd.get('date') || '').trim();
+      const slot = String(fd.get('slot') || '').trim();
+      if (!guestName || !contact || !date) {
+        showToast('Please enter your name, contact details, and preferred date.', 'error');
+        return;
+      }
+      const refCode = `APX-${Date.now().toString(36).toUpperCase().slice(-5)}`;
+      try {
+        const key = 'apex_private_viewings_v1';
+        const existing = JSON.parse(localStorage.getItem(key) || '[]');
+        existing.unshift({ refCode, vehicleId: car.id, vehicleName: displayName, guestName, contact, date, slot, createdAt: new Date().toISOString() });
+        localStorage.setItem(key, JSON.stringify(existing.slice(0, 20)));
+      } catch (e) {}
+
+      pvForm.setAttribute('hidden', '');
+      if (pvConf) {
+        pvConf.innerHTML = `
+          <div class="pv-conf-badge">Confirmed · ${escapeHTML(refCode)}</div>
+          <strong>Private Viewing Requested</strong>
+          <p>Concierge prepared the <strong>${escapeHTML(car.year + ' ' + displayName)}</strong> for <strong>${escapeHTML(guestName)}</strong> on <strong>${escapeHTML(date)}</strong> (${escapeHTML(slot)}).</p>
+        `;
+        pvConf.removeAttribute('hidden');
+      }
+      showToast(`Private viewing scheduled (${refCode})`, 'success');
     });
   }
 
@@ -3139,11 +3142,6 @@
           </div>
 
           <div class="form-group col-span-2">
-            <label class="form-label" for="car-sketchfab">Sketchfab 3D Model URL or ID (Optional)</label>
-            <input type="text" id="car-sketchfab" name="sketchfab" class="form-input" value="${car && car.sketchfabId ? car.sketchfabId : ''}" placeholder="e.g. 456b3d9d60b646369d76667848d6d027" />
-          </div>
-
-          <div class="form-group col-span-2">
             <label class="form-label">Vehicle Overview & Description</label>
             <textarea name="description" class="form-textarea" rows="3">${car ? car.description : 'Exceptional condition with verified provenance and full factory warranty.'}</textarea>
           </div>
@@ -3198,7 +3196,7 @@
         interiorColor: fd.get('interiorColor'),
         engine: fd.get('engine'),
         vin: fd.get('vin'),
-        sketchfabId: fd.get('sketchfab') ? String(fd.get('sketchfab')).trim() : null,
+        sketchfabId: car ? car.sketchfabId : null,
         image: fd.get('image'),
         description: fd.get('description')
       };

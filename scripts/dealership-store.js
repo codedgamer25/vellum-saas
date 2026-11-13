@@ -22,7 +22,11 @@
     ferrariRender: './models/ferrari_render.png',
     porscheStudio: './src/assets/images/porsche_gt3rs_studio_1794305858079.jpg',
     mercedesStudio: './src/assets/images/mercedes_g63_studio_1794305857861.jpg',
-    audiStudio: './src/assets/images/audi_rs6_studio_1794305860108.jpg'
+    audiStudio: './src/assets/images/audi_rs6_studio_1794305860108.jpg',
+    bmwStudio: './src/assets/images/bmw_m4_studio_1794532109025.jpg',
+    rangeRoverStudio: './src/assets/images/range_rover_sv_studio_1794532110726.jpg',
+    teslaStudio: './src/assets/images/tesla_plaid_studio_1794532111906.jpg',
+    astonStudio: './src/assets/images/aston_dbx707_studio_1794532112528.jpg'
   };
 
   /**
@@ -268,8 +272,9 @@
       horsepower: 503,
       vin: 'WBS43AY02PF202303',
       images: [
-        LOCAL_STUDIO_IMAGES.audiStudio,
-        LOCAL_STUDIO_IMAGES.porscheStudio
+        LOCAL_STUDIO_IMAGES.bmwStudio,
+        LOCAL_STUDIO_IMAGES.porscheStudio,
+        LOCAL_STUDIO_IMAGES.audiStudio
       ],
       description: 'Precision German track weapon finished in rare Isle of Man Green metallic with high-contrast Kyalami Orange carbon bucket seating.',
       features: [
@@ -331,8 +336,9 @@
       horsepower: 606,
       vin: 'SALWR2V44RA202405',
       images: [
+        LOCAL_STUDIO_IMAGES.rangeRoverStudio,
         LOCAL_STUDIO_IMAGES.mercedesStudio,
-        LOCAL_STUDIO_IMAGES.ferrariEditorial
+        LOCAL_STUDIO_IMAGES.astonStudio
       ],
       description: 'First-class luxury travel redefined by Special Vehicle Operations. Includes rear executive seating with deployable ceramic tables and refrigerated console.',
       features: [
@@ -394,8 +400,8 @@
       horsepower: 1020,
       vin: '5YJSA1E67RF202407',
       images: [
-        LOCAL_STUDIO_IMAGES.audiStudio,
-        LOCAL_STUDIO_IMAGES.porscheStudio
+        LOCAL_STUDIO_IMAGES.teslaStudio,
+        LOCAL_STUDIO_IMAGES.audiStudio
       ],
       description: '0 to 60 mph in 1.99 seconds. The world’s quickest production acceleration with carbon-sleeved rotors and torque vectoring.',
       features: [
@@ -425,8 +431,9 @@
       horsepower: 697,
       vin: 'SCFRMAAW0PG202308',
       images: [
-        LOCAL_STUDIO_IMAGES.ferrariEditorial,
-        LOCAL_STUDIO_IMAGES.mercedesStudio
+        LOCAL_STUDIO_IMAGES.astonStudio,
+        LOCAL_STUDIO_IMAGES.rangeRoverStudio,
+        LOCAL_STUDIO_IMAGES.ferrariEditorial
       ],
       description: 'The pinnacle of performance SUVs. 697 hp of British muscularity paired with race-derived wet-clutch transmission and carbon ceramic anchors.',
       features: [
@@ -441,10 +448,21 @@
   ];
 
   function sanitizeVehicleImages(vehicles) {
+    const legacyPhotoIds = new Set(['apex-car-03', 'apex-car-05', 'apex-car-07', 'apex-car-08']);
+    const legacyReuseSet = new Set([
+      LOCAL_STUDIO_IMAGES.audiStudio,
+      LOCAL_STUDIO_IMAGES.mercedesStudio,
+      LOCAL_STUDIO_IMAGES.ferrariEditorial
+    ]);
     return vehicles.map((v, idx) => {
       const seedMatch = INITIAL_VEHICLES.find((s) => s.id === v.id) || INITIAL_VEHICLES[idx % INITIAL_VEHICLES.length];
       const hasExternalUrl = Array.isArray(v.images) && v.images.some((u) => typeof u === 'string' && u.includes('unsplash.com'));
-      if (!Array.isArray(v.images) || v.images.length === 0 || hasExternalUrl) {
+      const usesStaleSharedPhoto =
+        legacyPhotoIds.has(v.id) &&
+        Array.isArray(v.images) &&
+        v.images.length > 0 &&
+        legacyReuseSet.has(v.images[0]);
+      if (!Array.isArray(v.images) || v.images.length === 0 || hasExternalUrl || usesStaleSharedPhoto) {
         return Object.assign({}, v, { images: [...seedMatch.images] });
       }
       return v;
